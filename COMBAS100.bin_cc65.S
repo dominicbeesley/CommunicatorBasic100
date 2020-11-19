@@ -7,29 +7,49 @@
 ;* Disassembly and annotations by Dominic Beesley November 2020                *
 ;*******************************************************************************
          .setcpu "65816"
+INTVAR_atsign =  0
+RETV_STR =       0
 OSWORD_1_READTIME = 1
 _COCRE   =       2
 _COENV   =       4
+INTVAR_A =       4
 _CKREAD  =       6
 _CODEL   =       6          ;Delete a coroutine
+COP_06_OPOSB =   $06
+INTVAR_B =       8
+OPT_8_UK =       8          ;Not sure what this does
 COP_OSBGT =      $0a        ;Call OSBGET
 _COBRK   =       $0c
 _MMALA   =       $0c        ;Allocate large ascending
+ARITH_FN_0C_UK = $0c
+VDU_CLS  =       12
 _OPERR   =       $0f
+ARITH_FN_POWER = $10
+INTVAR_D =       $10
+OPT_10_UK =      $10
+VDU_CLG  =       $10
 COP_11_OPADF =   $11        ;Allocate a DP
+VDU_COLOUR =     $11
 ARITH_FN_SIN =   $12
+VDU_GCOL =       $12
 _STSBK   =       $14        ;Get BRK signature
 ARITH_FN_COS =   $14
 _STTBK   =       $16        ;Get BRK text
 ARITH_FN_TAN =   $16
+COP_16_OPAEV =   $16
+VDU_MODE =       22
 ARITH_FN_ACS =   $18
 COP_OPRLH =      $18
+VDU_PLOT =       $19
 ARITH_FN_ASN =   $1a
 COP_1A_OPFZB =   $1a
 ARITH_FN_ATN =   $1c
 ARITH_FN_DEG =   $1e
+VDU_CURS_CHAR =  $1f        ;; PRINT TAB
 _STBMB   =       $20        ;?
 ARITH_FN_RAD =   $20
+OPT_20_UK =      $20
+COP_21_OPPRE =   $21
 ARITH_FN_LOG =   $22
 ARITH_FN_LN =    $24
 COP_24_OPCVD =   $24        ;Convert direct page ptr to long pointer
@@ -37,24 +57,52 @@ ARITH_FN_EXP =   $26
 COP_26_OPBHA =   $26        ;Get string banked address
 _OPCMD   =       $28
 ARITH_FN_SQR =   $28
+COP_28_OPCMD =   $28        ;Call module inline name
 COP_29_OPRFR =   $29
 COP_2C_OPFMA =   $2c
 COP_2E_OPFPO =   $2e        ;Find pool owner
 FN_ARITH_INT =   $30
+OPT_30_MASK =    $30
+INTVAR_O =       $3c
+INTVAR_P =       $40
+OPT_40_UK =      $40
 RETV_INT =       $40
 COP_54_OPRSP =   $54        ;Get PTR#
 COP_57_OPRLL =   $57        ;Get EXT#
 COP_5D_OPSTAR =  $5d        ;OSCLI?
+INTVAR_X =       $60
 COP_61_OPERC =   $61        ;Convert error number to string
+INTVAR_Y =       $64
+OSBYTE_126_ESCAPE_ACK = $7e
+tknAND   =       $80
+tknDIV   =       $81
+tknEOR   =       $82
+tknMOD   =       $83
+tknOR    =       $84
+tknOFF   =       $87
 tknSTEP  =       $88
+tknSPC   =       $89
+tknTAB   =       $8a
+tknELSE  =       $8b
+tknTHEN  =       $8c
 tknLineNo =      $8d        ;line number marker
 tknMissing =     $8d
 tknOPENIN =      $8e
+OPT_8F_MASK =    $8f
 VAR_OFFS_PROC =  $b1        ;Offset in variable linked list pointer table for PROCs
+VAR_OFFS_FN =    $b4        ;Offset if variable linked list pointer table for FNs
 VAR_OFFS_END =   $c0        ;Byte offset after end of variable linked list heads
 tknEOF   =       $c5
+tknAUTO  =       $c6
+tknPTR   =       $cf
+tknDIM   =       $de
+tknLOCAL =       $ea
+tknMODE  =       $eb
+tknON    =       $ee
 tknPROC  =       $f2
+tknREM   =       $f4
 tknREPORT =      $f6
+tknWIDTH =       $fe
 RETV_REAL =      $ff        ;VarType = real
 
 DP_BAS_Report =  $08
@@ -80,23 +128,30 @@ DP_BAS_WIDTH =   $3c
 DP_BAS_REPEAT_LVL = $3d
 DP_BAS_GOSUB_LVL = $3e
 DP_BAS_FOR_LVL = $3f
+DP_BAS_40_VARTYPE = $40
+DP_ASS_ASS_FLAGS_UK = $41
 DP_BAS_OPT =     $42
+DP_BAS_47_ASS_UK = $47
 DP_BAS_INT_WA =  $48        ;c.f. 6502 2A
 DP_FPA_sgn =     $4c
 DP_FPA_exp =     $4d
 DP_FPA_mant =    $4f
 DP_BAS_STRLEN =  $54
 DP_BAS_TMP6 =    $55
+DB_BAS_UNK_5A_6 = $5a
 DP_FPB_sgn =     $5c
 DP_FPB_exp =     $5e
 DP_FPB_mant =    $5f
+DP_BAS_61_UK =   $61
 DP_BAS_TMP64 =   $64
 DP_FP_TMP =      $65
 DP_BAS_FP_TMPEXP = $6b
 DP_BAS_FP_PTR1 = $6c
+tblMnePackSize = $6e
 DP_stack_save =  $72
 DP_BAS_CURCHAN = $90
 DP_BAS_MEMEND =  $92
+DP_BAS_95_UKPTR = $95
 DP_BAS_CO_FLAGS = $97       ;Seems to be a set of flags to decide what state we're in and whether to yield? - bit $40 set disables yeild
 DP_BAS_ARG2_FLAG = $99
 DP_BAS_ARG2 =    $9a
@@ -104,11 +159,10 @@ DP_BAS_MEMSIZE = $9d
 DP_BAS_CO_CTDN = $a0        ;Seems to count down as statements are execed and then yield every 100th?
 DP_BAS_MEMBASE = $a4        ;Base of workspace
 DP_BAS_STRWKSP_L = $a7
-DP_BAS_ASSWKSP = $aa
+DP_BAS_INTVARSptr = $aa
 DP_BAS_VARS_BASE = $ad      ;Pointers to VARS?
 DP_BAS_PRINT_FP_PTR = $b0   ;Used in PRINT HASH
 DP_BAS_FOR_STACKBASE = $b3
-VAR_OFFS_FN =    $b4        ;Offset if variable linked list pointer table for FNs
 DP_BAS_GOSUB_STACKBASE = $b6
 DP_BAS_REPEAT_STACKBASE = $b9
 DP_BAS_pointer_at_copy_of_PAGE = $bc
@@ -118,6 +172,7 @@ DP_BAS_LAST_EOSEOR_D_ = $c8 ;Set to end of statement marker EOR D
 DP_BAS_ARITHMODREF = $c9
 DP_BAS_STACKSAVE2 = $d1
 DP_BAS_OLD_DP =  $d3
+DP_BAS_ENDDP =   $d5        ;End of direct page
 _ST      =       $ff88
 _MM      =       $ff8c
 _CO      =       $ff90
@@ -292,7 +347,7 @@ memFreeDP:
 L4C14:   rep     #$30
          lda     DP_BAS_MEMEND+2
          and     #$ff00
-         pei     ($95)
+         pei     (DP_BAS_95_UKPTR)
          plb
          plb
          ldx     #$0014
@@ -534,28 +589,28 @@ L4C6B:   pea     $0000
          lda     DP_BAS_PAGE+1
          sta     [DP_BAS_pointer_at_copy_of_PAGE],y
          iny
-         sta     $95
+         sta     DP_BAS_95_UKPTR
          lda     DP_BAS_PAGE+2
          sta     [DP_BAS_pointer_at_copy_of_PAGE],y
          iny
-         sta     $96
+         sta     DP_BAS_95_UKPTR+1
          ldy     #$06
          sty     $98
          stz     DP_BAS_LISTO
          stz     DP_BAS_SET_TO_Z_AT_EOS
          lda     #$00
          ldy     #$02
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          iny
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          ldx     #$ff
          stx     DP_BAS_WIDTH
          tay
          lda     #$0a
-         sta     [DP_BAS_ASSWKSP]
+         sta     [DP_BAS_INTVARSptr]
          dec     A
          iny
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          lda     #$03
          sta     $43
          stz     $44
@@ -666,7 +721,7 @@ COROUTINE_ENTRY:
          tay
          tcd
          phx
-         lda     #$00d4
+         lda     #DP_BAS_ENDDP-1 ;TODO: fix up set to DP_BAS_ENDDP
          mvn     #$00,#$00  ;Copy D5 bytes to new DP from old DP
          pla
          sta     DP_BAS_OLD_DP
@@ -848,18 +903,18 @@ varLinkedListSearchCompareChar:
          dey
          dey
          lda     [DP_BAS_TMP6],y
-         cmp     #$40
+         cmp     #'@'
          bne     L4FCC
-         sep     #$40
+         sep     #$40       ;set V
          phb
          pla
-         sta     DP_BAS_INT_WA+2
+         sta     DP_BAS_INT_WA+2 ;override the bank from the builtins table to be our current bank
 L4FCA:   ldy     #$01
 L4FCC:   lda     [DP_BAS_INT_WA],y
          iny
          ora     [DP_BAS_INT_WA],y
          ora     [DP_BAS_INT_WA]
-         beq     L503D
+         beq     rtsL503D
          lda     DP_FP_TMP+2
          bne     @L4FDD
          phb
@@ -902,45 +957,34 @@ varLinkedListSearchFound:
          tya
          adc     DP_BAS_INT_WA
          sta     DP_BAS_INT_WA
-         bcc     @L501B
+         bcc     @sk
          inc     DP_BAS_INT_WA+1
-         bne     @L501B
+         bne     @sk
          inc     DP_BAS_INT_WA+2
-@L501B:  plp
-         lda     #$ff
-         bvc     L503D
+@sk:     plp
+         lda     #RETV_REAL
+         bvc     rtsL503D
 
-         .byte   $a5
-         .byte   $4b
-         .byte   $48
-         .byte   $da
-         .byte   $20
-         .byte   $7e
-         .byte   $8b
-         .byte   $a5
-         .byte   $4a
-         .byte   $25
-         .byte   $4b
-         .byte   $1a
-         .byte   $d0
-         .byte   $06
-         .byte   $8b
-         .byte   $68
-         .byte   $85
-         .byte   $4a
-         .byte   $80
-         .byte   $03
-         .byte   $20
-         .byte   $73
-         .byte   $70
-         .byte   $fa
-         .byte   $68
-         .byte   $85
-         .byte   $4b
-         .byte   $a9
-         .byte   $ff
+         lda     DP_BAS_INT_WA+3
+         pha
+         phx
+         jsr     L8B7E
+         lda     DP_BAS_INT_WA+2
+         and     DP_BAS_INT_WA+3
+         inc     A
+         bne     @L5034
+         phb
+         pla
+         sta     DP_BAS_INT_WA+2
+         bra     @L5037
 
-L503D:   rts
+@L5034:  jsr     L7073
+@L5037:  plx
+         pla
+         sta     DP_BAS_INT_WA+3
+         lda     #RETV_REAL
+rtsL503D:
+         rts
 
 _ukCallEv23:
          phx
@@ -988,45 +1032,47 @@ prog_search_lineno_fromPTR:
          clc
          rts                ;failed to find return with Cy=0
 
-L5082:   jsr     L6C8E
+fpRealDivide:
+         jsr     checkTypeInAConvertToINT
          lda     DP_BAS_INT_WA+3
          pha
          jsr     L83A4
-         jsr     L784A
-         stx     $40
-         jsr     L6C8E
+         jsr     stackINTEvalLevel2
+         stx     DP_BAS_40_VARTYPE
+         jsr     checkTypeInAConvertToINT
          pla
          sta     DP_BAS_TMP6+1
          eor     DP_BAS_INT_WA+3
          sta     DP_BAS_TMP6
          jsr     L83A4
-         ldx     #$5a
+         ldx     #DB_BAS_UNK_5A_6
          jsr     stack_copy6_to_X_uns4
          stz     DP_FPB_exp
          stz     DP_FPB_mant
          stz     DP_FPB_mant+1
-         stz     DP_FPB_mant+2
+         stz     DP_BAS_61_UK
          lda     DP_BAS_INT_WA+3
          ora     DP_BAS_INT_WA
          ora     DP_BAS_INT_WA+1
          ora     DP_BAS_INT_WA+2
-         beq     L50FB
+         beq     brk_12_DivisionBy0
          ldy     #$20
-@L50B6:  dey
-         beq     @L50FA
-         asl     DP_BAS_TMP6+5
-         rol     $5b
+@lp20:   dey
+         beq     @rtsL50FA
+         asl     DB_BAS_UNK_5A_6
+         rol     DB_BAS_UNK_5A_6+1
          rol     DP_FPB_sgn
-         rol     $5d
-         bpl     @L50B6
-@L50C3:  rol     DP_BAS_TMP6+5
-         rol     $5b
+         rol     DB_BAS_UNK_5A_6+3
+         bpl     @lp20
+@lpRolDiv:
+         rol     DB_BAS_UNK_5A_6
+         rol     DB_BAS_UNK_5A_6+1
          rol     DP_FPB_sgn
-         rol     $5d
+         rol     DB_BAS_UNK_5A_6+3
          rol     DP_FPB_exp
          rol     DP_FPB_mant
          rol     DP_FPB_mant+1
-         rol     DP_FPB_mant+2
+         rol     DP_BAS_61_UK
          sec
          lda     DP_FPB_exp
          sbc     DP_BAS_INT_WA
@@ -1037,24 +1083,26 @@ L5082:   jsr     L6C8E
          lda     DP_FPB_mant+1
          sbc     DP_BAS_INT_WA+2
          tax
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sbc     DP_BAS_INT_WA+3
-         bcc     @L50F5
-         sta     DP_FPB_mant+2
+         bcc     @sk1
+         sta     DP_BAS_61_UK
          stx     DP_FPB_mant+1
          pla
          sta     DP_FPB_mant
          pla
          sta     DP_FPB_exp
-         bcs     @L50F7
+         bcs     @sk2
 
-@L50F5:  pla
+@sk1:    pla
          pla
-@L50F7:  dey
-         bne     @L50C3
-@L50FA:  rts
+@sk2:    dey
+         bne     @lpRolDiv
+@rtsL50FA:
+         rts
 
-L50FB:   brk     $12
+brk_12_DivisionBy0:
+         brk     $12
 
          .byte   "Division by zero"
          .byte   $00
@@ -1065,7 +1113,8 @@ L510E:   stz     DP_FPA_sgn
          stz     DP_FPA_mant
 L5116:   rts
 
-L5117:   bra     @L5142
+braIntToReal:
+         bra     IntToReal  ;TODO: DEAD code?
 
          .byte   $80
          .byte   $02
@@ -1077,12 +1126,13 @@ L5117:   bra     @L5142
          .byte   "G Iflt + 4 error "
          .byte   $00
 
-@L5142:  stz     DP_FPA_mant+4
+IntToReal:
+         stz     DP_FPA_mant+4
          stz     DP_FPA_exp
          lda     DP_BAS_INT_WA+3
          sta     DP_FPA_sgn
          bpl     @L5151
-         jsr     L8400
+         jsr     negateWA
          lda     DP_BAS_INT_WA+3
 @L5151:  bne     @L5179
          stz     DP_FPA_mant+3
@@ -1216,7 +1266,7 @@ L5241:   lda     DP_FPA_exp+1
          ror     DP_FPA_mant+3
          ror     DP_FPB_mant
          ror     DP_FPB_mant+1
-         ror     DP_FPB_mant+2
+         ror     DP_BAS_61_UK
          ror     DP_FPB_mant+3
          inc     A
          beq     L5289
@@ -1225,10 +1275,10 @@ L5241:   lda     DP_FPA_exp+1
          cmp     #$99
          bcs     @L524C
          adc     #$08
-         ldy     DP_FPB_mant+2
+         ldy     DP_BAS_61_UK
          sty     DP_FPB_mant+3
          ldy     DP_FPB_mant+1
-         sty     DP_FPB_mant+2
+         sty     DP_BAS_61_UK
          ldy     DP_FPB_mant
          sty     DP_FPB_mant+1
          ldy     DP_FPA_mant+3
@@ -1310,7 +1360,7 @@ L52E8:   lda     DP_FPB_sgn
          sta     DP_FPA_mant
          lda     DP_FPB_mant+1
          sta     DP_FPA_mant+1
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sta     DP_FPA_mant+2
          lda     DP_FPB_mant+3
          sta     DP_FPA_mant+3
@@ -1333,10 +1383,10 @@ L5307:   lda     DP_FPA_mant
          sec
 @L531E:  ldx     DP_FPB_mant+3
          stx     DP_FPB_mant+4
-         ldx     DP_FPB_mant+2
+         ldx     DP_BAS_61_UK
          stx     DP_FPB_mant+3
          ldx     DP_FPB_mant+1
-         stx     DP_FPB_mant+2
+         stx     DP_BAS_61_UK
          ldx     DP_FPB_mant
          stx     DP_FPB_mant+1
          stz     DP_FPB_mant
@@ -1347,7 +1397,7 @@ L5307:   lda     DP_FPA_mant
          beq     @L5381
 @L5339:  lsr     DP_FPB_mant
          ror     DP_FPB_mant+1
-         ror     DP_FPB_mant+2
+         ror     DP_BAS_61_UK
          ror     DP_FPB_mant+3
          ror     DP_FPB_mant+4
          dec     A
@@ -1398,7 +1448,7 @@ L5307:   lda     DP_FPA_mant
          cmp     DP_FPB_mant+1
          bne     @L53AC
          lda     DP_FPA_mant+2
-         cmp     DP_FPB_mant+2
+         cmp     DP_BAS_61_UK
          bne     @L53AC
          lda     DP_FPA_mant+3
          cmp     DP_FPB_mant+3
@@ -1418,7 +1468,7 @@ L5307:   lda     DP_FPA_mant
          lda     DP_FPB_mant+3
          sbc     DP_FPA_mant+3
          sta     DP_FPA_mant+3
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sbc     DP_FPA_mant+2
          sta     DP_FPA_mant+2
          lda     DP_FPB_mant+1
@@ -1436,7 +1486,7 @@ L5307:   lda     DP_FPA_mant
          sbc     DP_FPB_mant+3
          sta     DP_FPA_mant+3
          lda     DP_FPA_mant+2
-         sbc     DP_FPB_mant+2
+         sbc     DP_BAS_61_UK
          sta     DP_FPA_mant+2
          lda     DP_FPA_mant+1
          sbc     DP_FPB_mant+1
@@ -2070,7 +2120,7 @@ tblAssOpCodes:
 L5933:   jmp     L6364
 
 L5936:   jsr     parse_skip_spaces_PTR2
-         eor     #$5d
+         eor     #']'
          beq     L5933
          jsr     parse_updPTRfromPTR2_yield
          dec     DP_BAS_TXTPTR2_OFF
@@ -2081,7 +2131,7 @@ L5936:   jsr     parse_skip_spaces_PTR2
          bcc     @L59C9
          lda     DP_BAS_COUNT
          adc     #$06
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
          lda     DP_BAS_TMP6+2
          jsr     L99E2
          lda     DP_BAS_TMP6+1
@@ -2089,7 +2139,7 @@ L5936:   jsr     parse_skip_spaces_PTR2
          lda     DP_BAS_TMP6
          jsr     L9A05
          ldx     #$fb
-         ldy     $5b
+         ldy     DB_BAS_UNK_5A_6+1
          bpl     @L5969
          ldy     DP_BAS_STRLEN
 @L5969:  sty     DP_FPB_sgn
@@ -2098,7 +2148,7 @@ L5936:   jsr     parse_skip_spaces_PTR2
 @L596F:  inx
          bne     @L597C
          jsr     PrintCRLFresetCOUNT
-         ldx     $5d
+         ldx     DB_BAS_UNK_5A_6+3
          jsr     L9A42
          ldx     #$fc
 @L597C:  lda     [DP_BAS_TMP6+3],y
@@ -2116,7 +2166,7 @@ L5936:   jsr     parse_skip_spaces_PTR2
 
 @L5992:  ldx     #$08
          lda     [DP_BAS_TXTPTR2]
-         cmp     #$2e
+         cmp     #'.'
          bne     @L59A9
 @L599A:  jsr     PrintChOrToken
          dex
@@ -2147,13 +2197,13 @@ L5936:   jsr     parse_skip_spaces_PTR2
          dey
 @L59CC:  iny
          lda     [DP_BAS_TXTPTR2],y
-         cmp     #$3a
+         cmp     #':'
          beq     @L59D7
          cmp     #$0d
          bne     @L59CC
 @L59D7:  jsr     parse_nextstmt_yield_TXTPTR2_Y
          lda     [DP_BAS_TXTPTR2]
-         cmp     #$3a
+         cmp     #':'
          beq     @L59F2
          lda     DP_BAS_TXTPTR2+1
          cmp     DP_BAS_MEMBASE+1
@@ -2173,39 +2223,39 @@ brk46_Label:
          .byte   $00
 
 L59FD:   lda     DP_BAS_OPT
-         and     #$08
+         and     #OPT_8_UK
          bne     @L5A1C
          jsr     L6F78
          beq     @L5A1C
          jsr     L8B74
-         jsr     L6C8E
+         jsr     checkTypeInAConvertToINT
          ldx     #$04
-         ldy     #$43
-@L5A12:  lda     $47,x
-         cmp     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_P+3
+@lp:     lda     DP_BAS_INT_WA-1,x
+         cmp     [DP_BAS_INTVARSptr],y
          bne     brk46_Label
          dey
          dex
-         bne     @L5A12
+         bne     @lp
 @L5A1C:  jsr     var_find
          beq     L5A7D
          bcs     L5A7D
          jsr     pushINTWA_on_hw_stack
-         jsr     L851B
-         sta     $40
+         jsr     getPpctAsINT
+         sta     DP_BAS_40_VARTYPE
          jsr     L8D5C
          jsr     L66AB
          sty     $71
 L5A33:   jsr     parse_skip_spaces_PTR2
          ldy     #$00
          stz     DP_FPB_sgn
-         cmp     #$3a
+         cmp     #':'
          beq     L5AA2
          cmp     #$0d
          beq     L5AA2
-         cmp     #$5c
+         cmp     #'\'
          beq     L5AA2
-         cmp     #$2e
+         cmp     #'.'
          beq     L59FD
          dec     DP_BAS_TXTPTR2_OFF
          ldx     #$03
@@ -2215,7 +2265,7 @@ L5A33:   jsr     parse_skip_spaces_PTR2
          inc     DP_BAS_TXTPTR2_OFF
          lda     [DP_BAS_TXTPTR2],y
          bmi     L5A80
-         cmp     #$20
+         cmp     #' '
          beq     @L5A6A
          ldy     #$05
          asl     A
@@ -2224,17 +2274,17 @@ L5A33:   jsr     parse_skip_spaces_PTR2
 @packlp2:
          asl     A
          rol     DP_FPB_sgn
-         rol     $5d
+         rol     DB_BAS_UNK_5A_6+3
          dey
          bne     @packlp2
          dex
          bne     @packlp
-@L5A6A:  ldx     #$6d
+@L5A6A:  ldx     #tblMnePackSize-1
          lda     DP_FPB_sgn
 @L5A6E:  cmp     tblAsmMnePack-1,x
          bne     @L5A7A
          ldy     tblAsmMnePack2-1,x
-         cpy     $5d
+         cpy     DB_BAS_UNK_5A_6+3
          beq     L5A97
 @L5A7A:  dex
          bne     @L5A6E
@@ -2253,97 +2303,98 @@ L5A80:   ldx     #$42
          jsr     L5F7C
          bne     L5A7D
 L5A97:   lda     tblAssOpCodes-1,x
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          ldy     #$01
          cpx     #$37
          bcs     L5B1E
-L5AA2:   sty     $5b
-         ldy     #$42
-         lda     [DP_BAS_ASSWKSP],y
+L5AA2:   sty     DB_BAS_UNK_5A_6+1
+         ldy     #INTVAR_P+2 ;TODO: check and optimize
+         lda     [DP_BAS_INTVARSptr],y
          sta     DP_BAS_TMP6+2
          xba
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          tax
          dey
          stx     DP_BAS_TMP6+1
-         lda     [DP_BAS_ASSWKSP],y
-         tay
+         lda     [DP_BAS_INTVARSptr],y
+         tay                ;does this do anything?
          sty     DP_BAS_TMP6
          lda     DP_BAS_OPT
          and     #$04
          cmp     #$01
          bcc     @L5ACC
-         ldy     #$3e
-         lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_O+2
+         lda     [DP_BAS_INTVARSptr],y
          xba
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          tax
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          tay
 @L5ACC:  sty     DP_BAS_TMP6+3
          stx     DP_BAS_TMP6+4
          xba
-         sta     DP_BAS_TMP6+5
-         ldy     $5b
-         beq     @L5B1D
-         bpl     @L5ADD
+         sta     DB_BAS_UNK_5A_6
+         ldy     DB_BAS_UNK_5A_6+1
+         beq     L5B1D
+         bpl     L5ADD
          ldy     DP_BAS_STRLEN
-         beq     @L5B1D
-@L5ADD:  dey
+         beq     L5B1D
+L5ADD:   dey
          tyx
-         lda     $47,x
-         bit     $5b
+         lda     DP_BAS_INT_WA-1,x
+         bit     DB_BAS_UNK_5A_6+1
          bpl     @L5AE7
          lda     [DP_BAS_STRWKSP_L],y
 @L5AE7:  eor     #$ff
          sta     [DP_BAS_TMP6+3],y
          cmp     [DP_BAS_TMP6+3],y
-         bne     @L5AF7
+         bne     brk_47_BadMemory
          eor     #$ff
          sta     [DP_BAS_TMP6+3],y
          cmp     [DP_BAS_TMP6+3],y
-         beq     @L5B04
-@L5AF7:  brk     $47
+         beq     L5B04
+brk_47_BadMemory:
+         brk     $47
 
          .byte   "Bad Memory"
          .byte   $00
 
-@L5B04:  phy
+L5B04:   phy
          clc
-         ldy     #$40
-         jsr     L5C99
+         ldy     #INTVAR_P
+         jsr     assAdd1ToPtrAtY
          lda     DP_BAS_OPT
          and     #$04
          cmp     #$01
          bcc     @L5B19
          clc
          ldy     #$3c
-         jsr     L5C99
+         jsr     assAdd1ToPtrAtY
 @L5B19:  ply
          tya
-         bne     @L5ADD
-@L5B1D:  rts
+         bne     L5ADD
+L5B1D:   rts
 
 L5B1E:   cpx     #$42
          bcs     L5B84
          lda     #$00
 L5B24:   pha
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          clc
-         ldy     #$40
+         ldy     #INTVAR_P
          lda     DP_BAS_INT_WA
-         sbc     [DP_BAS_ASSWKSP],y
+         sbc     [DP_BAS_INTVARSptr],y
          xba
          lda     DP_BAS_INT_WA+1
          iny
-         sbc     [DP_BAS_ASSWKSP],y
+         sbc     [DP_BAS_INTVARSptr],y
          iny
          tax
          lda     DP_BAS_INT_WA+2
-         sbc     [DP_BAS_ASSWKSP],y
+         sbc     [DP_BAS_INTVARSptr],y
          tay
          xba
          clc
@@ -2393,24 +2444,26 @@ L5B84:   cpx     #$4a
          bne     L5BCA
          pla
          jsr     L5F52
-L5B97:   lda     #$20
+L5B97:   lda     #OPT_20_UK
 L5B99:   and     DP_BAS_OPT
          beq     L5BA0
          jmp     L5E02
 
-L5BA0:   jsr     eval_INTBRK
+L5BA0:   jsr     eval_CastINTorBRK
 L5BA3:   lda     DP_BAS_INT_WA+1
          ora     DP_BAS_INT_WA+2
          ora     DP_BAS_INT_WA+3
-         bne     L5BAF
+         bne     brk_02_Byte
 L5BAB:   ldy     #$02
          bra     L5B81
 
-L5BAF:   brk     $02
+brk_02_Byte:
+         brk     $02
 
          .byte   "Byte"
 
-L5BB5:   brk     $48
+brk_48_Word:
+         brk     $48
 
          .byte   "Word"
          .byte   $00
@@ -2422,61 +2475,62 @@ L5BBF:   cpx     #$5b
          jsr     L5F7A
          pha
 L5BC7:   jsr     parse_skip_spaces_PTR2
-L5BCA:   cmp     #$28
+L5BCA:   cmp     #'('
          bne     L5C3B
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     parse_skip_spaces_PTR2
-         cmp     #$29
+         cmp     #')'
          bne     L5C0F
          jsr     L5F4F
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          beq     L5BFD
          pla
          bne     @L5BEA
-         lda     $47
+         lda     DP_BAS_47_ASS_UK
          sec
          sbc     #$0b
-         sta     $47
-@L5BEA:  inc     $47
+         sta     DP_BAS_47_ASS_UK
+@L5BEA:  inc     DP_BAS_47_ASS_UK
 L5BEC:   bra     L5BA3
 
-L5BEE:   lda     $47
+L5BEE:   lda     DP_BAS_47_ASS_UK
          adc     #$11
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          pla
          beq     L5C30
          pha
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
-         bne     L5C33
+         bne     brk_03_Index
 L5BFD:   pla
          bne     @L5C06
-         lda     $47
+         lda     DP_BAS_47_ASS_UK
          adc     #$05
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
 @L5C06:  jsr     L5F5D
-         cmp     #$59
+         cmp     #'Y'
          beq     L5BEC
-         bra     L5C33
+         bra     brk_03_Index
 
-L5C0F:   cmp     #$2c
-         bne     L5C33
+L5C0F:   cmp     #','
+         bne     brk_03_Index
          jsr     L5F5D
          beq     @L5C1C
-         cmp     #$53
-         bne     L5C33
+         cmp     #'S'
+         bne     brk_03_Index
 @L5C1C:  tax
          jsr     parse_skip_spaces_PTR2
-         cmp     #$29
-         bne     L5C33
+         cmp     #')'
+         bne     brk_03_Index
          cpx     #$53
          beq     L5BEE
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
-         beq     L5C33
+         beq     brk_03_Index
          pla
          bne     L5BEC
 L5C30:   jmp     brk10_Syntax
 
-L5C33:   brk     $03
+brk_03_Index:
+         brk     $03
 
          .byte   "Index"
          .byte   $00
@@ -2487,15 +2541,15 @@ L5C3B:   jsr     L66A3
          jsr     L5F4F
          jsr     L5F5D
          beq     L5C86
-         cmp     #$59
+         cmp     #'Y'
          beq     L5C5F
-         cmp     #$53
-         bne     L5C33
+         cmp     #'S'
+         bne     brk_03_Index
          pla
          beq     L5C30
-         lda     $47
+         lda     DP_BAS_47_ASS_UK
          sbc     #$0e
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          bra     L5BEC
 
 L5C5E:   pha
@@ -2505,20 +2559,20 @@ L5C5F:   jsr     L5F52
          cmp     #$01
          bcc     @L5C6F
          lda     DP_BAS_INT_WA+2
-         eor     $41
+         eor     DP_ASS_ASS_FLAGS_UK
          beq     @L5C7C
-@L5C6F:  lda     $47
+@L5C6F:  lda     DP_BAS_47_ASS_UK
          and     #$0f
          eor     #$0d
          bne     @L5C81
          lda     #$0f
-         tsb     $47
+         tsb     DP_BAS_47_ASS_UK
          iny
 @L5C7C:  lda     DP_BAS_INT_WA+3
          beq     L5CE5
          sec
 @L5C81:  bcc     L5C30
-         jmp     L5D7A
+         jmp     brk_99_Bank
 
 L5C86:   jsr     L5F55
          pla
@@ -2530,23 +2584,24 @@ L5C91:   jsr     L5F88
          bne     L5C5E
          jmp     L5BAB
 
-L5C99:   lda     [DP_BAS_ASSWKSP],y
+assAdd1ToPtrAtY:
+         lda     [DP_BAS_INTVARSptr],y
          adc     #$01
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          iny
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          adc     #$00
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          iny
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          adc     #$00
-         sta     [DP_BAS_ASSWKSP],y
+         sta     [DP_BAS_INTVARSptr],y
          rts
 
 L5CAE:   cpx     #$50
          bcs     L5CE8
          jsr     L5F5D
-         cmp     #$41
+         cmp     #'A'
          beq     L5CCC
 L5CB9:   jsr     L66A3
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
@@ -2554,7 +2609,7 @@ L5CB9:   jsr     L66A3
          jsr     L5F4F
          jsr     L5F5D
          beq     L5C91
-L5CC9:   brl     L5C33
+L5CC9:   brl     brk_03_Index
 
 L5CCC:   iny
          lda     [DP_BAS_TXTPTR2],y
@@ -2565,14 +2620,14 @@ L5CCC:   iny
          bcc     L5CE0
          bne     @L5CDE
          ldy     #$36
-@L5CDE:  sty     $47
+@L5CDE:  sty     DP_BAS_47_ASS_UK
 L5CE0:   jsr     L5F55
          ldy     #$01
 L5CE5:   jmp     L5AA2
 
 L5CE8:   cpx     #$52
          bcs     @L5D16
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          ldy     #$03
          ldx     #$01
          lda     DP_BAS_INT_WA+1
@@ -2581,7 +2636,7 @@ L5CE8:   cpx     #$52
          bne     @L5D02
          ldx     #$0f
          lda     #$64
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          dey
 @L5D02:  phy
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
@@ -2589,8 +2644,8 @@ L5CE8:   cpx     #$52
          jsr     L5F5D
          bne     L5CC9
          txa
-         adc     $47
-         sta     $47
+         adc     DP_BAS_47_ASS_UK
+         sta     DP_BAS_47_ASS_UK
 @L5D12:  ply
          brl     L5AA2
 
@@ -2601,16 +2656,16 @@ L5CE8:   cpx     #$52
          jsr     parse_skipSpacesPTR2_cmp_HASH
          beq     L5D9D
          dec     DP_BAS_TXTPTR2_OFF
-@L5D25:  jsr     eval_INTBRK
+@L5D25:  jsr     eval_CastINTorBRK
 L5D28:   jmp     L5C8E
 
 L5D2B:   jsr     parse_skipSpacesPTR2_cmp_HASH
          bne     L5CB9
          ldy     #$89
-         sty     $47
+         sty     DP_BAS_47_ASS_UK
          jmp     L5B97
 
-         .byte   $10
+         .byte   $10        ;TODO: dead?
          .byte   $02
 
 L5D39:   jmp     L5DCA
@@ -2621,15 +2676,15 @@ L5D3C:   beq     L5D2B
          jsr     L5F7A
          pha
          jsr     parse_skip_spaces_PTR2
-         cmp     #$28
+         cmp     #'('
          beq     L5DA2
          ldy     #$03
          pla
          bne     @L5D5B
-         lda     $47
+         lda     DP_BAS_47_ASS_UK
          clc
          adc     L5CE0,x
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          iny
 @L5D5B:  phy
          jsr     L66A3
@@ -2637,18 +2692,19 @@ L5D3C:   beq     L5D2B
          beq     L5D83
          ply
 L5D65:   lda     DP_BAS_INT_WA+3
-         bne     L5D7A
+         bne     brk_99_Bank
          cpy     #$04
          beq     @L5D77
          phy
          ldy     #$42
          lda     DP_BAS_INT_WA+2
-         cmp     [DP_BAS_ASSWKSP],y
-         bne     L5D7A
+         cmp     [DP_BAS_INTVARSptr],y
+         bne     brk_99_Bank
          ply
 @L5D77:  jmp     L5AA2
 
-L5D7A:   brk     $49
+brk_99_Bank:
+         brk     $49
 
          .byte   "Bank"
          .byte   $00
@@ -2658,7 +2714,7 @@ L5D83:   beq     L5DEF
          pla
          bne     L5E05
          lda     #$dc
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          bra     L5E05
 
 L5D8E:   pla
@@ -2666,30 +2722,30 @@ L5D8E:   pla
          cpx     #$58
          bne     @L5D99
          lda     #$fc
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
 @L5D99:  ldy     #$03
          bra     L5D65
 
-L5D9D:   lda     #$10
+L5D9D:   lda     #OPT_10_UK
          jmp     L5B99
 
 L5DA2:   phx
          jsr     L5F4F
          jsr     L5F4F
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          plx
          jsr     parse_skip_spaces_PTR2
-         cmp     #$29
+         cmp     #')'
          beq     L5D81
-         cmp     #$2c
+         cmp     #','
          bne     L5DC7
          jsr     L5F4F
          jsr     L5F5D
          bne     L5DC7
          jsr     parse_skip_spaces_PTR2
-         cmp     #$29
+         cmp     #')'
          beq     L5D8E
-L5DC7:   jmp     L5C33
+L5DC7:   jmp     brk_03_Index
 
 L5DCA:   cpx     #$5e
          bcs     @L5DE4
@@ -2721,12 +2777,12 @@ L5DF2:   cpx     #$64
 
 @L5DFD:  jsr     parse_skipSpacesPTR2_cmp_HASH
          bne     L5DEF
-L5E02:   jsr     eval_INTBRK
+L5E02:   jsr     eval_CastINTorBRK
 L5E05:   ldy     #$03
          lda     DP_BAS_INT_WA+2
          ora     DP_BAS_INT_WA+3
          beq     @L5E10
-         jmp     L5BB5
+         jmp     brk_48_Word
 
 @L5E10:  jmp     L5AA2
 
@@ -2741,7 +2797,7 @@ L5E13:   jsr     L66A3
 @L5E27:  pla
          jmp     L5D28
 
-L5E2B:   jsr     eval_INTBRK
+L5E2B:   jsr     eval_CastINTorBRK
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          bne     L5E97
          jsr     parse_skip_spaces_PTR2
@@ -2751,18 +2807,18 @@ L5E2B:   jsr     eval_INTBRK
          jsr     L5F4F
          jsr     L5F88
          beq     L5E97
-         jmp     L5BAF
+         jmp     brk_02_Byte
 
 L5E47:   cpx     #$67
          bcs     @L5E6B
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     L5F88
          bne     L5E9B
          lda     DP_BAS_INT_WA
          pha
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          bne     L5DEF
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     L5F88
          bne     L5E9B
          pla
@@ -2773,7 +2829,7 @@ L5E47:   cpx     #$67
 
 @L5E6B:  beq     @L5E68
          phx
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          plx
          cpx     #$69
          bcc     L5EDC
@@ -2788,7 +2844,7 @@ L5E47:   cpx     #$67
          jsr     L5F88
          bne     L5E9B
          lda     DP_BAS_INT_WA
-         sta     $41
+         sta     DP_ASS_ASS_FLAGS_UK
 L5E8E:   lda     DP_BAS_OPT
          sta     $43
          ldy     #$00
@@ -2797,19 +2853,19 @@ L5E8E:   lda     DP_BAS_OPT
 L5E97:   pla
          jmp     L5C91
 
-L5E9B:   jmp     L5D7A
+L5E9B:   jmp     brk_99_Bank
 
-L5E9E:   jmp     L5BAF
+L5E9E:   jmp     brk_02_Byte
 
 L5EA1:   jmp     brk19_bad_MODE
 
-L5EA4:   jsr     L5F71
-         and     #$df
-         cmp     #$42
+L5EA4:   jsr     parseEor0Next
+         and     #$df       ;;to upper?
+         cmp     #'B'
          beq     @L5EB0
          brl     L5F30
 
-@L5EB0:  jsr     eval_INTBRK
+@L5EB0:  jsr     eval_CastINTorBRK
          lda     DP_BAS_INT_WA+3
          bmi     L5E8E
          jsr     L5F88
@@ -2819,7 +2875,7 @@ L5EA4:   jsr     L5F71
          stz     DP_BAS_INT_WA
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          bne     @L5ECE
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     L5F88
          bne     L5E9E
 @L5ECE:  plx
@@ -2838,50 +2894,50 @@ L5EDC:   jsr     L5F88
 L5EE3:   sta     DP_BAS_OPT
          bra     L5E8E
 
-L5EE7:   lda     #$40
+L5EE7:   lda     #OPT_40_UK
          trb     DP_BAS_OPT
          jsr     L5F88
          ora     DP_BAS_INT_WA
          beq     L5E8E
          lda     DP_BAS_OPT
-         and     #$8f
-         ora     #$40
+         and     #OPT_8F_MASK
+         ora     #OPT_40_UK
          bra     L5EE3
 
 L5EFA:   lda     DP_BAS_OPT
-         and     #$40
+         and     #OPT_40_UK
          bne     L5EA1
 L5F00:   jsr     L5F88
          bne     L5E9E
          lda     DP_BAS_INT_WA
-         and     #$30
+         and     #OPT_30_MASK
          trb     DP_BAS_OPT
          bcc     L5E8E
          tsb     DP_BAS_OPT
          brl     L5E8E
 
 L5F12:   ldx     #$01
-         jsr     L5F71
-         and     #$df
-         cmp     #$42
+         jsr     parseEor0Next
+         and     #$df       ;to upper
+         cmp     #'B'
          beq     L5F33
          inx
-         cmp     #$57
+         cmp     #'W'
          beq     L5F33
          inx
-         cmp     #$4c
+         cmp     #'L'
          beq     L5F33
          inx
-         cmp     #$44
+         cmp     #'D'
          beq     L5F33
-         cmp     #$53
+         cmp     #'S'
          beq     L5F43
 L5F30:   jmp     brk10_Syntax
 
 L5F33:   phx
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          ldx     #$47
-         jsr     L9A49
+         jsr     storeWAatDPX
          ply
 L5F3D:   jmp     L5AA2
 
@@ -2896,15 +2952,15 @@ L5F4B:   ldy     #$ff
 
 L5F4F:   jsr     L5F52
 L5F52:   jsr     L5F55
-L5F55:   lda     $47
+L5F55:   lda     DP_BAS_47_ASS_UK
          clc
          adc     #$04
-         sta     $47
+         sta     DP_BAS_47_ASS_UK
          rts
 
 L5F5D:   jsr     parse_skip_spaces_PTR2
-         and     #$df
-         cmp     #$58
+         and     #$df       ;to upper
+         cmp     #'X'
          rts
 
 parse_skipSpacesPTR2_cmp_HASH:
@@ -2917,14 +2973,16 @@ parse_SkipSpacesPTR2_cmp_COMMA:
          cmp     #','
          rts
 
-L5F71:   lda     #$00
-L5F73:   ldy     DP_BAS_TXTPTR2_OFF
+parseEor0Next:
+         lda     #$00
+parseEorANext:
+         ldy     DP_BAS_TXTPTR2_OFF
          inc     DP_BAS_TXTPTR2_OFF
          eor     [DP_BAS_TXTPTR2],y
          rts
 
-L5F7A:   lda     #$4c
-L5F7C:   jsr     L5F73
+L5F7A:   lda     #'L'
+L5F7C:   jsr     parseEorANext
          and     #$df
          beq     @L5F87
          dec     DP_BAS_TXTPTR2_OFF
@@ -2947,7 +3005,7 @@ L5F8F:   sta     [DP_BAS_TMP6]
          sta     DP_BAS_TMP6+4
          tya
          adc     DP_BAS_TMP6+2
-         sta     DP_BAS_TMP6+5
+         sta     DB_BAS_UNK_5A_6
 @L5FA3:  iny
          lda     [DP_BAS_TMP6+3],y
          sta     [DP_BAS_TMP6],y
@@ -3001,10 +3059,10 @@ L5FAD:   and     #$0f
          lda     DP_BAS_TMP6+1
          sta     DP_BAS_TMP6+4
          lda     DP_BAS_TMP6+2
-         sta     DP_BAS_TMP6+5
-         jsr     L604F
-         jsr     L604F
-         jsr     L604F
+         sta     DB_BAS_UNK_5A_6
+         jsr     incTMP6ptr
+         jsr     incTMP6ptr
+         jsr     incTMP6ptr
 @L6006:  lda     [DP_BAS_TMP6+3],y
          sta     [DP_BAS_TMP6],y
          dey
@@ -3033,89 +3091,92 @@ L600F:   txa
 L602F:   clc
          rts
 
-L6031:   cmp     #$7b
+L6031:   cmp     #'{'
          bcs     L602F
-         cmp     #$5f
+         cmp     #'_'
          bcs     L6047
-         cmp     #$5b
+         cmp     #'['
          bcs     L602F
-         cmp     #$40
+         cmp     #'@'
          bcs     L6047
-L6041:   cmp     #$3a
+L6041:   cmp     #':'
          bcs     L602F
-         cmp     #$30
+         cmp     #'0'
 L6047:   rts
 
-L6048:   cmp     #$2e
+L6048:   cmp     #'.'
          bne     L6041
          rts
 
-L604D:   lda     [DP_BAS_TMP6]
-L604F:   inc     DP_BAS_TMP6
+getAatTMP6ptrAndInc:
+         lda     [DP_BAS_TMP6]
+incTMP6ptr:
+         inc     DP_BAS_TMP6
          bne     L6090
          inc     DP_BAS_TMP6+1
          bne     L6090
          inc     DP_BAS_TMP6+2
          rts
 
-L605A:   jsr     L604F
+incTMP6ptrLDA:
+         jsr     incTMP6ptr
          lda     [DP_BAS_TMP6]
          rts
 
-L6060:   jsr     L604F
+L6060:   jsr     incTMP6ptr
 L6063:   lda     [DP_BAS_TMP6]
          cmp     #$0d
          beq     L6090
-         cmp     #$20
+         cmp     #' '
          beq     L6060
-         cmp     #$26
+         cmp     #'&'
          bne     @L6081
-@L6071:  jsr     L605A
+@L6071:  jsr     incTMP6ptrLDA
          jsr     L6041
          bcs     @L6071
-         cmp     #$41
+         cmp     #'A'
          bcc     L6063
-         cmp     #$47
+         cmp     #'G'
          bcc     @L6071
-@L6081:  cmp     #$22
+@L6081:  cmp     #'"'
          bne     L6091
-@L6085:  jsr     L605A
-         cmp     #$22
+@L6085:  jsr     incTMP6ptrLDA
+         cmp     #'"'
          beq     L6060
          cmp     #$0d
          bne     @L6085
 L6090:   rts
 
-L6091:   cmp     #$3a
+L6091:   cmp     #':'
          bne     L609E
-         jsr     L604F
+         jsr     incTMP6ptr
 L6098:   stz     DP_FPB_sgn
-L609A:   stz     $5d
+L609A:   stz     DB_BAS_UNK_5A_6+3
          bra     L6063
 
-L609E:   cmp     #$2c
+L609E:   cmp     #','
          beq     L6060
-         cmp     #$2a
+         cmp     #'*'
          bne     L60B2
          lda     DP_FPB_sgn
          beq     L6090
 L60AA:   ldx     #$ff
          stx     DP_FPB_sgn
-         stz     $5d
+         stz     DB_BAS_UNK_5A_6+3
          bra     L6060
 
-L60B2:   cmp     #$2e
+L60B2:   cmp     #'.'
          beq     @L60C4
          jsr     L6041
          bcc     L60E7
-         ldx     $5d
+         ldx     DB_BAS_UNK_5A_6+3
          beq     @L60C4
          jsr     L5FAD
          bcc     L6060
 @L60C4:  lda     [DP_BAS_TMP6]
          jsr     L6048
          bcc     L60D0
-         jsr     L604F
+         jsr     incTMP6ptr
          bra     @L60C4
 
 L60D0:   ldx     #$ff
@@ -3127,16 +3188,16 @@ L60D6:   jsr     L6031
 L60DB:   lda     [DP_BAS_TMP6]
          jsr     L6031
          bcc     L60D0
-         jsr     L604F
+         jsr     incTMP6ptr
          bra     L60DB
 
-L60E7:   cmp     #$40
+L60E7:   cmp     #'@'
          bcc     L60AA
-         cmp     #$58
+         cmp     #'X'
          bcs     L60D6
-         ldx     #$f5
+         ldx     #<tblTokensAsc
          stx     DP_BAS_TMP6+3
-         ldx     #$53
+         ldx     #>tblTokensAsc
          stx     DP_BAS_TMP6+4
 @L60F7:  ldy     #$00
          cmp     (DP_BAS_TMP6+3)
@@ -3148,12 +3209,12 @@ L60E7:   cmp     #$40
          cmp     [DP_BAS_TMP6],y
          beq     @L60FF
          lda     [DP_BAS_TMP6],y
-         cmp     #$2e
+         cmp     #'.'
          beq     @L6119
 @L610E:  iny
          lda     (DP_BAS_TMP6+3),y
          bpl     @L610E
-         cmp     #$fe
+         cmp     #tknWIDTH
          bne     @L6126
          bcs     L60DB
 @L6119:  iny
@@ -3198,11 +3259,11 @@ L6146:   txa
          lsr     A
          bcc     @L6161
          stx     DP_FPB_sgn
-         stz     $5d
+         stz     DB_BAS_UNK_5A_6+3
 @L6161:  lsr     A
          bcc     @L6168
          stz     DP_FPB_sgn
-         stz     $5d
+         stz     DB_BAS_UNK_5A_6+3
 @L6168:  lsr     A
          bcc     @L617B
          pha
@@ -3210,13 +3271,13 @@ L6146:   txa
 @L616E:  lda     [DP_BAS_TMP6],y
          jsr     L6031
          bcc     @L617A
-         jsr     L604F
+         jsr     incTMP6ptr
          bra     @L616E
 
 @L617A:  pla
 @L617B:  lsr     A
          bcc     @L6180
-         stx     $5d
+         stx     DB_BAS_UNK_5A_6+3
 @L6180:  lsr     A
          bcs     L6190
          jmp     L6060
@@ -3233,7 +3294,7 @@ parse_skip_spaces_PTR2:
          ldy     DP_BAS_TXTPTR2_OFF
          inc     DP_BAS_TXTPTR2_OFF
          lda     [DP_BAS_TXTPTR2],y
-         cmp     #$20
+         cmp     #' '
          beq     parse_skip_spaces_PTR2
 L619B:   rts
 
@@ -3488,9 +3549,9 @@ cont_or_prompt:
 
 L6331:   lda     #$03
          sta     DP_BAS_OPT
-         ldy     #$42
-         lda     [DP_BAS_ASSWKSP],y
-         sta     $41
+         ldy     #INTVAR_P+2
+         lda     [DP_BAS_INTVARSptr],y
+         sta     DP_ASS_ASS_FLAGS_UK
          jmp     L5936
 
 L633E:   jmp     L9B6F
@@ -3498,13 +3559,13 @@ L633E:   jmp     L9B6F
 L6341:   ldy     DP_BAS_TXTPTR2_OFF
          dey
          lda     [DP_BAS_TXTPTR2],y
-         cmp     #$2a
+         cmp     #'*'
          beq     L62CB
-         cmp     #$5b
+         cmp     #'['
          beq     L6331
-         cmp     #$a2
+         cmp     #'"' | $80 ;TODO tknEXT?
          beq     L633E
-         cmp     #$3d
+         cmp     #'='
          bne     L6359
          brl     L6430
 
@@ -3524,25 +3585,26 @@ L6366:   phx
          ldx     #$02
          jsl     _EV
          plx
-         bcc     @L638D
+         bcc     L638D
          lda     #$01
          ldx     #$02
          jsl     _EV
-         bcs     @L638A
+         bcs     jmp_brk_11_Escape
          jsr     cmp_ERRORPTRisDEFAULT
          lda     #$03
-         cop     $16
-         bra     @L638D
+         cop     COP_16_OPAEV
+         bra     L638D
 
-@L638A:  brl     brk_11_Escape
+jmp_brk_11_Escape:
+         brl     brk_11_Escape
 
-@L638D:  ply
+L638D:   ply
          plx
          inc     DP_BAS_TXTPTR2_OFF
          lda     [DP_BAS_TXTPTR2],y
-         cmp     #$20
+         cmp     #' '
          beq     L6364
-         cmp     #$2e
+         cmp     #'.'
          bne     @L63A2
          lda     DP_BAS_LAST_EOSEOR_D_
          beq     L6402
@@ -3550,7 +3612,7 @@ L6366:   phx
 
 @L63A2:  ldx     #$ff
          stx     DP_BAS_LAST_EOSEOR_D_
-         cmp     #$cf
+         cmp     #tknPTR
          bcc     L63BF
 ;*******************************************************************************
 ;* A contains a builtin function token, dispatch to the function based on A    *
@@ -3568,7 +3630,7 @@ evalDispatchFN:
          rti
 
 L63B8:   jsr     parse_skip_spaces_PTR2
-         cmp     #$c6
+         cmp     #tknAUTO
          bcs     evalDispatchFN
 L63BF:   ldx     DP_BAS_TXTPTR2
          stx     DP_BAS_TXTPTR
@@ -3593,11 +3655,11 @@ L63BF:   ldx     DP_BAS_TXTPTR2
          dec     DP_BAS_TXTPTR2_OFF
 exec_LET:
          jsr     var_find
-         beq     L645C
+         beq     jmp_brk_10_Syntax
 L63F0:   bcc     L644A
          jsr     stack_INTWA
          jsr     parse_expectEQ_PTR_OFF
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          bne     brk06_type_mismatch
          jsr     L64B2
          brl     parse_EOS_TXTPTR2
@@ -3618,7 +3680,7 @@ L6402:   lda     #$ff
          lda     #$ff
          sta     DP_BAS_INT_WA+3
          lda     #$04
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L8D5C
          ldy     DP_BAS_TXTPTR_OFF
          sty     DP_BAS_TXTPTR2_OFF
@@ -3640,15 +3702,16 @@ L6430:   sec
          jsr     L7527
          jmp     L7282
 
-L644A:   lda     $5b
+L644A:   lda     DB_BAS_UNK_5A_6+1
          cmp     #$40
-         beq     L645C
+         beq     jmp_brk_10_Syntax
          jsr     pushINTWA_on_hw_stack
          jsr     parse_expectEQ_PTR_OFF
          jsr     L8D5C
          jmp     parse_EOS_TXTPTR2
 
-L645C:   jmp     brk10_Syntax
+jmp_brk_10_Syntax:
+         jmp     brk10_Syntax
 
 exec_STOP:
          jsr     parse_nextstmt_yield_TXTOFF2
@@ -3690,7 +3753,7 @@ L649F:   jsr     L9AF9
 @L64AF:  sta     [DP_BAS_INT_WA]
          rts
 
-L64B2:   jsr     L993C
+L64B2:   jsr     popIntA
 L64B5:   lda     DP_BAS_INT_WA+3
          sta     DP_FP_TMP+2
          cmp     #$80
@@ -3800,7 +3863,7 @@ L6567:   jsr     parse_skip_space_CMPcomma
          bne     L65C2
          jsr     L7537
          jsr     fpCopyFPAtoPrintPTR
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          jsr     BPUT_A_to_CURCHAN
          tax
          beq     L65AB
@@ -3863,11 +3926,11 @@ exec_PRINT:
          dec     DP_BAS_TXTPTR2_OFF
          bra     exec_PRINT_int
 
-L65D0:   lda     [DP_BAS_ASSWKSP]
+L65D0:   lda     [DP_BAS_INTVARSptr]
          beq     exec_PRINT_int
          lda     DP_BAS_COUNT
 @L65D6:  beq     exec_PRINT_int
-         sbc     [DP_BAS_ASSWKSP]
+         sbc     [DP_BAS_INTVARSptr]
          bcs     @L65D6
          tay
 @L65DD:  jsr     printSpcOrSendToLOMEMandINC
@@ -3875,51 +3938,51 @@ L65D0:   lda     [DP_BAS_ASSWKSP]
          bne     @L65DD
 exec_PRINT_int:
          clc
-         lda     [DP_BAS_ASSWKSP]
+         lda     [DP_BAS_INTVARSptr]
          sta     DP_BAS_TMP2A
-@L65E8:  ror     $2b
+@L65E8:  ror     DP_BAS_TMP2A+1
 @L65EA:  jsr     parse_skip_spaces_PTR2
-         cmp     #$3a
+         cmp     #':'
          beq     @L65F9
          cmp     #$0d
          beq     @L65F9
-         cmp     #$8b
+         cmp     #tknELSE
          bne     @L6612
 @L65F9:  jsr     PrintCRLFresetCOUNT
 @L65FC:  jmp     L6359
 
 @L65FF:  stz     DP_BAS_TMP2A
-         stz     $2b
+         stz     DP_BAS_TMP2A+1
          jsr     parse_skip_spaces_PTR2
-         cmp     #$3a
+         cmp     #':'
          beq     @L65FC
          cmp     #$0d
          beq     @L65FC
-         cmp     #$8b
+         cmp     #tknELSE
          beq     @L65FC
-@L6612:  cmp     #$7e
+@L6612:  cmp     #'~'
          beq     @L65E8
-         cmp     #$2c
+         cmp     #','
          beq     L65D0
-         cmp     #$3b
+         cmp     #';'
          beq     @L65FF
          jsr     L66B0
          bcc     @L65EA
          lda     DP_BAS_TMP2A
          pha
-         lda     $2b
+         lda     DP_BAS_TMP2A+1
          pha
          dec     DP_BAS_TXTPTR_OFF
          jsr     L7537
          pla
-         sta     $2b
+         sta     DP_BAS_TMP2A+1
          pla
          sta     DP_BAS_TMP2A
          lda     DP_BAS_TXTPTR_OFF
          sta     DP_BAS_TXTPTR2_OFF
          tya
          beq     @L664E
-         jsr     L793A
+         jsr     cmdPRINT_num2str
          lda     DP_BAS_TMP2A
          sec
          sbc     DP_BAS_STRLEN
@@ -3941,10 +4004,11 @@ exec_PRINT_int:
 
 L6660:   jmp     brk_05_missing_comma
 
-L6663:   lda     DP_BAS_INT_WA
+printTAB:
+         lda     DP_BAS_INT_WA
          pha
          jsr     L6C77
-         lda     #$1f
+         lda     #VDU_CURS_CHAR
          jsr     call_OSWRCH
          pla
          jsr     call_OSWRCH
@@ -3953,8 +4017,8 @@ L6663:   lda     DP_BAS_INT_WA
 
 L6677:   jsr     L6C7F
          jsr     parse_skip_space_CMPcomma
-         beq     L6663
-         cmp     #$29
+         beq     printTAB
+         cmp     #')'
          bne     L6660
          lda     DP_BAS_INT_WA
          sbc     DP_BAS_COUNT
@@ -3975,7 +4039,7 @@ L66A0:   clc
          bra     L66AB
 
 L66A3:   dec     DP_BAS_TXTPTR2_OFF
-eval_INTBRK:
+eval_CastINTorBRK:
          jsr     L7527
          jsr     L6C8F
 L66AB:   ldy     DP_BAS_TXTPTR_OFF
@@ -3992,9 +4056,9 @@ L66B0:   ldx     DP_BAS_TXTPTR2
          stx     DP_BAS_TXTPTR_OFF
          cmp     #$27
          beq     L669D
-         cmp     #$8a
+         cmp     #tknTAB
          beq     L6677
-         cmp     #$89
+         cmp     #tknSPC
          beq     L6691
 L66CC:   sec
 L66CD:   rts
@@ -4009,21 +4073,22 @@ brk_09_missing_quote:
 L66D3:   jsr     parse_skip_spaces_PTR2
          jsr     L66B0
          bcc     L66CD
-         cmp     #$22
+         cmp     #'"'
          bne     L66CC
-@L66DF:  iny
+@prStrLp:
+         iny
          lda     [DP_BAS_TXTPTR],y
          cmp     #$0d
          beq     brk_09_missing_quote
-         cmp     #$22
-         bne     @L66F3
+         cmp     #'"'
+         bne     @sk
          iny
          sty     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$22
+         cmp     #'"'
          bne     L66A0
-@L66F3:  jsr     printCh
-         bra     @L66DF
+@sk:     jsr     printCh
+         bra     @prStrLp
 
 mem_check_in_bounds:
          jsr     L6725
@@ -4047,9 +4112,9 @@ L6712:   jsr     @L6718
 @L6718:  lda     DP_BAS_INT_WA
          cmp     #$00
          lda     DP_BAS_INT_WA+1
-         sbc     $95
+         sbc     DP_BAS_95_UKPTR
          lda     DP_BAS_INT_WA+2
-         sbc     $96
+         sbc     DP_BAS_95_UKPTR+1
          rts
 
 L6725:   sec
@@ -4063,7 +4128,7 @@ L6725:   sec
          sbc     DP_BAS_INT_WA+2
 @L6736:  rts
 
-L6737:   jsr     L5F73
+L6737:   jsr     parseEorANext
          beq     @L6740
          dec     DP_BAS_TXTPTR2_OFF
          eor     #$00
@@ -4073,11 +4138,11 @@ jmp_brk1a_no_such_var1:
          jmp     brk1a_no_such_var
 
 exec_CALL:
-         lda     #$4c
+         lda     #'L'
          jsr     L6737
          cmp     #$01
          bcc     @L6752
-         lda     #$49
+         lda     #'I'
          jsr     L6737
 @L6752:  php
          jsr     L7527
@@ -4113,7 +4178,7 @@ exec_CALL:
 @L678B:  ply
          dec     DP_BAS_TXTPTR_OFF
          jsr     parse_nextstmt_yield_PTR2_OFF
-         jsr     L993C
+         jsr     popIntA
          plp
          bcc     @L67AA
          bne     @L67AA
@@ -4198,37 +4263,37 @@ L6804:   lda     DP_BAS_INT_WA+2
          lda     #$01
          trb     DP_BAS_INT_WA+3
          ldy     #$0c
-         and     [DP_BAS_ASSWKSP],y
+         and     [DP_BAS_INTVARSptr],y
          ora     DP_BAS_INT_WA+3
          eor     #$30
          pha
          rep     #$30
          .a16
          .i16
-         ldy     #$0064
-         lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_Y
+         lda     [DP_BAS_INTVARSptr],y
          pha
-         ldy     #$0060
-         lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_X
+         lda     [DP_BAS_INTVARSptr],y
          tax
-         ldy     #$0004
-         lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_A
+         lda     [DP_BAS_INTVARSptr],y
          pha
          lda     DP_BAS_INT_WA+3
          pha
-         ldy     #$0005
+         ldy     #INTVAR_A+1
          and     #$0080
          beq     @L6838
-         ldy     #$0009
-@L6838:  lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_B+1
+@L6838:  lda     [DP_BAS_INTVARSptr],y
          pha
          plb
          plb
          pla
          and     #$0002
          beq     @L6849
-         ldy     #$0010
-         lda     [DP_BAS_ASSWKSP],y
+         ldy     #INTVAR_D
+         lda     [DP_BAS_INTVARSptr],y
          tcd
 @L6849:  pla
          ply
@@ -4252,7 +4317,7 @@ exec_DELETE:
          sta     DP_BAS_TMP6+3
          lda     DP_BAS_INT_WA+1
          sta     DP_BAS_TMP6+4
-         jsr     L993C
+         jsr     popIntA
 @L686F:  jsr     L962A
          jsr     parse_yield
          jsr     INT_inc_WA
@@ -4273,19 +4338,19 @@ L6885:   lda     #$0a
          bne     @L68A8
          jsr     parse_lineno_atOFF
          lda     DP_BAS_INT_WA+1
-         bne     L690D
+         bne     brk_00_Silly
          lda     DP_BAS_INT_WA
-         beq     L690D
+         beq     brk_00_Silly
          jmp     parse_nextstmt_yield_TXTOFF2
 
 @L68A8:  jmp     L72D9
 
 L68AB:   lda     DP_BAS_TOP
-         sta     $5b
+         sta     DB_BAS_UNK_5A_6+1
          lda     DP_BAS_TOP+1
          sta     DP_FPB_sgn
          lda     DP_BAS_TOP+2
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
 L68B7:   clc
          lda     DP_BAS_PAGE
          adc     #$01
@@ -4301,38 +4366,40 @@ L68B7:   clc
 
 exec_RENUMBER:
          jsr     L6885
-         ldx     #$58
+         ldx     #DP_BAS_TMP6+3
          jsr     stack_copy6_to_X_uns4
          jsr     do_END
          jsr     L68AB
 @L68DB:  lda     [DP_BAS_TMP6]
          bmi     L6915
-         sta     [$5b]
+         sta     [DB_BAS_UNK_5A_6+1]
          lda     [DP_BAS_TMP6],y
-         sta     [$5b],y
+         sta     [DB_BAS_UNK_5A_6+1],y
          sec
          tya
-         adc     $5b
-         sta     $5b
+         adc     DB_BAS_UNK_5A_6+1
+         sta     DB_BAS_UNK_5A_6+1
          bcc     @L68F3
          inc     DP_FPB_sgn
          bne     @L68F3
-         inc     $5d
+         inc     DB_BAS_UNK_5A_6+3
 @L68F3:  cmp     DP_BAS_HIMEM
          lda     DP_FPB_sgn
          sbc     DP_BAS_HIMEM+1
-         lda     $5d
+         lda     DB_BAS_UNK_5A_6+3
          sbc     DP_BAS_HIMEM+2
-         bcs     @L6904
+         bcs     brk_cc_RENUMBER_space
          jsr     L69D9
          bra     @L68DB
 
-@L6904:  brk     $00
+brk_cc_RENUMBER_space:
+         brk     $00
 
          .byte   $cc
          .byte   " space"
 
-L690D:   brk     $00
+brk_00_Silly:
+         brk     $00
 
          .byte   "Silly"
          .byte   $00
@@ -4369,12 +4436,12 @@ L6915:   jsr     L68B7
 @L694E:  lda     [DP_BAS_TXTPTR2],y
          ldx     DP_BAS_INT_WA+3
          bne     @L695C
-         cmp     #$8d
+         cmp     #tknLineNo
          beq     @L6972
-         cmp     #$f4
+         cmp     #tknREM
          beq     @L6969
 @L695C:  iny
-         cmp     #$22
+         cmp     #'"'
          bne     @L6965
          eor     DP_BAS_INT_WA+3
          sta     DP_BAS_INT_WA+3
@@ -4389,10 +4456,10 @@ L6915:   jsr     L68B7
          jsr     L68AB
 @L6978:  lda     [DP_BAS_TMP6]
          bmi     @L69BB
-         lda     [$5b]
+         lda     [DB_BAS_UNK_5A_6+1]
          cmp     DP_BAS_INT_WA+1
          bne     @L69A5
-         lda     [$5b],y
+         lda     [DB_BAS_UNK_5A_6+1],y
          cmp     DP_BAS_INT_WA
          bne     @L69A5
          lda     [DP_BAS_TMP6],y
@@ -4406,35 +4473,32 @@ L6915:   jsr     L68B7
          lda     DP_BAS_TXTPTR2+1
          sta     DP_BAS_TMP6+4
          lda     DP_BAS_TXTPTR2+2
-         sta     DP_BAS_TMP6+5
+         sta     DB_BAS_UNK_5A_6
          jsr     L600F
 @L69A1:  ldy     DP_BAS_TXTPTR2_OFF
          bra     @L694E
 
 @L69A5:  clc
          jsr     L69D9
-         lda     $5b
+         lda     DB_BAS_UNK_5A_6+1
          adc     #$02
-         sta     $5b
+         sta     DB_BAS_UNK_5A_6+1
          bcc     @L6978
          inc     DP_FPB_sgn
          bne     @L6978
-         inc     $5d
+         inc     DB_BAS_UNK_5A_6+3
          bra     @L6978
 
 @L69B9:  bra     L6A19
 
-@L69BB:  jsr     L9C22
-         lsr     DP_FPB_mant+2
-         adc     #$6c
-         adc     DP_BAS_TMP64
-         jsr     L7461
-         jsr     $1fb7
+@L69BB:  jsr     printStringAfter
+         .byte   "Failed at "
+         lda     [DP_BAS_TXTPTR2],y
          sta     DP_BAS_INT_WA+1
          iny
          lda     [DP_BAS_TXTPTR2],y
          sta     DP_BAS_INT_WA
-         jsr     printWAasDecimal16b
+         jsr     int16print_AnyLen
          jsr     PrintCRLFresetCOUNT
          bra     @L69A1
 
@@ -4454,11 +4518,11 @@ exec_AUTO:
          jsr     L6885
          lda     DP_BAS_INT_WA
          pha
-         jsr     L993C
+         jsr     popIntA
 @L69F5:  jsr     stack_INTWA
-         jsr     L7891
+         jsr     int16print_fmt5
          jsr     L95BF
-         jsr     L993C
+         jsr     popIntA
          jsr     L6098
          ldy     #$00
          jsr     L96C0
@@ -4477,14 +4541,14 @@ L6A1C:   jmp     L6BA2
 
 L6A1F:   dec     DP_BAS_TXTPTR2_OFF
          jsr     var_find
-         beq     L6A9C
-         bcs     L6A9C
+         beq     brk_0a_Bad_DIM
+         bcs     brk_0a_Bad_DIM
          jsr     pushINTWA_on_hw_stack
          jsr     L6C7F
          jsr     INT_inc_WA
          lda     DP_BAS_INT_WA+3
          ora     DP_BAS_INT_WA+2
-         bne     L6A9C
+         bne     brk_0a_Bad_DIM
          clc
          lda     DP_BAS_INT_WA
          adc     DP_BAS_VARTOP
@@ -4514,42 +4578,44 @@ L6A1F:   dec     DP_BAS_TXTPTR2_OFF
          stx     DP_BAS_VARTOP+1
          sty     DP_BAS_VARTOP+2
          lda     #$40
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L8D5C
          jsr     L66AB
 L6A70:   jsr     parse_SkipSpacesPTR2_cmp_COMMA
          beq     exec_DIM
          jmp     L6359
 
-L6A78:   ldx     #$61
+mul16fromStack:
+         ldx     #DP_BAS_61_UK
          jsr     stack_copy6_to_X_uns4
-L6A7D:   rep     #$30
+mul16:   rep     #$30
          .a16
          .i16
          ldx     #$0000
-@L6A82:  lsr     DP_FPB_mant+2
-         bcc     @L6A8D
+@lp:     lsr     DP_BAS_61_UK
+         bcc     @sk
          clc
          txa
          adc     DP_BAS_INT_WA
          tax
-         bcs     L6A9C
-@L6A8D:  lda     DP_FPB_mant+2
-         beq     @L6A97
+         bcs     brk_0a_Bad_DIM
+@sk:     lda     DP_BAS_61_UK
+         beq     @sk2
          asl     DP_BAS_INT_WA
-         bcs     L6A9C
-         bra     @L6A82
+         bcs     brk_0a_Bad_DIM
+         bra     @lp
 
-@L6A97:  stx     DP_BAS_INT_WA
+@sk2:    stx     DP_BAS_INT_WA
          sep     #$30
          .a8
          .i8
          rts
 
-L6A9C:   brk     $0a
+brk_0a_Bad_DIM:
+         brk     $0a
 
          .byte   "Bad "
-         .byte   $de
+         .byte   tknDIM
          .byte   $00
 
 exec_DIM:
@@ -4573,44 +4639,44 @@ exec_DIM:
          sbc     #$00
          sta     DP_BAS_TMP6+2
          ldx     #$05
-         stx     DP_FPB_mant+2
+         stx     DP_BAS_61_UK
          ldx     DP_BAS_TXTPTR2_OFF
          jsr     varScanNameAtTMP6
          cpy     #$01
-         beq     L6A9C
-         cmp     #$28
+         beq     brk_0a_Bad_DIM
+         cmp     #'('
          beq     @L6AEA
-         cmp     #$24
+         cmp     #'$'
          beq     @L6ADF
-         cmp     #$25
+         cmp     #'%'
          bne     @L6AE7
-         dec     DP_FPB_mant+2
+         dec     DP_BAS_61_UK
 @L6ADF:  iny
          inx
          lda     [DP_BAS_TMP6],y
-         cmp     #$28
+         cmp     #'('
          beq     @L6AEA
 @L6AE7:  jmp     L6A1F
 
 @L6AEA:  iny
          stx     DP_BAS_TXTPTR2_OFF
          jsr     varFind_00
-@L6AF0:  bne     L6A9C
+@L6AF0:  bne     brk_0a_Bad_DIM
          jsr     L6E93
          ldx     #$01
          jsr     L6EFA
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          pha
          lda     #$01
          pha
          jsr     retA_8bit_INT
 @L6B03:  jsr     stack_INTWA
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          lda     DP_BAS_INT_WA+1
          and     #$c0
          ora     DP_BAS_INT_WA+2
          ora     DP_BAS_INT_WA+3
-         bne     L6A9C
+         bne     brk_0a_Bad_DIM
          jsr     INT_inc_WA
          ply
          lda     DP_BAS_INT_WA
@@ -4620,17 +4686,17 @@ exec_DIM:
          sta     [DP_BAS_VARTOP],y
          iny
          phy
-         jsr     L6A78
+         jsr     mul16fromStack
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          beq     @L6B03
-         cmp     #$29
+         cmp     #')'
          bne     @L6AF0
          plx
          pla
          phx
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          stz     DP_FPB_mant+3
-         jsr     L6A7D
+         jsr     mul16
          pla
          pha
          adc     DP_BAS_INT_WA
@@ -4638,7 +4704,7 @@ exec_DIM:
          bcc     @L6B47
          inc     DP_BAS_INT_WA+1
          bne     @L6B47
-         brl     L6A9C
+         brl     brk_0a_Bad_DIM
 
 @L6B47:  lda     DP_BAS_VARTOP+2
          sta     DP_BAS_TMP6+2
@@ -4756,11 +4822,11 @@ exec_CLEAR:
 exec_TRACE:
          jsr     parse_lineno_atOFF
          bcs     @L6C1B
-         cmp     #$ee
+         cmp     #tknON
          beq     @L6C2C
-         cmp     #$87
+         cmp     #tknOFF
          beq     @L6C35
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
 @L6C1B:  jsr     parse_nextstmt_yield_TXTOFF2
          lda     DP_BAS_INT_WA
          sta     DP_BAS_TRACE_LIM
@@ -4794,21 +4860,21 @@ exec_TIME_set:
 
 @L6C53:  inc     DP_BAS_TXTPTR2_OFF
          jsr     PTR_eq_PTR2_exeptEquals
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          bne     jmp_brk06_type_mismatch16
          ldy     DP_BAS_STRLEN
          lda     #$0d
          sta     [DP_BAS_STRWKSP_L],y
          ldx     #$08
          jsr     L8604
-         cop     $28
-         eor     $4c,S
-         eor     f:fpConstPiDiv2
+         cop     COP_28_OPCMD
+         .byte   "CLOCK"
+         .byte   $00
          phk
          plb
          jmp     parse_EOS_TXTPTR2
 
-L6C74:   jsr     storeStringOnStack
+L6C74:   jsr     StackString
 L6C77:   jsr     L854D
          bra     L6C8F
 
@@ -4823,10 +4889,11 @@ eval_ret_INT:
 
 eval_force_INT:
          jsr     PTR_eq_PTR2_exeptEquals
-L6C8C:   lda     $40
-L6C8E:   tay
+L6C8C:   lda     DP_BAS_40_VARTYPE
+checkTypeInAConvertToINT:
+         tay
 L6C8F:   beq     jmp_brk06_type_mismatch16
-L6C91:   bpl     L6CC0
+L6C91:   bpl     rtsL6CC0
 eval_real2INT:
          php
          phy
@@ -4839,7 +4906,7 @@ eval_real2INT:
          jsr     moduleCallARITHref
          jsr     DP_BAS_STACKptreqBHA
          plb
-         jsr     L993C
+         jsr     popIntA
          lda     #RETV_INT
          plx
          ply
@@ -4854,16 +4921,18 @@ L6CB0:   lda     DP_FPA_mant
          sta     DP_BAS_INT_WA+1
          lda     DP_FPA_mant+3
          sta     DP_BAS_INT_WA
-L6CC0:   rts
+rtsL6CC0:
+         rts
 
 jmp_brk06_type_mismatch16:
          jmp     brk06_type_mismatch
 
 eval_real:
          jsr     evalLevel1
-L6CC7:   beq     jmp_brk06_type_mismatch16
-         bmi     L6CC0
-         jsr     L5117
+ckTypeIntToReal:
+         beq     jmp_brk06_type_mismatch16
+         bmi     rtsL6CC0
+         jsr     braIntToReal
          rts
 
 exec_PROC:
@@ -4875,7 +4944,7 @@ exec_PROC:
          sta     DP_BAS_TXTPTR+2
          lda     DP_BAS_TXTPTR2_OFF
          sta     DP_BAS_TXTPTR_OFF
-         lda     #$f2       ;;PROC
+         lda     #tknPROC   ;;PROC
          jsr     exec_FN_PROC
          jsr     parse_nextstmt_yield_PTR2_OFF
          jmp     parse_EOS_TXTPTR2
@@ -4886,28 +4955,25 @@ st0_at_PTR_WA_plus4:
          sta     [DP_BAS_INT_WA],y
          beq     L6D17
 
-         .a16
-         .i16
 exec_LOCAL:
          tsc
          sec
          sbc     DP_stack_save
          xba
          sbc     DP_stack_save+1
-         bcs     L6D2F
+         bcs     brk_0c_Not_LOCAL
          xba
-         cmp     #$b0fd
-         and     $6f2f20
+         cmp     #$fd
+         bcs     brk_0c_Not_LOCAL
+         jsr     var_find
          beq     L6D2C
          jsr     L8B55
          ldy     DP_BAS_INT_WA+3
          bmi     st0_at_PTR_WA_plus4
          jsr     pushINTWA_on_hw_stack
          jsr     exec_FALSE
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L8D5C
-         .a8
-         .i8
 L6D17:   tsx
          phd
          tsc
@@ -4921,43 +4987,40 @@ L6D17:   tsx
          beq     exec_LOCAL
          jmp     L6359
 
-         .a16
-         .i16
 L6D2C:   jmp     L635B
 
-L6D2F:   brk     $0c
+brk_0c_Not_LOCAL:
+         brk     $0c
 
          .byte   "Not "
-         .byte   $ea
+         .byte   tknLOCAL
 
-         .a8
-         .i8
 brk19_bad_MODE:
          brk     $19
 
          .byte   "Bad "
-         .byte   $eb
+         .byte   tknMODE
          .byte   $00
 
 exec_GCOL:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          lda     DP_BAS_INT_WA
          pha
          jsr     eval_commaINTBRK
          jsr     parse_nextstmt_yield_PTR2_OFF
-         lda     #$12
+         lda     #VDU_GCOL
          jsr     call_OSWRCH ;gcol escape code
          pla
          bra     OSWRCH_A_then_WA0 ;jump forward to OSWRCH A, WA+0
 
 exec_COLOUR:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     parse_nextstmt_yield_TXTOFF2
-         lda     #$11       ;escape code for COLOUR
+         lda     #VDU_COLOUR ;escape code for COLOUR
          bra     OSWRCH_A_then_WA0
 
 exec_MODE:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     parse_nextstmt_yield_TXTOFF2
          jsr     L9B1D
          inx
@@ -4974,7 +5037,7 @@ exec_MODE:
          cmp     DP_BAS_HIMEM+2
          bne     brk19_bad_MODE
 @L6D7D:  stz     DP_BAS_COUNT
-         lda     #$16
+         lda     #VDU_MODE
 OSWRCH_A_then_WA0:
          jsr     call_OSWRCH
          lda     DP_BAS_INT_WA
@@ -4993,14 +5056,14 @@ doMOVEDRAW:
          bra     L6DA0
 
 exec_PLOT:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          lda     DP_BAS_INT_WA
          pha
          jsr     eval_commaINTBRK
 L6DA0:   jsr     stack_INTWA
          jsr     eval_commaINTBRK
          jsr     parse_nextstmt_yield_PTR2_OFF
-         lda     #$19
+         lda     #VDU_PLOT
          jsr     call_OSWRCH ;OSWRCH plot escape code
          pla
          jsr     call_OSWRCH ;OSWRCH plot reason
@@ -5015,13 +5078,14 @@ L6DA0:   jsr     stack_INTWA
 
 exec_CLG:
          jsr     parse_nextstmt_yield_TXTOFF2
-         lda     #$10
+         lda     #VDU_CLG
          bra     call_OSWRCH_EOS
 
+; HERE HERE HERE
 exec_CLS:
          jsr     parse_nextstmt_yield_TXTOFF2
          stz     DP_BAS_COUNT
-         lda     #$0c
+         lda     #VDU_CLS
 call_OSWRCH_EOS:
          jsr     call_OSWRCH
          jmp     parse_EOS_TXTPTR2
@@ -5088,10 +5152,10 @@ exec_VDU:
          beq     L6E6F
          cmp     #$0d
          beq     L6E6F
-         cmp     #$8b       ;ELSE?
+         cmp     #tknELSE   ;ELSE?
          beq     L6E6F
          dec     DP_BAS_TXTPTR2_OFF
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     exec_VDU_OSWRCH_WA0
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          beq     exec_VDU   ;had a comma, go again
@@ -5115,40 +5179,37 @@ exec_VDU_OSWRCH_WA0:
          lda     DP_BAS_INT_WA
          jmp     call_OSWRCH
 
-         .byte   $4b
-         .byte   $eb
-         .byte   $ad
-         .byte   $0f
-         .byte   $02
-         .byte   $48
-         .byte   $ad
-         .byte   $0e
-         .byte   $02
-         .byte   $48
-         .byte   $eb
-         .byte   $08
-         .byte   $40
+         phk                ;TODO: DEAD code?
+         xba
+         lda     $020f
+         pha
+         lda     $020e
+         pha
+         xba
+         php
+         rti
 
 L6E84:   ldy     #$01
          lda     [DP_BAS_TMP6],y
          tax
-         lda     #$b1
-         cpx     #$f2
+         lda     #VAR_OFFS_PROC
+         cpx     #tknPROC
          beq     L6EA9
-         lda     #$b4
+         lda     #VAR_OFFS_FN
          bra     L6EA9
 
 L6E93:   ldy     #$01
          lda     [DP_BAS_TMP6],y
-         cmp     #$40
-         bne     @L6E9E
+         cmp     #'@'
+         bne     varPtrFromChar
          brl     brk10_Syntax
 
-@L6E9E:  sec
-         sbc     #$40
+varPtrFromChar:
+         sec
+         sbc     #'@'
          pha
          asl     A
-         clc
+         clc                ;TODO: is this needed?
          adc     $01,S
          sta     $01,S
          pla
@@ -5161,8 +5222,8 @@ L6EA9:   clc
          bne     @L6EB6
          iny
 @L6EB6:  sta     DP_BAS_TMP6+4
-         stx     DP_BAS_TMP6+5
-         sty     $5b
+         stx     DB_BAS_UNK_5A_6
+         sty     DB_BAS_UNK_5A_6+1
          ldy     #$01
          lda     [DP_BAS_TMP6+4],y
          iny
@@ -5234,8 +5295,8 @@ L6F2B:   rts
 L6F2C:   jsr     L6EFA
 var_find:
          jsr     L6F78
-         bne     L6F51
-         bcs     L6F51
+         bne     rtsL6F51
+         bcs     rtsL6F51
          jsr     L6E93
          ldx     #$05
          cpx     DP_BAS_INT_WA+3
@@ -5243,15 +5304,16 @@ var_find:
          inx
          bra     L6F2C
 
-L6F42:   cmp     #$21
+L6F42:   cmp     #'!'
          beq     L6F52
-         cmp     #$24
+         cmp     #'$'
          beq     L6F5D
-         eor     #$3f
+         eor     #'?'
          beq     L6F54
          lda     #$00
          sec
-L6F51:   rts
+rtsL6F51:
+         rts
 
 L6F52:   lda     #$04
 L6F54:   pha
@@ -5263,13 +5325,14 @@ L6F5D:   inc     DP_BAS_TXTPTR_OFF
          jsr     eval_ret_INT
          lda     DP_BAS_INT_WA+1
          ora     DP_BAS_INT_WA+2
-         beq     @L6F6E
+         beq     brk_08_dollar_range
          lda     #$80
          sta     DP_BAS_INT_WA+3
          sec
          rts
 
-@L6F6E:  brk     $08
+brk_08_dollar_range:
+         brk     $08
 
          .byte   "$ range"
          .byte   $00
@@ -5285,30 +5348,30 @@ L6F78:   lda     DP_BAS_TXTPTR2
 L6F87:   iny
 L6F88:   sty     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$20
+         cmp     #' '
          beq     L6F87
-L6F90:   sta     $5b
-         cmp     #$40
+L6F90:   sta     DB_BAS_UNK_5A_6+1
+         cmp     #'@'
          bcc     L6F42
-         cmp     #$5b
+         cmp     #'['
          bcs     @L6FBA
          asl     A
          asl     A
          sta     DP_BAS_INT_WA
          iny
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$25
+         cmp     #'%'
          bne     @L6FBA
-         stz     $5b
-         lda     DP_BAS_ASSWKSP+1
+         stz     DB_BAS_UNK_5A_6+1
+         lda     DP_BAS_INTVARSptr+1
          sta     DP_BAS_INT_WA+1
-         lda     DP_BAS_ASSWKSP+2
+         lda     DP_BAS_INTVARSptr+2
          sta     DP_BAS_INT_WA+2
          ldx     #$04
          stx     DP_BAS_INT_WA+3
          iny
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$28
+         cmp     #'('
          bne     @L702C
 @L6FBA:  ldx     #$05
          stx     DP_BAS_INT_WA+3
@@ -5341,47 +5404,47 @@ L6F90:   sta     $5b
 @L6FE8:  inx
          iny
          lda     [DP_BAS_TMP6],y
-         cmp     #$40
+         cmp     #'@'
          bcs     @L6FFF
-         cmp     #$30
+         cmp     #'0'
          bcc     @L700B
-         cmp     #$3a
+         cmp     #':'
          bcc     @L6FE8
          bra     @L700B
 
 @L6FFA:  jsr     L70AD
          bra     @L7028
 
-@L6FFF:  cmp     #$5b
+@L6FFF:  cmp     #'['
          bcc     @L6FE8
-         cmp     #$5f
+         cmp     #'_'
          bcc     @L700B
-         cmp     #$7b
+         cmp     #'{'
          bcc     @L6FE8
 @L700B:  cpy     #$01
          beq     @L703A
-         cmp     #$24
+         cmp     #'$'
          beq     L708B
-         cmp     #$25
+         cmp     #'%'
          bne     @L701D
          dec     DP_BAS_INT_WA+3
          inx
          iny
          lda     [DP_BAS_TMP6],y
-@L701D:  cmp     #$28
+@L701D:  cmp     #'('
          beq     @L6FFA
          jsr     varFind_00
          beq     L703E
          stx     DP_BAS_TXTPTR_OFF
 @L7028:  ldy     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-@L702C:  cmp     #$21
+@L702C:  cmp     #'!'
          beq     L7042
          eor     #$3f
          beq     L7044
          clc
          sty     DP_BAS_TXTPTR_OFF
-         lda     #$ff
+         lda     #RETV_REAL
          rts
 
 @L703A:  lda     #$00
@@ -5399,7 +5462,7 @@ L7044:   pha
          jsr     L8B74
          jsr     L6C8F
          ldx     #$04
-@L7050:  lda     $47,x
+@L7050:  lda     DP_BAS_47_ASS_UK,x
          pha
          dex
          bne     @L7050
@@ -5413,15 +5476,15 @@ L7044:   pha
          inx
          dey
          bne     @L705E
-L7067:   jsr     @L7073
+L7067:   jsr     L7073
          pla
          sta     DP_BAS_INT_WA+3
-         stz     $5b
+         stz     DB_BAS_UNK_5A_6+1
          clc
-         lda     #$ff
+         lda     #RETV_REAL
          rts
 
-@L7073:  jsr     L5F88
+L7073:   jsr     L5F88
          bne     @L708A
          phd
          clc
@@ -5439,7 +5502,7 @@ L7067:   jsr     @L7073
 L708B:   inx
          iny
          lda     [DP_BAS_TMP6],y
-         cmp     #$28
+         cmp     #'('
          beq     @L70A0
          jsr     varFind_00
          beq     L703E
@@ -5484,9 +5547,9 @@ L70AD:   inx
          inc     DP_BAS_TXTPTR_OFF
          cpx     #','
          bne     brk_0e_Array
-         ldx     #$58
+         ldx     #DB_BAS_UNK_5A_6-2
          jsr     stack_copy6_to_X_uns4
-         ldy     $5b
+         ldy     DB_BAS_UNK_5A_6+1
          pla
          sta     DP_BAS_TMP6+2
          pla
@@ -5501,7 +5564,7 @@ L70AD:   inx
          jsr     @L71B9
          sty     DP_BAS_INT_WA+3
          lda     [DP_BAS_TMP6],y
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          iny
          lda     [DP_BAS_TMP6],y
          sta     DP_FPB_mant+3
@@ -5513,7 +5576,7 @@ L70AD:   inx
          sta     DP_BAS_INT_WA+1
          bcc     @L7113
          inc     DP_BAS_INT_WA+2
-@L7113:  jsr     L6A7D
+@L7113:  jsr     mul16
          sec
          lda     [DP_BAS_TMP6]
          sbc     DP_BAS_INT_WA+3
@@ -5527,9 +5590,9 @@ L70AD:   inx
          sta     DP_BAS_TMP6+1
          pla
          sta     DP_BAS_TMP6
-         ldx     #$58
+         ldx     #DB_BAS_UNK_5A_6-2
          jsr     stack_copy6_to_X_uns4
-         ldy     $5b
+         ldy     DB_BAS_UNK_5A_6+1
          jsr     @L71B9
          clc
          lda     DP_BAS_TMP6+3
@@ -5744,7 +5807,7 @@ L7282:   txa
 parse_checkEOS_updTXTPTRfrom2:
          cmp     #':'
          beq     parse_updTXTPTR_from_TXTPTR2_Y
-         cmp     #$8b
+         cmp     #tknELSE
          beq     parse_updTXTPTR_from_TXTPTR2_Y
          cmp     #$0d
          bne     brk10_Syntax
@@ -5790,7 +5853,7 @@ exec_ENDPROC:
          plb
          lda     (DP_stack_save)
          plb
-         cmp     #$f2
+         cmp     #tknPROC
          bne     brk_0d_NoPROC
 parse_nextstmt_yield_TXTOFF2:
          ldy     DP_BAS_TXTPTR2_OFF
@@ -5807,7 +5870,7 @@ parse_yield:
          bne     @L72EC
          dec     DP_BAS_CO_CTDN
          bne     @L72EC
-         cop     $21        ;YIELD
+         cop     COP_21_OPPRE ;YIELD
          lda     #$64
          sta     DP_BAS_CO_CTDN
 @L72EC:  phx
@@ -5826,18 +5889,20 @@ parse_yield:
 @L7309:  plx
          rts
 
-L730B:   lda     #$7e
+; HERE HERE HERE 
+; search for #$ and make constants/pointers
+L730B:   lda     #OSBYTE_126_ESCAPE_ACK
          jsr     call_OSBYTE
          bit     DP_BAS_CO_FLAGS
          bmi     @L7317
-         brl     @L735A
+         brl     secRTS
 
 @L7317:  bvc     @L731C
-         brl     @L735A
+         brl     secRTS
 
-@L731C:  lda     #$5b
+@L731C:  lda     #<secRTS+1
          sta     DP_BAS_TMP6
-         lda     #$73
+         lda     #>secRTS
          sta     DP_BAS_TMP6+1
          phk
          pla
@@ -5850,10 +5915,10 @@ L730B:   lda     #$7e
          beq     @L7359
 @L7335:  lda     #$40
          tsb     DP_BAS_CO_FLAGS
-         lda     #$5d
+         lda     #<basPROCatHELP+1
          sta     DP_BAS_TXTPTR2
          sta     DP_BAS_TXTPTR
-         lda     #$73
+         lda     #>basPROCatHELP
          sta     DP_BAS_TXTPTR2+1
          sta     DP_BAS_TXTPTR+1
          phk
@@ -5862,41 +5927,42 @@ L730B:   lda     #$7e
          sta     DP_BAS_TXTPTR+2
          stz     DP_BAS_TXTPTR2_OFF
          stz     DP_BAS_TXTPTR_OFF
-         lda     #$f2
+         lda     #tknPROC
          jsr     exec_FN_PROC
          lda     #$40
          trb     DP_BAS_CO_FLAGS
          clc
 @L7359:  rts
 
-@L735A:  sec
+secRTS:  sec
          rts
 
-         .byte   $f2
+basPROCatHELP:
+         .byte   tknPROC    ;TODO: is this byte needed?
          .byte   "@HELP",$0d
 
 HELP:    lda     #$10
          bit     DP_BAS_CO_FLAGS
-         bpl     @L73A8
-         bne     @L73A8
-         lda     #$a9
+         bpl     @secRTS
+         bne     @secRTS
+         lda     #<secRTS+79
          sta     DP_BAS_TMP6
-         lda     #$73
+         lda     #>secRTS
          sta     DP_BAS_TMP6+1
          phk
          pla
          sta     DP_BAS_TMP6+2
          ldy     #$07
          jsr     varFindPROCFN
-         bne     @L7383
+         bne     @sk
          jsr     L88C8
-         beq     @L73A8
-@L7383:  lda     #$10
+         beq     @secRTS
+@sk:     lda     #$10
          tsb     DP_BAS_CO_FLAGS
-         lda     #$ab
+         lda     #<basPROCatKILL+1
          sta     DP_BAS_TXTPTR2
          sta     DP_BAS_TXTPTR
-         lda     #$73
+         lda     #>basPROCatKILL
          sta     DP_BAS_TXTPTR2+1
          sta     DP_BAS_TXTPTR+1
          phk
@@ -5905,22 +5971,23 @@ HELP:    lda     #$10
          sta     DP_BAS_TXTPTR+2
          stz     DP_BAS_TXTPTR2_OFF
          stz     DP_BAS_TXTPTR_OFF
-         lda     #$f2
+         lda     #tknPROC
          jsr     exec_FN_PROC
          lda     #$10
          trb     DP_BAS_CO_FLAGS
          clc
          rts
 
-@L73A8:  sec
+@secRTS: sec
          rts
 
-         .byte   $f2
+basPROCatKILL:
+         .byte   tknPROC
          .byte   "@KILL",$0d
 
 L73B1:   jsr     parse_nextstmt_yield_TXTOFF2
          lda     [DP_BAS_TXTPTR2]
-         cmp     #$3a
+         cmp     #':'
          beq     anRTS
          lda     DP_BAS_TXTPTR2+1
          cmp     DP_BAS_MEMBASE+1
@@ -5967,7 +6034,7 @@ exec_IF: jsr     L7527
          ora     DP_BAS_INT_WA+3
          beq     IFdoELSE
          stz     DP_BAS_INT_WA+3
-         cpx     #$8c
+         cpx     #tknTHEN
          beq     THENskip   ;check if last token parsed was THEN
 IFexecthis:
          jmp     L6364
@@ -5987,7 +6054,7 @@ IFdoELSE:
          cmp     #$0d
          beq     @L7439     ;end of line continue
          iny
-         cmp     #$8b       ;got ELSE?
+         cmp     #tknELSE   ;got ELSE?
          bne     @lpEL
          sty     DP_BAS_TXTPTR2_OFF
          beq     L7417
@@ -6002,60 +6069,65 @@ doTracePrintLineNoIfInRange:
          bcs     anRTS
          lda     #'['
          jsr     printCh
-         jsr     printWAasDecimal16b
+         jsr     int16print_AnyLen
          lda     #']'
          jsr     printCh
          jmp     printSpcOrSendToLOMEMandINC
 
-L7456:   pla
+evalDoCmpePopIntMStkConvoRealCmp:
+         pla
          sta     DP_BAS_INT_WA
          pla
          sta     DP_BAS_INT_WA+1
          pla
          sta     DP_BAS_INT_WA+2
          pla
-         .byte   $85
-L7461:   phk
+         sta     DP_BAS_INT_WA+3
          jsr     stack_REAL
-         jsr     L5117
+         jsr     braIntToReal
          jsr     fpCopyFPAtoFPB
          jsr     popFPFromStackToPTR1
          jsr     fpCopyPTR1toFPA
-         bra     L7483
+         bra     evalDoCompareRealFPAwithFPB
 
-L7473:   jsr     stack_REAL
-         jsr     L764D
+evalDoCompareReal:
+         jsr     stack_REAL
+         jsr     evalLevel4
          tay
-         jsr     L6CC7
+         jsr     ckTypeIntToReal
          jsr     popFPFromStackToPTR1
-L7480:   jsr     fpMoveRealAtPTR1toFPB
-L7483:   bra     @L7485
+evalDoCompareRealFPAwithPTR1:
+         jsr     fpMoveRealAtPTR1toFPB
+evalDoCompareRealFPAwithFPB:
+         bra     @unnecessary ;TODO - optimize away
 
-@L7485:  ldy     #$00
+@unnecessary:
+         ldy     #$00
          lda     #$7f
          trb     DP_FPB_sgn
          lda     DP_FPA_sgn
          and     #$80
          cmp     DP_FPB_sgn
-         bne     @L74B1
+         bne     @rts
          lda     DP_FPB_exp
          cmp     DP_FPA_exp+1
-         bne     @L74B2
+         bne     @roreorrol
          lda     DP_FPB_mant
          cmp     DP_FPA_mant
-         bne     @L74B2
+         bne     @roreorrol
          lda     DP_FPB_mant+1
          cmp     DP_FPA_mant+1
-         bne     @L74B2
-         lda     DP_FPB_mant+2
+         bne     @roreorrol
+         lda     DP_BAS_61_UK
          cmp     DP_FPA_mant+2
-         bne     @L74B2
+         bne     @roreorrol
          lda     DP_FPB_mant+3
          cmp     DP_FPA_mant+3
-         bne     @L74B2
-@L74B1:  rts
+         bne     @roreorrol
+@rts:    rts
 
-@L74B2:  ror     A
+@roreorrol:
+         ror     A
          eor     DP_FPB_sgn
          rol     A
          lda     #$01
@@ -6064,9 +6136,11 @@ L7483:   bra     @L7485
 jmp_brk06_type_mismatch14:
          jmp     brk06_type_mismatch
 
-L74BC:   txa
-L74BD:   beq     @L74F8
-         bmi     L7473
+evalDoCompare:
+         txa
+evalDoCompare2:
+         beq     evalDoCompareString
+         bmi     evalDoCompareReal
          lda     DP_BAS_INT_WA+3
          pha
          lda     DP_BAS_INT_WA+2
@@ -6075,13 +6149,13 @@ L74BD:   beq     @L74F8
          pha
          lda     DP_BAS_INT_WA
          pha
-         jsr     L764D
+         jsr     evalLevel4
          tay
          beq     jmp_brk06_type_mismatch14
-         bpl     @L74D8
-         brl     L7456
+         bpl     @sk
+         brl     evalDoCmpePopIntMStkConvoRealCmp
 
-@L74D8:  lda     DP_BAS_INT_WA+3
+@sk:     lda     DP_BAS_INT_WA+3
          eor     #$80
          sta     DP_BAS_INT_WA+3
          sec
@@ -6101,24 +6175,25 @@ L74BD:   beq     @L74F8
          ora     DP_BAS_INT_WA
          rts
 
-@L74F8:  jsr     storeStringOnStack
-         jsr     L764D
+evalDoCompareString:
+         jsr     StackString
+         jsr     evalLevel4
          tay
          bne     jmp_brk06_type_mismatch14
          lda     [DP_BAS_STACK]
          cmp     DP_BAS_STRLEN
-         bcc     @L7509
+         bcc     @sk1
          lda     DP_BAS_STRLEN
-@L7509:  sta     DP_BAS_TMP6
+@sk1:    sta     DP_BAS_TMP6
          dey
-@L750C:  iny
+@eqlp:   iny
          cpy     DP_BAS_TMP6
          beq     @L751B
          iny
          lda     [DP_BAS_STACK],y
          dey
          cmp     [DP_BAS_STRWKSP_L],y
-         beq     @L750C
+         beq     @eqlp
          bra     @L751F
 
 @L751B:  lda     [DP_BAS_STACK]
@@ -6137,179 +6212,201 @@ L7527:   lda     DP_BAS_TXTPTR2
          sta     DP_BAS_TXTPTR+2
          lda     DP_BAS_TXTPTR2_OFF
          sta     DP_BAS_TXTPTR_OFF
-L7537:   jsr     @L757F
-@L753A:  cpx     #$84
-         beq     @L7548
-         cpx     #$82
-         beq     @L7563
+L7537:   jsr     evalLevel6
+L753A:   cpx     #tknOR
+         beq     evalLevel7OR
+         cpx     #tknEOR
+         beq     evalLevel7EOR
          dec     DP_BAS_TXTPTR_OFF
          tay
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          rts
 
-@L7548:  jsr     @L7579
-         jsr     L6C8E
+evalLevel7OR:
+         jsr     INTevalLevel6
+         jsr     checkTypeInAConvertToINT
          ldy     #$03
          phx
-@L7551:  lda     [DP_BAS_STACK],y
+@lp:     lda     [DP_BAS_STACK],y
          tyx
          ora     DP_BAS_INT_WA,x
          sta     DP_BAS_INT_WA,x
          dey
-         bpl     @L7551
+         bpl     @lp
          plx
-@L755C:  jsr     stack_ADD4
-         lda     #$40
-         bra     @L753A
+unstack4_retInt:
+         jsr     stack_ADD4
+         lda     #RETV_INT
+         bra     L753A
 
-@L7563:  jsr     @L7579
-         jsr     L6C8E
+evalLevel7EOR:
+         jsr     INTevalLevel6
+         jsr     checkTypeInAConvertToINT
          ldy     #$03
          phx
-@L756C:  lda     [DP_BAS_STACK],y
+@lp:     lda     [DP_BAS_STACK],y
          tyx
          eor     DP_BAS_INT_WA,x
          sta     DP_BAS_INT_WA,x
          dey
-         bpl     @L756C
+         bpl     @lp
          plx
-         bra     @L755C
+         bra     unstack4_retInt
 
-@L7579:  jsr     L6C8E
+INTevalLevel6:
+         jsr     checkTypeInAConvertToINT
          jsr     stack_INTWA
-@L757F:  jsr     @L75A8
-@L7582:  cpx     #$80
-         beq     @L7587
+evalLevel6:
+         jsr     evalLevel5
+evalLevel6lp0:
+         cpx     #tknAND
+         beq     evalDoAND
          rts
 
-@L7587:  jsr     L6C8E
+evalDoAND:
+         jsr     checkTypeInAConvertToINT
          jsr     stack_INTWA
-         jsr     @L75A8
-         jsr     L6C8E
+         jsr     evalLevel5
+         jsr     checkTypeInAConvertToINT
          ldy     #$03
          phx
-@L7596:  lda     [DP_BAS_STACK],y
+@lp:     lda     [DP_BAS_STACK],y
          tyx
          and     DP_BAS_INT_WA,x
          sta     DP_BAS_INT_WA,x
          dey
-         bpl     @L7596
+         bpl     @lp
          plx
          jsr     stack_ADD4
-         lda     #$40
-         bra     @L7582
+         lda     #RETV_INT
+         bra     evalLevel6lp0
 
-@L75A8:  jsr     L764D
-         cpx     #$3f
-         bcs     @L75B3
-         cpx     #$3c
-         bcs     @L75B4
-@L75B3:  rts
+evalLevel5:
+         jsr     evalLevel4
+         cpx     #'?'
+         bcs     @rts
+         cpx     #'<'
+         bcs     evalComparison
+@rts:    rts
 
-@L75B4:  beq     @L75CC
-         cpx     #$3e
-         beq     @L75F4
+evalComparison:
+         beq     evalCompLt1
+         cpx     #'>'
+         beq     evalCompGt1
          tax
-         jsr     L74BD
-         bne     @L75C1
-@L75C0:  dey
-@L75C1:  sty     DP_BAS_INT_WA
+         jsr     evalDoCompare2
+         bne     evalCompRetFALSE
+evalCompRetTRUE:
+         dey
+evalCompRetFALSE:
+         sty     DP_BAS_INT_WA
          sty     DP_BAS_INT_WA+1
          sty     DP_BAS_INT_WA+2
          sty     DP_BAS_INT_WA+3
-         lda     #$40
+         lda     #RETV_INT
          rts
 
-@L75CC:  tax
+evalCompLt1:
+         tax
          ldy     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$3d
-         beq     @L75E0
-         cmp     #$3e
-         beq     @L75EB
-         jsr     L74BC
-         bcc     @L75C0
-         bra     @L75C1
+         cmp     #'='
+         beq     evalCompLtEq1
+         cmp     #'>'
+         beq     evalCompNE
+         jsr     evalDoCompare
+         bcc     evalCompRetTRUE
+         bra     evalCompRetFALSE
 
-@L75E0:  inc     DP_BAS_TXTPTR_OFF
-         jsr     L74BC
-         beq     @L75C0
-         bcc     @L75C0
-         bra     @L75C1
+evalCompLtEq1:
+         inc     DP_BAS_TXTPTR_OFF
+         jsr     evalDoCompare
+         beq     evalCompRetTRUE
+         bcc     evalCompRetTRUE
+         bra     evalCompRetFALSE
 
-@L75EB:  inc     DP_BAS_TXTPTR_OFF
-         jsr     L74BC
-         bne     @L75C0
-         bra     @L75C1
+evalCompNE:
+         inc     DP_BAS_TXTPTR_OFF
+         jsr     evalDoCompare
+         bne     evalCompRetTRUE
+         bra     evalCompRetFALSE
 
-@L75F4:  tax
+evalCompGt1:
+         tax
          ldy     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$3d
-         beq     @L7606
-         jsr     L74BC
-         beq     @L75C1
-         bcs     @L75C0
-         bra     @L75C1
+         cmp     #'='
+         beq     evalCompGE1
+         jsr     evalDoCompare
+         beq     evalCompRetFALSE
+         bcs     evalCompRetTRUE
+         bra     evalCompRetFALSE
 
-@L7606:  inc     DP_BAS_TXTPTR_OFF
-         jsr     L74BC
-         bcs     @L75C0
-         bra     @L75C1
+evalCompGE1:
+         inc     DP_BAS_TXTPTR_OFF
+         jsr     evalDoCompare
+         bcs     evalCompRetTRUE
+         bra     evalCompRetFALSE
 
-L760F:   brk     $13
+brk_13_StringTooLong:
+         brk     $13
 
          .byte   "String too long"
          .byte   $00
 
-L7621:   jsr     storeStringOnStack
-         jsr     L784D
+evalL4StringPlus:
+         jsr     StackString
+         jsr     evalLevel2
          tay
-         beq     @L762D
+         beq     @sk
          brl     jmp_brk06_type_mismatch13
 
-@L762D:  clc
+@sk:     clc
          phx
          lda     [DP_BAS_STACK]
          adc     DP_BAS_STRLEN
-         bcs     L760F
+         bcs     brk_13_StringTooLong
          tax
          pha
          ldy     DP_BAS_STRLEN
-@L7639:  dex
+@lp:     dex
          dey
          lda     [DP_BAS_STRWKSP_L],y
          jsr     storeStringX
-         bne     @L7639
+         bne     @lp
          jsr     L9928
          pla
          sta     DP_BAS_STRLEN
          plx
-         lda     #$00
-         bra     L7650
+         lda     #RETV_STR
+         bra     _skEvalLevel4NoLevel3
 
-L764D:   jsr     L7801
-L7650:   cpx     #$2b
-         beq     @L765C
-         cpx     #$2d
-         bne     @L765B
-         brl     L76CA
+evalLevel4:
+         jsr     fpStackWAtoStackReal
+_skEvalLevel4NoLevel3:
+         cpx     #'+'
+         beq     evalL4Plus
+         cpx     #'-'
+         bne     @skRTS
+         brl     evalLevel4Minus
 
-@L765B:  rts
+@skRTS:  rts
 
-@L765C:  tay
-         beq     L7621
-         bmi     L76A0
-         jsr     L77FE
+evalL4Plus:
+         tay
+         beq     evalL4StringPlus
+         bmi     evalL4RealPlus
+         jsr     stackIntThenEvalL3
          tay
          beq     jmp_brk06_type_mismatch13
-         bmi     L76BD
-         bra     @L766D
+         bmi     evalL4IntPlusReal
+         bra     @skUnnecessary
 
-         .byte   $80
-         .byte   $e3
+         bra     _skEvalLevel4NoLevel3 ;TODO: DEAD?
 
-@L766D:  clc
+@skUnnecessary:
+         clc
+; evalL4IntegerAdd
          lda     [DP_BAS_STACK]
          adc     DP_BAS_INT_WA
          sta     DP_BAS_INT_WA
@@ -6324,52 +6421,57 @@ L7650:   cpx     #$2b
          iny
          lda     [DP_BAS_STACK],y
          adc     DP_BAS_INT_WA+3
-L7688:   sta     DP_BAS_INT_WA+3
+evalL4PopIntStackReturnInt:
+         sta     DP_BAS_INT_WA+3
          clc
          lda     DP_BAS_STACK
          adc     #$04
          sta     DP_BAS_STACK
-         lda     #$40
-         bcc     L7650
+         lda     #RETV_INT
+         bcc     _skEvalLevel4NoLevel3
          inc     DP_BAS_STACK+1
-         bne     L7650
+         bne     _skEvalLevel4NoLevel3
          inc     DP_BAS_STACK+2
-         bra     L7650
+         bra     _skEvalLevel4NoLevel3
 
 jmp_brk06_type_mismatch13:
          jmp     brk06_type_mismatch
 
-L76A0:   jsr     stack_REAL
-         jsr     L7801
-         tay
-         beq     jmp_brk06_type_mismatch13
-         stx     $40
-         bmi     L76B0
-         jsr     L5117
-L76B0:   jsr     popFPFromStackToPTR1
-         jsr     L7E91
-L76B6:   ldx     $40
-         lda     #$ff
-         brl     L7650
-
-L76BD:   stx     $40
-         jsr     L993C
+evalL4RealPlus:
          jsr     stack_REAL
-         jsr     L5117
-         bra     L76B0
-
-L76CA:   tay
-         beq     jmp_brk06_type_mismatch13
-         bmi     @L76F8
-         jsr     L77FE
+         jsr     fpStackWAtoStackReal
          tay
          beq     jmp_brk06_type_mismatch13
-         bmi     @L7713
-         bra     @L76DA
+         stx     DP_BAS_40_VARTYPE
+         bmi     sk
+         jsr     braIntToReal
+sk:      jsr     popFPFromStackToPTR1
+         jsr     fpFPAeqPTR1addFPA
+evalTokenFromVarTypeReturnReal:
+         ldx     DP_BAS_40_VARTYPE
+         lda     #RETV_REAL
+         brl     _skEvalLevel4NoLevel3
 
-         .byte   $08
+evalL4IntPlusReal:
+         stx     DP_BAS_40_VARTYPE
+         jsr     popIntA
+         jsr     stack_REAL
+         jsr     braIntToReal
+         bra     sk
 
-@L76DA:  sec
+evalLevel4Minus:
+         tay
+         beq     jmp_brk06_type_mismatch13
+         bmi     evalL4RealMinus
+         jsr     stackIntThenEvalL3
+         tay
+         beq     jmp_brk06_type_mismatch13
+         bmi     evalL4IntMinusReal
+         bra     @skUnnecessary
+
+         php                ;TODO: DEAD code
+@skUnnecessary:
+         sec
          lda     [DP_BAS_STACK]
          sbc     DP_BAS_INT_WA
          sta     DP_BAS_INT_WA
@@ -6384,114 +6486,106 @@ L76CA:   tay
          iny
          lda     [DP_BAS_STACK],y
          sbc     DP_BAS_INT_WA+3
-         brl     L7688
+         brl     evalL4PopIntStackReturnInt
 
-@L76F8:  jsr     stack_REAL
-         jsr     L7801
+evalL4RealMinus:
+         jsr     stack_REAL
+         jsr     fpStackWAtoStackReal
          tay
-         bne     @L7704
+         bne     @sk
          brl     jmp_brk06_type_mismatch13
 
-@L7704:  stx     $40
-         bmi     @L770B
-         jsr     L5117
-@L770B:  jsr     popFPFromStackToPTR1
-         jsr     L7E8E
-         bra     L76B6
+@sk:     stx     DP_BAS_40_VARTYPE
+         bmi     @skReal
+         jsr     braIntToReal
+@skReal: jsr     popFPFromStackToPTR1
+         jsr     fpFPAeqPTR1subFPA
+         bra     evalTokenFromVarTypeReturnReal
 
-@L7713:  stx     $40
-         jsr     L993C
+evalL4IntMinusReal:
+         stx     DP_BAS_40_VARTYPE
+         jsr     popIntA
          jsr     stack_REAL
-         jsr     L5117
+         jsr     braIntToReal
          jsr     popFPFromStackToPTR1
-         jsr     L83AD
-         brl     L76B6
+         jsr     fpFPAeqPTR1subFPAnegFPA
+         brl     evalTokenFromVarTypeReturnReal
 
-L7727:   jsr     L5117
-L772A:   jsr     L993C
+eval3Mul_IntAsRealEvalAndMul:
+         jsr     braIntToReal
+eval3Mul_StackRealEvalAndMul:
+         jsr     popIntA
          jsr     stack_REAL
-         jsr     L5117
+         jsr     braIntToReal
          bra     L7742
 
-L7735:   jsr     L5117
-L7738:   jsr     stack_REAL
-         jsr     L784D
+forceIntToRealAndMul1:
+         jsr     braIntToReal
+evalLevel3MulReal:
+         jsr     stack_REAL
+         jsr     evalLevel2
          tay
-         jsr     L6CC7
+         jsr     ckTypeIntToReal
 L7742:   jsr     popFPFromStackToPTR1
-         jsr     L7EAE
-         lda     #$ff
+         jsr     fpFPAeqPTR1mulFPA
+         lda     #RETV_REAL
          jmp     L7804
 
-         .byte   $08
-         .byte   $5a
-         .byte   $da
-         .byte   $8b
-         .byte   $20
-         .byte   $44
-         .byte   $98
-         .byte   $20
-         .byte   $d6
-         .byte   $78
-         .byte   $a2
-         .byte   $0c
-         .byte   $4b
-         .byte   $20
-         .byte   $e7
-         .byte   $9d
-         .byte   $20
-         .byte   $e0
-         .byte   $78
-         .byte   $ab
-         .byte   $20
-         .byte   $2a
-         .byte   $98
-         .byte   $20
-         .byte   $7a
-         .byte   $7d
-         .byte   $fa
-         .byte   $7a
-         .byte   $28
-         .byte   $a9
-         .byte   $ff
-         .byte   $4c
-         .byte   $04
-         .byte   $78
+         php                ;TODO: dead code?
+         phy
+         phx
+         phb
+         jsr     stack_REAL
+         jsr     BHAeqDP_BAS_STACKptr
+         ldx     #ARITH_FN_0C_UK
+         phk
+         jsr     moduleCallARITHref
+         jsr     DP_BAS_STACKptreqBHA
+         plb
+         jsr     popFPFromStackToPTR1
+         jsr     fpCopyPTR1toFPA
+         plx
+         ply
+         plp
+         lda     #RETV_REAL
+         jmp     L7804
 
 jmp_brk06_type_mismatch12:
          jmp     brk06_type_mismatch
 
-L7772:   tay
-         beq     jmp_brk06_type_mismatch12
-         bmi     L7738
-         ldy     DP_BAS_INT_WA+3
-         cpy     DP_BAS_INT_WA+2
-         bne     L7735
-         lda     DP_BAS_INT_WA+1
-         asl     A
-         adc     #$00
-         tya
-         bne     L7735
-         jsr     L784A
+EvalL3Mul:
          tay
          beq     jmp_brk06_type_mismatch12
-         bmi     L772A
+         bmi     evalLevel3MulReal
          ldy     DP_BAS_INT_WA+3
          cpy     DP_BAS_INT_WA+2
-         bne     L7727
+         bne     forceIntToRealAndMul1
+         lda     DP_BAS_INT_WA+1
+         asl     A
+         adc     #$00
+         tya
+         bne     forceIntToRealAndMul1
+         jsr     stackINTEvalLevel2
+         tay
+         beq     jmp_brk06_type_mismatch12
+         bmi     eval3Mul_StackRealEvalAndMul
+         ldy     DP_BAS_INT_WA+3
+         cpy     DP_BAS_INT_WA+2
+         bne     eval3Mul_IntAsRealEvalAndMul
          lda     DP_BAS_INT_WA+1
          asl     A
          tya
          adc     #$00
-         bne     L7727
+         bne     eval3Mul_IntAsRealEvalAndMul
          phy
          jsr     L83A4
-         stx     $40
-         bra     @L77A3
+         stx     DP_BAS_40_VARTYPE
+         bra     @skUnnecessary ;TODO: DEAD code
 
-@L77A3:  ldx     #$58
-         jsr     L9A49
-         jsr     L993C
+@skUnnecessary:
+         ldx     #DP_BAS_TMP6+3
+         jsr     storeWAatDPX
+         jsr     popIntA
          pla
          eor     DP_BAS_INT_WA+3
          sta     DP_BAS_TMP6
@@ -6499,10 +6593,10 @@ L7772:   tay
          ldy     #$00
          ldx     #$00
          stz     DP_FPB_mant+1
-         stz     DP_FPB_mant+2
-@L77BB:  lsr     DP_BAS_TMP6+4
+         stz     DP_BAS_61_UK
+@lp:     lsr     DP_BAS_TMP6+4
          ror     DP_BAS_TMP6+3
-         bcc     @L77D6
+         bcc     @sk
          clc
          tya
          adc     DP_BAS_INT_WA
@@ -6513,85 +6607,98 @@ L7772:   tay
          lda     DP_FPB_mant+1
          adc     DP_BAS_INT_WA+2
          sta     DP_FPB_mant+1
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          adc     DP_BAS_INT_WA+3
-         sta     DP_FPB_mant+2
-@L77D6:  asl     DP_BAS_INT_WA
+         sta     DP_BAS_61_UK
+@sk:     asl     DP_BAS_INT_WA
          rol     DP_BAS_INT_WA+1
          rol     DP_BAS_INT_WA+2
          rol     DP_BAS_INT_WA+3
          lda     DP_BAS_TMP6+3
          ora     DP_BAS_TMP6+4
-         bne     @L77BB
+         bne     @lp
          sty     DP_FPB_exp
          stx     DP_FPB_mant
          lda     DP_BAS_TMP6
          php
-L77EB:   ldx     #$5e
-L77ED:   jsr     L80B4
+divmodNegateWAifMI:
+         ldx     #DP_FPB_exp
+divmodNegateWAifZP_GEN_PTR:
+         jsr     copyDPXtoWA
          plp
-         bpl     L77F6
-         jsr     L8400
-L77F6:   ldx     $40
+         bpl     divModFinish
+         jsr     negateWA
+divModFinish:
+         ldx     DP_BAS_40_VARTYPE
          brl     L7804
 
-L77FB:   jmp     L7772
+jmpEvalL3Mul:
+         jmp     EvalL3Mul
 
-L77FE:   jsr     stack_INTWA
-L7801:   jsr     L784D
-L7804:   cpx     #$2a
-         beq     L77FB
-         cpx     #$2f
-         beq     @L7815
-         cpx     #$83
-         beq     @L7830
-         cpx     #$81
-         beq     @L7838
+stackIntThenEvalL3:
+         jsr     stack_INTWA
+fpStackWAtoStackReal:
+         jsr     evalLevel2
+L7804:   cpx     #'*'
+         beq     jmpEvalL3Mul
+         cpx     #'/'
+         beq     evalL3DoRealDiv
+         cpx     #tknMOD
+         beq     evalL3DoMOD
+         cpx     #tknDIV
+         beq     evalL3DoDIV
          rts
 
-@L7815:  tay
-         jsr     L6CC7
-         jsr     stack_REAL
-         jsr     L784D
-         stx     $40
+evalL3DoRealDiv:
          tay
-         jsr     L6CC7
+         jsr     ckTypeIntToReal
+         jsr     stack_REAL
+         jsr     evalLevel2
+         stx     DP_BAS_40_VARTYPE
+         tay
+         jsr     ckTypeIntToReal
          jsr     popFPFromStackToPTR1
          jsr     L7DF2
-         lda     #$ff
-         brl     L77F6
+         lda     #RETV_REAL
+         brl     divModFinish
 
-@L7830:  jsr     L5082
+evalL3DoMOD:
+         jsr     fpRealDivide
          lda     DP_BAS_TMP6+1
          php
-         bra     L77EB
+         bra     divmodNegateWAifMI
 
-@L7838:  jsr     L5082
-         rol     DP_BAS_TMP6+5
-         rol     $5b
+evalL3DoDIV:
+         jsr     fpRealDivide
+         rol     DB_BAS_UNK_5A_6
+         rol     DB_BAS_UNK_5A_6+1
          rol     DP_FPB_sgn
-         rol     $5d
+         rol     DB_BAS_UNK_5A_6+3
          bit     DP_BAS_TMP6
          php
-         ldx     #$5a
-         bra     L77ED
+         ldx     #DB_BAS_UNK_5A_6
+         bra     divmodNegateWAifZP_GEN_PTR
 
-L784A:   jsr     stack_INTWA
-L784D:   jsr     evalLevel1
-@L7850:  pha
-@L7851:  ldy     DP_BAS_TXTPTR_OFF
+stackINTEvalLevel2:
+         jsr     stack_INTWA
+evalLevel2:
+         jsr     evalLevel1
+evalLevel2Again:
+         pha
+@spclp:  ldy     DP_BAS_TXTPTR_OFF
          inc     DP_BAS_TXTPTR_OFF
          lda     [DP_BAS_TXTPTR],y
-         cmp     #$20
-         beq     @L7851
+         cmp     #' '
+         beq     @spclp
          tax
          pla
-         cpx     #$5e
-         beq     @L7862
+         cpx     #'^'
+         beq     evalDoCARET
          rts
 
-@L7862:  tay
-         jsr     L6CC7
+evalDoCARET:
+         tay
+         jsr     ckTypeIntToReal
          jsr     stack_REAL
          jsr     eval_real
          php
@@ -6600,7 +6707,7 @@ L784D:   jsr     evalLevel1
          phb
          jsr     stack_REAL
          jsr     BHAeqDP_BAS_STACKptr
-         ldx     #$10
+         ldx     #ARITH_FN_POWER
          phk
          jsr     moduleCallARITHref
          jsr     DP_BAS_STACKptreqBHA
@@ -6610,17 +6717,19 @@ L784D:   jsr     evalLevel1
          plx
          ply
          plp
-         lda     #$ff
-         bra     @L7850
+         lda     #RETV_REAL
+         bra     evalLevel2Again
 
-printWAasDecimal16b:
+int16print_AnyLen:
          lda     #$00
-         bra     L7893
+         bra     int16print_fmtA
 
-L7891:   lda     #$05
-L7893:   sta     DP_BAS_TMP2A
+int16print_fmt5:
+         lda     #$05
+int16print_fmtA:
+         sta     DP_BAS_TMP2A
          ldx     #$04
-@L7897:  stz     DP_FPB_mant+2,x
+@L7897:  stz     DP_BAS_61_UK,x
          sec
 @L789A:  lda     DP_BAS_INT_WA
          sbc     tblDigitsLo,x
@@ -6630,7 +6739,7 @@ L7893:   sta     DP_BAS_TMP2A
          bcc     @L78AF
          sta     DP_BAS_INT_WA+1
          sty     DP_BAS_INT_WA
-         inc     DP_FPB_mant+2,x
+         inc     DP_BAS_61_UK,x
          bra     @L789A
 
 @L78AF:  dex
@@ -6638,7 +6747,7 @@ L7893:   sta     DP_BAS_TMP2A
          ldx     #$05
 @L78B4:  dex
          beq     @L78BB
-         lda     DP_FPB_mant+2,x
+         lda     DP_BAS_61_UK,x
          beq     @L78B4
 @L78BB:  stx     DP_BAS_TMP6
          lda     DP_BAS_TMP2A
@@ -6648,8 +6757,8 @@ L7893:   sta     DP_BAS_TMP2A
          tax
          jsr     L9A42
          ldx     DP_BAS_TMP6
-@L78CB:  lda     DP_FPB_mant+2,x
-         ora     #$30
+@L78CB:  lda     DP_BAS_61_UK,x
+         ora     #'0'
          jsr     printChOrSendtoLOMEMandINC
          dex
          bpl     @L78CB
@@ -6673,60 +6782,68 @@ DP_BAS_STACKptreqBHA:
          sta     DP_BAS_STACK+2
          rts
 
-L78EA:   tya
-         bpl     @L78F0
+cmdPRINT_num2str_hex:
+         tya
+         bpl     @skRealC
          jsr     eval_real2INT
-@L78F0:  ldx     #$00
+@skRealC:
+         ldx     #$00
          ldy     #$00
-@L78F4:  phx
+@lp1:    phx
          tyx
          lda     DP_BAS_INT_WA,x
          plx
          pha
          and     #$0f
-         sta     $5d,x
+         sta     DB_BAS_UNK_5A_6+3,x
          pla
          lsr     A
          lsr     A
          lsr     A
          lsr     A
          inx
-         sta     $5d,x
+         sta     DB_BAS_UNK_5A_6+3,x
          inx
          iny
          cpy     #$04
-         bne     @L78F4
-@L790C:  dex
-         beq     @L7913
-         lda     $5d,x
-         beq     @L790C
-@L7913:  lda     $5d,x
+         bne     @lp1
+@lpsk0:  dex
+         beq     @lpsk0end
+         lda     DB_BAS_UNK_5A_6+3,x
+         beq     @lpsk0
+@lpsk0end:
+         lda     DB_BAS_UNK_5A_6+3,x
          cmp     #$0a
-         bcc     @L791B
+         bcc     @skhexdig
          adc     #$06
-@L791B:  adc     #$30
+@skhexdig:
+         adc     #'0'
          jsr     L7AF7
          dex
-         bpl     @L7913
+         bpl     @lpsk0end
          rts
 
-L7924:   bpl     L792D
-         lda     #$2d
+cmdPRINT_num2str_realNon0:
+         bpl     cmdPRINT_num2str_realNon0_lp1
+         lda     #'-'
          stz     DP_FPA_sgn
          jsr     L7AF7
-L792D:   lda     DP_FPA_exp+1
+cmdPRINT_num2str_realNon0_lp1:
+         lda     DP_FPA_exp+1
          cmp     #$81
          bcs     L7984
          jsr     fpMulBy10
          dec     DP_FP_TMP+5
-         bra     L792D
+         bra     cmdPRINT_num2str_realNon0_lp1
 
-L793A:   phy
-         ldy     #$02
-         lda     [DP_BAS_ASSWKSP],y
+; HERE HERE HERE doing #$'s and labels
+cmdPRINT_num2str:
+         phy
+         ldy     #INTVAR_atsign+2
+         lda     [DP_BAS_INTVARSptr],y
          tax
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          xba
          ply
          cpx     #$03
@@ -6746,13 +6863,13 @@ L795C:   sta     DP_BAS_TMP6+1
          sta     $70
          stz     DP_BAS_STRLEN
          stz     DP_FP_TMP+5
-         bit     $2b
-         bmi     L78EA
+         bit     DP_BAS_TMP2A+1
+         bmi     cmdPRINT_num2str_hex
          tya
          bmi     @L796E
-         jsr     L5117
+         jsr     braIntToReal
 @L796E:  jsr     fpFPACkMant0SetSgnExp0
-         bne     L7924
+         bne     cmdPRINT_num2str_realNon0
          lda     DP_BAS_TMP6
          bne     @L797C
          lda     #$30
@@ -6771,10 +6888,10 @@ L7984:   cmp     #$84
          bcc     L7997
 @L7990:  jsr     fpFPADiv10
 L7993:   inc     DP_FP_TMP+5
-         bra     L792D
+         bra     cmdPRINT_num2str_realNon0_lp1
 
 L7997:   lda     DP_FPA_mant+4
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     fpCopyFPAtoPrintPTR
          lda     $70
          sta     DP_BAS_TMP6+1
@@ -6801,7 +6918,7 @@ L7997:   lda     DP_FPA_mant+4
          bne     @L79C7
 @L79CD:  jsr     PrintPTRtoPTR1
          jsr     fpMoveRealAtPTR1toFPB
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          sta     DP_FPB_mant+4
          jsr     L5307
 @L79DA:  lda     DP_FPA_exp+1
@@ -7185,7 +7302,7 @@ fpCopyFPAtoFPB:
          lda     DP_FPA_mant+1
          sta     DP_FPB_mant+1
          lda     DP_FPA_mant+2
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          lda     DP_FPA_mant+3
          sta     DP_FPB_mant+3
          lda     DP_FPA_mant+4
@@ -7197,7 +7314,7 @@ fpCopyFPAtoFPBAndShiftRight:
 fpShiftFPBMantRight:
          lsr     DP_FPB_mant
          ror     DP_FPB_mant+1
-         ror     DP_FPB_mant+2
+         ror     DP_BAS_61_UK
          ror     DP_FPB_mant+3
          ror     DP_FPB_mant+4
          rts
@@ -7219,7 +7336,7 @@ fpAddAtoBstoreinA_sameExp:
          adc     DP_FPB_mant+3
          sta     DP_FPA_mant+3
          lda     DP_FPA_mant+2
-         adc     DP_FPB_mant+2
+         adc     DP_BAS_61_UK
          sta     DP_FPA_mant+2
          lda     DP_FPA_mant+1
          adc     DP_FPB_mant+1
@@ -7258,7 +7375,7 @@ fpFPADiv10:
          lda     DP_FPA_mant
          sta     DP_FPB_mant+1
          lda     DP_FPA_mant+1
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          lda     DP_FPA_mant+2
          sta     DP_FPB_mant+3
          lda     DP_FPA_mant+3
@@ -7268,7 +7385,7 @@ fpFPADiv10:
          jsr     fpAddAtoBstoreinA_sameExp
          stz     DP_FPB_mant+1
          lda     DP_FPA_mant
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          lda     DP_FPA_mant+1
          sta     DP_FPB_mant+3
          lda     DP_FPA_mant+2
@@ -7301,7 +7418,7 @@ fpMoveRealAtPTR1toFPB:
          sta     DP_FPB_mant+3
          dey
          lda     [DP_BAS_FP_PTR1],y
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          dey
          lda     [DP_BAS_FP_PTR1],y
          sta     DP_FPB_mant+1
@@ -7314,7 +7431,7 @@ fpMoveRealAtPTR1toFPB:
          bne     @sk1
          tya
          ora     DP_FPB_mant+1
-         ora     DP_FPB_mant+2
+         ora     DP_BAS_61_UK
          ora     DP_FPB_mant+3
          beq     @sk2
 @sk1:    tya
@@ -7332,7 +7449,7 @@ fpCopyFPAtoPrintPTR:
          sta     DP_BAS_FP_PTR1+1
          lda     #$00
          adc     DP_BAS_PRINT_FP_PTR+2
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
 fpCopyFPAtoPTR1:
          lda     DP_FPA_exp+1
          sta     [DP_BAS_FP_PTR1]
@@ -7363,7 +7480,7 @@ fpCopyPrintPTRtoFPA:
          sta     DP_BAS_FP_PTR1+1
          lda     #$00
          adc     DP_BAS_PRINT_FP_PTR+2
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
 fpCopyPTR1toFPA:
          stz     DP_FPA_mant+4
          stz     DP_FPA_exp
@@ -7398,7 +7515,7 @@ fpSetFPBto0:
          stz     DP_FPB_exp
          stz     DP_FPB_mant
          stz     DP_FPB_mant+1
-         stz     DP_FPB_mant+2
+         stz     DP_BAS_61_UK
          stz     DP_FPB_mant+3
          stz     DP_FPB_mant+4
          rts
@@ -7409,7 +7526,7 @@ fpConstAtoPTR1:
          sta     DP_BAS_FP_PTR1+1
          phb                ;Should this be PHK?
          pla
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
          rts
 
 PrintPTRtoPTR1:
@@ -7422,7 +7539,7 @@ PrintPTRtoPTR1:
          sta     DP_BAS_FP_PTR1+1
          lda     #$00
          adc     DP_BAS_PRINT_FP_PTR+2
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
          rts
 
 exec_TAN:
@@ -7438,7 +7555,7 @@ L7DE1:   lda     #$80
          sta     DP_FPA_exp+1
          jmp     L7EC0
 
-L7DEB:   jmp     L50FB
+L7DEB:   jmp     brk_12_DivisionBy0
 
 L7DEE:   .byte   $02
          .byte   $08
@@ -7477,7 +7594,7 @@ L7DF2:   lda     DP_FPA_mant
          ldy     DP_FPB_mant+1
          cpy     DP_FPA_mant+1
          bne     @L7E3A
-         ldy     DP_FPB_mant+2
+         ldy     DP_BAS_61_UK
          cpy     DP_FPA_mant+2
          bne     @L7E3A
          ldy     DP_FPB_mant+3
@@ -7487,9 +7604,9 @@ L7DF2:   lda     DP_FPA_mant
          lda     DP_FPB_mant+3
          sbc     DP_FPA_mant+3
          sta     DP_FPB_mant+3
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sbc     DP_FPA_mant+2
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          lda     DP_FPB_mant+1
          sbc     DP_FPA_mant+1
          sta     DP_FPB_mant+1
@@ -7498,7 +7615,7 @@ L7DF2:   lda     DP_FPA_mant
          sec
 @L7E53:  rol     DP_FPB_sgn
          asl     DP_FPB_mant+3
-         rol     DP_FPB_mant+2
+         rol     DP_BAS_61_UK
          rol     DP_FPB_mant+1
          rol     A
          dex
@@ -7508,7 +7625,7 @@ L7DF2:   lda     DP_FPA_mant
          dey
          bpl     @L7E1D
          ora     DP_FPB_mant+1
-         ora     DP_FPB_mant+2
+         ora     DP_BAS_61_UK
          ora     DP_FPB_mant+3
          beq     @L7E6F
          sec
@@ -7530,8 +7647,10 @@ L7DF2:   lda     DP_FPA_mant
          jsr     L51E4
          bra     fpRountMantFPA_bra
 
-L7E8E:   jsr     fpNegateFP_A
-L7E91:   bra     @L7E93     ;TODO - optimize away!
+fpFPAeqPTR1subFPA:
+         jsr     fpNegateFP_A
+fpFPAeqPTR1addFPA:
+         bra     @L7E93     ;TODO - optimize away!
 
 @L7E93:  jsr     fpMoveRealAtPTR1toFPB
          beq     rts7ECC
@@ -7549,7 +7668,8 @@ fpRountMantFPA:
          jsr     fpIncFPAMantMSBs
          bra     L7EB6
 
-L7EAE:   jsr     fpFPAeqPTRmulFPA_internal
+fpFPAeqPTR1mulFPA:
+         jsr     fpFPAeqPTRmulFPA_internal
          bra     fpRountMantFPA_bra
 
 L7EB3:   rol     A
@@ -7606,7 +7726,7 @@ fpFPAeqPTRmulFPA_internal:
          ldy     #$20
 @L7F14:  lsr     DP_FPB_mant
          ror     DP_FPB_mant+1
-         ror     DP_FPB_mant+2
+         ror     DP_BAS_61_UK
          ror     DP_FPB_mant+3
          ror     DP_FPB_mant+4
          asl     DP_FP_TMP+2
@@ -7635,7 +7755,7 @@ dpAddFPBmanttoFPAmant:
          adc     DP_FPB_mant+3
          sta     DP_FPA_mant+3
          lda     DP_FPA_mant+2
-         adc     DP_FPB_mant+2
+         adc     DP_BAS_61_UK
          sta     DP_FPA_mant+2
          lda     DP_FPA_mant+1
          adc     DP_FPB_mant+1
@@ -7841,7 +7961,7 @@ L806F:   inc     DP_BAS_TXTPTR_OFF
          beq     L8053
          cmp     #$01
          beq     L8050
-@L8086:  jsr     L5117
+@L8086:  jsr     braIntToReal
          jsr     stack_REAL
          jsr     L8050
          jsr     popFPFromStackToPTR1
@@ -7851,7 +7971,7 @@ L806F:   inc     DP_BAS_TXTPTR_OFF
          bra     L80C4
 
 @L809D:  ldx     #$22
-         jsr     L9A49
+         jsr     storeWAatDPX
          lda     #$40
          sta     DP_BAS_RAND+4
          rts
@@ -7863,7 +7983,8 @@ exec_RND:
          beq     L806F
          jsr     L52BD
          ldx     #$22
-L80B4:   lda     $00,x
+copyDPXtoWA:
+         lda     $00,x
          sta     DP_BAS_INT_WA
          lda     $01,x
          sta     DP_BAS_INT_WA+1
@@ -8049,7 +8170,7 @@ exec_EVAL:
          inc     DP_BAS_STRLEN
          lda     #$0d
          sta     [DP_BAS_STRWKSP_L],y
-         jsr     storeStringOnStack
+         jsr     StackString
          lda     DP_BAS_TXTPTR
          pha
          lda     DP_BAS_TXTPTR+1
@@ -8084,7 +8205,7 @@ L81FC:   pla
          sta     DP_BAS_TXTPTR+1
          pla
          sta     DP_BAS_TXTPTR
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          rts
 
 jmp_brk06_type_mismatch10:
@@ -8126,7 +8247,7 @@ L8213:   ldx     DP_BAS_STRLEN
          jsr     parseDecimalLiteral
          bcc     @L8256
          jsr     evalLevel1CheckNotStringNegate
-@L8256:  sta     $40
+@L8256:  sta     DP_BAS_40_VARTYPE
          bra     L81FC
 
 exec_INT:
@@ -8140,7 +8261,7 @@ exec_INT:
          bpl     @L827D
          lda     DP_FPB_mant
          ora     DP_FPB_mant+1
-         ora     DP_FPB_mant+2
+         ora     DP_BAS_61_UK
          ora     DP_FPB_mant+3
          beq     @L827D
          jsr     L5294
@@ -8225,7 +8346,7 @@ exec_POINT:
          lda     DP_BAS_INT_WA
          pha
          ldx     DP_BAS_INT_WA+1
-         jsr     L993C
+         jsr     popIntA
          stx     DP_BAS_INT_WA+3
          pla
          sta     DP_BAS_INT_WA+2
@@ -8243,7 +8364,7 @@ exec_INSTR:
          cpx     #','
          bne     @L8334
          inc     DP_BAS_TXTPTR_OFF
-         jsr     storeStringOnStack
+         jsr     StackString
          jsr     L7537
          beq     @L8326
          brl     jmp_brk06_type_mismatch9
@@ -8318,20 +8439,21 @@ exec_ABS:
          beq     jmp_brk06_type_mismatch8
          bmi     L83AA
 L83A4:   bit     DP_BAS_INT_WA+3
-         bmi     L8400
-         bra     L8417
+         bmi     negateWA
+         bra     ldaRETV_INT_rtsL8417
 
 L83AA:   stz     DP_FPA_sgn
          rts
 
-L83AD:   jsr     L7E8E
+fpFPAeqPTR1subFPAnegFPA:
+         jsr     fpFPAeqPTR1subFPA
 fpNegateFP_A:
          lda     DP_FPA_mant
-         beq     @L83BA
+         beq     @sk
          lda     DP_FPA_sgn
          eor     #$80
          sta     DP_FPA_sgn
-@L83BA:  lda     #$ff
+@sk:     lda     #$ff
          rts
 
 parseCheckDollarNoSuchVar:
@@ -8376,7 +8498,8 @@ evalLevel1UnaryMinus:
 evalLevel1CheckNotStringNegate:
          beq     jmp_brk06_type_mismatch8
          bmi     fpNegateFP_A
-L8400:   sec
+negateWA:
+         sec
          lda     #$00
          tay
          sbc     DP_BAS_INT_WA
@@ -8390,7 +8513,8 @@ L8400:   sec
          tya
          sbc     DP_BAS_INT_WA+3
          sta     DP_BAS_INT_WA+3
-L8417:   lda     #$40
+ldaRETV_INT_rtsL8417:
+         lda     #RETV_INT
          rts
 
 ;*******************************************************************************
@@ -8562,14 +8686,15 @@ parseCheckOPTNoSuchVar:
          bne     brk1a_no_such_var
          bcs     brk1a_no_such_var
          stx     DP_BAS_TXTPTR_OFF
-L851B:   ldy     #$42
-         lda     [DP_BAS_ASSWKSP],y
+getPpctAsINT:
+         ldy     #INTVAR_P+2
+         lda     [DP_BAS_INTVARSptr],y
          tax
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          xba
          dey
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          xba
          tay
          xba
@@ -8799,41 +8924,32 @@ exec_RIGHT:
          jsr     L6C74
          jsr     L9928
          plp
-         bcs     retSTR+3
+         bcs     L8690
          lda     DP_BAS_INT_WA
          cmp     DP_BAS_STRLEN
          bcs     retSTR
 ret_str_lenA:
          sta     DP_BAS_STRLEN
 retSTR:  lda     #$00
+rtsL868F:
          rts
 
-         .byte   $a5
-         .byte   $54
-         .byte   $e5
-         .byte   $48
-         .byte   $90
-         HiAscii "wpw(%"
-         .byte   $48
-         .byte   $85
-         .byte   $54
-         .byte   $f0
-         .byte   $f0
-         .byte   $a2
-         .byte   $00
-         .byte   $b7
-         .byte   $a7
-         .byte   $20
-         .byte   $3b
-         .byte   $84
-         .byte   $e8
-         .byte   $c8
-         .byte   $c6
-         .byte   $48
-         .byte   $d0
-         .byte   $f5
-         .byte   $80
-         .byte   $df
+L8690:   lda     DP_BAS_STRLEN
+         sbc     DP_BAS_INT_WA
+         bcc     retSTR
+         beq     rtsL868F
+         tay
+         lda     DP_BAS_INT_WA
+         sta     DP_BAS_STRLEN
+         beq     rtsL868F
+         ldx     #$00
+@L86A1:  lda     [DP_BAS_STRWKSP_L],y
+         jsr     storeStringX
+         inx
+         iny
+         dec     DP_BAS_INT_WA
+         bne     @L86A1
+         bra     retSTR
 
 exec_INKEYDollar:
          jsr     doINKEY_int
@@ -8853,7 +8969,7 @@ exec_MID:
          bne     jmp_brk06_type_mismatch6
          cpx     #','
          bne     jmp_brk_05_missing_comma
-         jsr     storeStringOnStack
+         jsr     StackString
          inc     DP_BAS_TXTPTR_OFF
          jsr     L6C7F
          lda     DP_BAS_INT_WA
@@ -8907,10 +9023,10 @@ exec_STR:
          beq     jmp_brk06_type_mismatch5
          tay
          pla
-         sta     $2b
+         sta     DP_BAS_TMP2A+1
          phy
          ldy     #$03
-         lda     [DP_BAS_ASSWKSP],y
+         lda     [DP_BAS_INTVARSptr],y
          ply
          tax
          bne     @L873B
@@ -8918,7 +9034,7 @@ exec_STR:
          jsr     L795A
          bra     L8775
 
-@L873B:  jsr     L793A
+@L873B:  jsr     cmdPRINT_num2str
          bra     L8775
 
 jmp_brk06_type_mismatch5:
@@ -8930,7 +9046,7 @@ exec_STRING:
          jsr     parse_skip_spaces_CMPcommaBRK
          jsr     L854D
          bne     jmp_brk06_type_mismatch5
-         jsr     L993C
+         jsr     popIntA
          ldx     DP_BAS_STRLEN
          beq     L8775
          lda     DP_BAS_INT_WA
@@ -8954,7 +9070,7 @@ L8775:   lda     #$00
 L8778:   sta     DP_BAS_STRLEN
          rts
 
-L877B:   jmp     L760F
+L877B:   jmp     brk_13_StringTooLong
 
 L877E:   ldy     #$00
          lda     [DP_BAS_INT_WA],y
@@ -8998,7 +9114,7 @@ L87A6:   jsr     L878B
          lda     DP_BAS_PAGE+1
          sta     DP_FPB_mant+1
          lda     DP_BAS_PAGE+2
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          ldy     #$03
          bra     @L87DF
 
@@ -9010,7 +9126,7 @@ L87A6:   jsr     L878B
          bcc     @L87DF
          inc     DP_FPB_mant+1
          bne     @L87DF
-         inc     DP_FPB_mant+2
+         inc     DP_BAS_61_UK
 @L87DF:  tyx
          ldy     #$01
          lda     [DP_FPB_mant],y
@@ -9032,7 +9148,7 @@ L87A6:   jsr     L878B
          clc
          adc     DP_FPB_mant
          ldy     DP_FPB_mant+1
-         ldx     DP_FPB_mant+2
+         ldx     DP_BAS_61_UK
          bcc     @L8809
          iny
          bne     @L8808
@@ -9042,7 +9158,7 @@ L87A6:   jsr     L878B
          sta     DP_FPB_sgn
          tya
          sbc     #$00
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
          txa
          sbc     #$00
          sta     DP_FPB_exp
@@ -9076,14 +9192,14 @@ L87A6:   jsr     L878B
 @L8848:  lda     DP_BAS_TXTPTR2
          sta     DP_FPB_sgn
          lda     DP_BAS_TXTPTR2+1
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
          lda     DP_BAS_TXTPTR2+2
          sta     DP_FPB_exp
          lda     DP_FPB_mant
          sta     DP_BAS_TXTPTR2
          lda     DP_FPB_mant+1
          sta     DP_BAS_TXTPTR2+1
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sta     DP_BAS_TXTPTR2+2
          jsr     var_find
          bcs     @L88A7
@@ -9100,7 +9216,7 @@ L87A6:   jsr     L878B
          lda     #$ff
          sta     DP_BAS_INT_WA+3
          lda     #$04
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L8D5C
          lda     #$40
          ora     DP_BAS_SET_TO_Z_AT_EOS
@@ -9108,7 +9224,7 @@ L87A6:   jsr     L878B
          lda     DP_FPB_sgn
          sta     DP_BAS_TXTPTR2
          sta     DP_BAS_TXTPTR
-         lda     $5d
+         lda     DB_BAS_UNK_5A_6+3
          sta     DP_BAS_TXTPTR+1
          sta     DP_BAS_TXTPTR2+1
          lda     DP_FPB_exp
@@ -9117,7 +9233,7 @@ L87A6:   jsr     L878B
          ply
          sty     DP_BAS_TXTPTR_OFF
          sty     DP_BAS_TXTPTR2_OFF
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          sta     DP_BAS_INT_WA+3
          rts
 
@@ -9196,7 +9312,7 @@ L88C8:   ldy     #$00
          sta     DP_FPB_sgn
          tya
          sbc     #$00
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
          txa
          sbc     #$00
          sta     DP_FPB_exp
@@ -9245,7 +9361,7 @@ L896F:   brk     $1e
 
 exec_FN: lda     #$a4
 exec_FN_PROC:
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L623E
          clc
          tsc
@@ -9275,7 +9391,7 @@ exec_FN_PROC:
          xba
          lda     DP_stack_save
          tcs
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          pha
          lda     DP_BAS_TXTPTR2_OFF
          pha
@@ -9399,7 +9515,7 @@ exec_FN_PROC:
          inc     DP_BAS_STACK+1
          bne     @L8A7E
          inc     DP_BAS_STACK+2
-@L8A7E:  lda     $40
+@L8A7E:  lda     DP_BAS_40_VARTYPE
          rts
 
 @L8A81:  lda     DP_BAS_TXTPTR_OFF
@@ -9445,7 +9561,7 @@ exec_FN_PROC:
          bne     @L8AEA
 @L8AC7:  jsr     L7537
          jsr     stack_INTorREAL
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          sta     DP_BAS_INT_WA
          jsr     stack_INTWA
          plx
@@ -9483,9 +9599,9 @@ exec_FN_PROC:
          .byte   "Arguments"
          .byte   $00
 
-@L8B0F:  jsr     L993C
+@L8B0F:  jsr     popIntA
          lda     DP_BAS_INT_WA
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          pla
          sta     DP_BAS_INT_WA
          pla
@@ -9495,21 +9611,21 @@ exec_FN_PROC:
          pla
          sta     DP_BAS_INT_WA+3
          bmi     @L8B41
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          beq     @L8AEA
          ldx     #$55
-         jsr     L9A49
-         lda     $40
+         jsr     storeWAatDPX
+         lda     DP_BAS_40_VARTYPE
          bpl     @L8B39
          jsr     popFPFromStackToPTR1
          jsr     fpCopyPTR1toFPA
          bra     @L8B3C
 
-@L8B39:  jsr     L993C
+@L8B39:  jsr     popIntA
 @L8B3C:  jsr     L8D6C
          bra     @L8B4B
 
-@L8B41:  lda     $40
+@L8B41:  lda     DP_BAS_40_VARTYPE
          bne     @L8AEA
          jsr     L9928
          jsr     L64B5
@@ -9523,7 +9639,7 @@ L8B55:   ldy     DP_BAS_INT_WA+3
          cpy     #$05
          bcs     @L8B60
          ldx     #$55
-         jsr     L9A49
+         jsr     storeWAatDPX
 @L8B60:  jsr     L8B74
          php
          jsr     stack_INTorREAL
@@ -9531,15 +9647,15 @@ L8B55:   ldy     DP_BAS_INT_WA+3
          beq     @L8B71
          bmi     @L8B71
          ldx     #$55
-         jsr     L80B4
+         jsr     copyDPXtoWA
 @L8B71:  jmp     stack_INTWA
 
 L8B74:   ldy     DP_BAS_INT_WA+3
          bmi     L8BCE
-         beq     @L8B99
+         beq     L8B99
          cpy     #$05
          beq     L8B9E
-         ldy     #$03
+L8B7E:   ldy     #$03
          lda     [DP_BAS_INT_WA],y
          sta     DP_BAS_INT_WA+3
          dey
@@ -9557,7 +9673,7 @@ L8B74:   ldy     DP_BAS_INT_WA+3
          lda     #$40
          rts
 
-@L8B99:  lda     [DP_BAS_INT_WA],y
+L8B99:   lda     [DP_BAS_INT_WA],y
          jmp     retAY_16bit_INT
 
 L8B9E:   stz     DP_FPA_mant+4
@@ -9653,7 +9769,7 @@ L8C17:   ldy     DP_BAS_TXTPTR2_OFF
          cmp     DP_BAS_MEMBASE+2
          beq     @L8C6C
 @L8C3C:  ldx     DP_BAS_TXTPTR2
-@L8C3E:  jsr     L604D
+@L8C3E:  jsr     getAatTMP6ptrAndInc
          cmp     #$0d
          bne     @L8C61
          cpx     DP_BAS_TMP6
@@ -9662,13 +9778,13 @@ L8C17:   ldy     DP_BAS_TXTPTR2_OFF
          lda     DP_BAS_TXTPTR2+2
          sbc     DP_BAS_TMP6+2
          bcc     @L8C6C
-         jsr     L604D
+         jsr     getAatTMP6ptrAndInc
          ora     #$00
          bmi     @L8C6D
          sta     DP_BAS_ERL+1
-         jsr     L604D
+         jsr     getAatTMP6ptrAndInc
          sta     DP_BAS_ERL
-         jsr     L604D
+         jsr     getAatTMP6ptrAndInc
 @L8C61:  cpx     DP_BAS_TMP6
          tya
          sbc     DP_BAS_TMP6+1
@@ -9763,7 +9879,7 @@ bas_DEF_ERROR:
          .byte   $0d
 
 exec_SOUND:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          ldx     #$03
 @parmlp: lda     DP_BAS_INT_WA
          pha
@@ -9784,7 +9900,7 @@ exec_SOUND:
          bra     L8D38
 
 exec_ENVELOPE:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          ldx     #$0d
 @parmlp: lda     DP_BAS_INT_WA
          pha
@@ -9809,7 +9925,7 @@ L8D43:   jsr     cop_OSWORD
          bra     L8D53
 
 exec_WIDTH:
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     parse_nextstmt_yield_PTR2_OFF
          ldy     DP_BAS_INT_WA
          dey
@@ -9835,7 +9951,7 @@ L8D5C:   ply
 L8D6C:   lda     DP_BAS_TMP6+3
          cmp     #$05
          beq     @L8D95
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          beq     jmp_brk06_type_mismatch4
          bpl     @L8D7B
          jsr     eval_real2INT
@@ -9855,10 +9971,10 @@ L8D6C:   lda     DP_BAS_TMP6+3
          sta     [DP_BAS_TMP6],y
 @L8D94:  rts
 
-@L8D95:  lda     $40
+@L8D95:  lda     DP_BAS_40_VARTYPE
          beq     jmp_brk06_type_mismatch4
          bmi     L8D9E
-         jsr     L5117
+         jsr     braIntToReal
 L8D9E:   lda     DP_FPA_exp+1
          sta     [DP_BAS_TMP6]
          ldy     #$01
@@ -9884,7 +10000,7 @@ exec_EDIT:
          .byte   "Not available"
          .byte   $00
 
-L8DCE:   stz     $5b
+L8DCE:   stz     DB_BAS_UNK_5A_6+1
          stz     DP_FPB_sgn
          jsr     exec_FALSE
          jsr     parse_lineno_atOFF
@@ -9896,7 +10012,7 @@ L8DCE:   stz     $5b
          bcc     @L8DF3
          jsr     parse_SkipSpacesPTR2_cmp_COMMA
          beq     @L8DFA
-         jsr     L993C
+         jsr     popIntA
          jsr     stack_INTWA
          dec     DP_BAS_TXTPTR2_OFF
          bra     @L8DFD
@@ -9906,7 +10022,7 @@ L8DCE:   stz     $5b
          dec     DP_BAS_TXTPTR2_OFF
 @L8DFA:  jsr     parse_lineno_atOFF
 @L8DFD:  ldx     #$4f
-         jsr     L9A49
+         jsr     storeWAatDPX
          jsr     parse_skip_spaces_PTR2
          cmp     #$e7
          bne     L8E27
@@ -9921,7 +10037,7 @@ exec_LIST:
          bne     L8DCE      ;go and do "LIST"
          inc     DP_BAS_TXTPTR2_OFF ;Skip 'O'
 ; Do LISTO
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          jsr     parse_nextstmt_yield_TXTOFF2
          lda     DP_BAS_INT_WA
          sta     DP_BAS_LISTO
@@ -9931,7 +10047,7 @@ L8E27:   jsr     L72D9
 L8E2A:   lda     DP_BAS_TXTPTR2
          sta     DP_BAS_TXTPTR
          jsr     do_END
-         jsr     L993C
+         jsr     popIntA
          jsr     prog_search_lineno
          lda     DP_FPB_exp
          sta     DP_BAS_TXTPTR2
@@ -9967,9 +10083,9 @@ L8E2A:   lda     DP_BAS_TXTPTR2
          ldy     #$04
          sty     DP_BAS_TXTPTR2_OFF
          sty     DP_BAS_TXTPTR_OFF
-         bit     $5b
+         bit     DB_BAS_UNK_5A_6+1
          bpl     @L8E7E
-         stz     $5b
+         stz     DB_BAS_UNK_5A_6+1
 @L8E7E:  bit     DP_FPB_sgn
          bpl     @L8E84
          stz     DP_FPB_sgn
@@ -9986,7 +10102,7 @@ L8E2A:   lda     DP_BAS_TXTPTR2
          bne     @L8EA6
          cmp     #$ed
          bne     @L8EA0
-         dec     $5b
+         dec     DB_BAS_UNK_5A_6+1
 @L8EA0:  cmp     #$fd
          bne     @L8EA6
          dec     DP_FPB_sgn
@@ -10012,12 +10128,12 @@ L8E2A:   lda     DP_BAS_TXTPTR2
 
 @L8EC3:  lda     $70
          beq     @L8E54
-         jsr     L7891
+         jsr     int16print_fmt5
          lda     #$01
          inx
          sec
          jsr     L9A37
-         ldx     $5b
+         ldx     DB_BAS_UNK_5A_6+1
          lda     #$02
          jsr     L9A36
          ldx     DP_FPB_sgn
@@ -10043,12 +10159,12 @@ L8E2A:   lda     DP_BAS_TXTPTR2
          bne     @L8F0B
          jsr     parse_lineno_atPTR2_Y
          sty     DP_BAS_TXTPTR2_OFF
-         jsr     printWAasDecimal16b
+         jsr     int16print_AnyLen
          bra     @L8EE1
 
 @L8F0B:  cmp     #$e3
          bne     @L8F11
-         inc     $5b
+         inc     DB_BAS_UNK_5A_6+1
 @L8F11:  cmp     #$f5
          bne     @L8F17
          inc     DP_FPB_sgn
@@ -10196,7 +10312,7 @@ exec_NEXT:
 @L9010:  jsr     L8B9E
          lda     #$04
          jsr     L9148
-         jsr     L7E91
+         jsr     fpFPAeqPTR1addFPA
          lda     DP_BAS_INT_WA
          sta     DP_BAS_TMP6
          lda     DP_BAS_INT_WA+1
@@ -10206,7 +10322,7 @@ exec_NEXT:
          jsr     L8D9E
          lda     #$09
          jsr     L9148
-         jsr     L7480
+         jsr     evalDoCompareRealFPAwithPTR1
          beq     @L8FEB
          ldy     #$05
          lda     [DP_BAS_FOR_STACKBASE],y
@@ -10313,7 +10429,7 @@ exec_FOR:
          jmp     L6364
 
 @L90F4:  jsr     L7537
-         jsr     L6CC7
+         jsr     ckTypeIntToReal
          lda     #$09
          jsr     L9148
          jsr     fpCopyFPAtoPTR1
@@ -10322,7 +10438,7 @@ exec_FOR:
          cmp     #$88
          bne     @L9114
          jsr     L7537
-         jsr     L6CC7
+         jsr     ckTypeIntToReal
          ldy     DP_BAS_TXTPTR_OFF
 @L9114:  sty     DP_BAS_TXTPTR2_OFF
          lda     #$04
@@ -10335,7 +10451,7 @@ exec_FOR:
          adc     #$11
          sta     DP_BAS_FOR_STACKBASE
          bcc     @L912F
-         inc     VAR_OFFS_FN
+         inc     DP_BAS_FOR_STACKBASE+1
          bne     @L912F
          inc     DP_BAS_FOR_STACKBASE+2
 @L912F:  inc     DP_BAS_FOR_LVL
@@ -10345,9 +10461,9 @@ L9132:   sec
          lda     DP_BAS_FOR_STACKBASE
          sbc     #$11
          sta     DP_BAS_FOR_STACKBASE
-         lda     VAR_OFFS_FN
+         lda     DP_BAS_FOR_STACKBASE+1
          sbc     #$00
-         sta     VAR_OFFS_FN
+         sta     DP_BAS_FOR_STACKBASE+1
          lda     DP_BAS_FOR_STACKBASE+2
          sbc     #$00
          sta     DP_BAS_FOR_STACKBASE+2
@@ -10358,11 +10474,11 @@ L9148:   clc
          adc     DP_BAS_FOR_STACKBASE
          sta     DP_BAS_FP_PTR1
          lda     #$00
-         adc     VAR_OFFS_FN
+         adc     DP_BAS_FOR_STACKBASE+1
          sta     DP_BAS_FP_PTR1+1
          lda     #$00
          adc     DP_BAS_FOR_STACKBASE+2
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
          rts
 
 exec_GOSUB:
@@ -10466,7 +10582,7 @@ exec_ON: jsr     parse_skip_spaces_PTR2
          cmp     #$85       ;check for ERROR
          beq     exec_ON_ERROR
          dec     DP_BAS_TXTPTR2_OFF
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          cpx     #$f2
          beq     @L921C
          iny
@@ -10571,7 +10687,7 @@ parse_lineno_searchprog_brknfnd:
          bcs     prog_search_lineno_brknotfnd
          lda     #$80
          sta     DP_BAS_SET_TO_Z_AT_EOS
-         jsr     eval_INTBRK
+         jsr     eval_CastINTorBRK
          lda     #$80
          trb     DP_BAS_SET_TO_Z_AT_EOS
          bit     DP_BAS_SET_TO_Z_AT_EOS
@@ -10646,10 +10762,10 @@ exec_INPUT_HASH:
          php
          jsr     stack_INTWA
          jsr     L9314
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          plp
          bcc     @L9371
-         lda     $40
+         lda     DP_BAS_40_VARTYPE
          bne     jmp_brk06_type_mismatch3
          jsr     L9314
          sta     DP_BAS_STRLEN
@@ -10664,7 +10780,7 @@ exec_INPUT_HASH:
 @L936C:  jsr     L64B2
          bra     @L933D
 
-@L9371:  lda     $40
+@L9371:  lda     DP_BAS_40_VARTYPE
          beq     jmp_brk06_type_mismatch3
          bmi     @L9383
          ldx     #$03
@@ -10766,7 +10882,7 @@ exec_INPUT_LINE:
          jsr     L8D5C
 @L9430:  brl     @L93B0
 
-@L9433:  stz     $40
+@L9433:  stz     DP_BAS_40_VARTYPE
          jsr     L64B5
          bra     @L9430
 
@@ -10815,7 +10931,7 @@ exec_READ:
 @L948E:  jsr     @L94B1
          jsr     stack_INTWA
          jsr     parseDataStringToStrWksp
-         sta     $40
+         sta     DP_BAS_40_VARTYPE
          jsr     L64B2
 @L949C:  clc
          lda     DP_BAS_TXTPTR_OFF
@@ -11005,13 +11121,13 @@ L95C9:   sta     DP_BAS_TMP6+1
          stz     DP_BAS_TMP6+3
          lda     #$ee
          sta     DP_BAS_TMP6+4
-         stz     DP_BAS_TMP6+5
+         stz     DB_BAS_UNK_5A_6
          lda     #$20
          tsb     DP_BAS_CO_FLAGS
          bne     @L95E0
-         stz     $5b
+         stz     DB_BAS_UNK_5A_6+1
          stz     DP_FPB_sgn
-@L95E0:  stz     $5d
+@L95E0:  stz     DB_BAS_UNK_5A_6+3
          stz     DP_FPB_exp
          stz     DP_FPB_mant
          stz     DP_FPB_mant+1
@@ -11047,7 +11163,7 @@ L95C9:   sta     DP_BAS_TMP6+1
 @L9619:  stz     DP_BAS_COUNT
          lda     #$20
          trb     DP_BAS_CO_FLAGS
-         ldy     $5b
+         ldy     DB_BAS_UNK_5A_6+1
          lda     #$00
          rts
 
@@ -11121,7 +11237,7 @@ L969E:   rts
 
 L969F:   ldx     #$ff
          stx     DP_BAS_OPT
-         stx     $5d
+         stx     DB_BAS_UNK_5A_6+3
          jsr     L97FD
          lda     DP_BAS_TXTPTR2
          sta     DP_BAS_TMP6
@@ -11144,40 +11260,40 @@ L96C0:   lda     DP_BAS_LISTO
 @L96CC:  tya
          clc
          adc     DP_BAS_MEMBASE
-         sta     $5b
+         sta     DB_BAS_UNK_5A_6+1
          lda     DP_BAS_MEMBASE+1
          adc     #$00
          sta     DP_FPB_sgn
          lda     DP_BAS_MEMBASE+2
          adc     #$00
-         sta     $5d
+         sta     DB_BAS_UNK_5A_6+3
          jsr     L962A
          ldy     #$00
          lda     #$0d
-         cmp     [$5b]
+         cmp     [DB_BAS_UNK_5A_6+1]
          beq     L969E
 @L96E9:  iny
-         cmp     [$5b],y
+         cmp     [DB_BAS_UNK_5A_6+1],y
          bne     @L96E9
          lda     #$20
 @L96F0:  dey
          beq     @L96F7
-         cmp     [$5b],y
+         cmp     [DB_BAS_UNK_5A_6+1],y
          beq     @L96F0
 @L96F7:  iny
          lda     #$0d
-         sta     [$5b],y
+         sta     [DB_BAS_UNK_5A_6+1],y
          iny
          iny
          iny
          iny
-         sty     DP_FPB_mant+2
+         sty     DP_BAS_61_UK
          lda     DP_BAS_TOP
          sta     DP_BAS_TMP6+3
          lda     DP_BAS_TOP+1
          sta     DP_BAS_TMP6+4
          lda     DP_BAS_TOP+2
-         sta     DP_BAS_TMP6+5
+         sta     DB_BAS_UNK_5A_6
          jsr     L9AC1
          sta     DP_BAS_TMP6
          lda     DP_BAS_TOP+1
@@ -11208,9 +11324,9 @@ L96C0:   lda     DP_BAS_LISTO
          lda     DP_BAS_TMP6+4
          sbc     #$01
          sta     DP_BAS_TMP6+4
-         lda     DP_BAS_TMP6+5
+         lda     DB_BAS_UNK_5A_6
          sbc     #$00
-         sta     DP_BAS_TMP6+5
+         sta     DB_BAS_UNK_5A_6
          sec
          lda     DP_BAS_TMP6+1
          sbc     #$01
@@ -11223,7 +11339,7 @@ L96C0:   lda     DP_BAS_LISTO
          phy
          tya
          ldx     DP_BAS_TMP6+4
-         ldy     DP_BAS_TMP6+5
+         ldy     DB_BAS_UNK_5A_6
          adc     DP_BAS_TMP6+3
          bcc     @L976B
          inx
@@ -11243,7 +11359,7 @@ L96C0:   lda     DP_BAS_LISTO
          lda     DP_BAS_INT_WA
          sta     [DP_FPB_exp],y
          iny
-         lda     DP_FPB_mant+2
+         lda     DP_BAS_61_UK
          sta     [DP_FPB_exp],y
          sec
          tya
@@ -11255,7 +11371,7 @@ L96C0:   lda     DP_BAS_LISTO
          inc     DP_FPB_mant+1
 @L9794:  ldy     #$ff
 @L9796:  iny
-         lda     [$5b],y
+         lda     [DB_BAS_UNK_5A_6+1],y
          sta     [DP_FPB_exp],y
          cmp     #$0d
          bne     @L9796
@@ -11263,16 +11379,16 @@ L96C0:   lda     DP_BAS_LISTO
 
 int_CLEAR:
          stz     DP_BAS_LOMEM
-         lda     $95
+         lda     DP_BAS_95_UKPTR
          sta     DP_BAS_LOMEM+1
-         lda     $96
+         lda     DP_BAS_95_UKPTR+1
          sta     DP_BAS_LOMEM+2
          lda     DP_BAS_TOP
          cmp     #$00
          lda     DP_BAS_TOP+1
-         sbc     $95
+         sbc     DP_BAS_95_UKPTR
          lda     DP_BAS_TOP+2
-         sbc     $96
+         sbc     DP_BAS_95_UKPTR+1
          bcc     clearVARSsetVARTOPtoLOMEM
          lda     DP_BAS_MEMEND
          cmp     DP_BAS_TOP
@@ -11348,7 +11464,7 @@ popFPFromStackToPTR1:
          adc     #$00
          sta     DP_BAS_STACK+1
          lda     DP_BAS_STACK+2
-         sta     DP_BAS_FP_PTR1+2
+         sta     tblMnePackSize
          adc     #$00
          sta     DP_BAS_STACK+2
          rts
@@ -11378,7 +11494,7 @@ stack_REAL:
          rts
 
 stack_INTorREAL:
-         beq     storeStringOnStack
+         beq     StackString
          bmi     stack_REAL
 stack_INTWA:
          lda     DP_BAS_STACK
@@ -11413,7 +11529,7 @@ pushINTWA_on_hw_stack:
          phy
          rts
 
-storeStringOnStack:
+StackString:
          clc                ;TODO: use MVN
          lda     DP_BAS_STACK
          sbc     DP_BAS_STRLEN
@@ -11447,7 +11563,7 @@ L98B8:   lda     DP_BAS_TMP6+3
          iny
          lda     [DP_BAS_TMP6],y
          sbc     #$00
-         sta     DP_BAS_TMP6+5
+         sta     DB_BAS_UNK_5A_6
          dey
 @L98DB:  lda     [DP_BAS_STACK],y
          sta     [DP_BAS_TMP6+3],y
@@ -11510,7 +11626,7 @@ L9937:   lda     [DP_BAS_STACK]
 L9939:   sec
          bra     stack_ADD_A
 
-L993C:   ldy     #$03
+popIntA: ldy     #$03
          lda     [DP_BAS_STACK],y
          sta     DP_BAS_INT_WA+3
          dey
@@ -11684,7 +11800,8 @@ L9A42:   jsr     printSpcOrSendToLOMEMandINC
          bne     L9A42
 L9A48:   rts
 
-L9A49:   lda     DP_BAS_INT_WA
+storeWAatDPX:
+         lda     DP_BAS_INT_WA
          sta     $00,x
          lda     DP_BAS_INT_WA+1
          sta     $01,x
@@ -11699,9 +11816,9 @@ L9A5A:   jmp     brk_00_NoRoom
 L9A5D:   lda     DP_BAS_PAGE
          cmp     #$00
          lda     DP_BAS_PAGE+1
-         sbc     $95
+         sbc     DP_BAS_95_UKPTR
          lda     DP_BAS_PAGE+2
-         sbc     $96
+         sbc     DP_BAS_95_UKPTR+1
          bcc     L9A5A
          lda     DP_BAS_PAGE
          cmp     DP_BAS_MEMEND
@@ -11762,7 +11879,7 @@ L9AC3:   adc     DP_BAS_TOP
 @L9ACF:  ldy     #$01
          rts
 
-L9AD2:   jsr     L9C22
+L9AD2:   jsr     printStringAfter
          ora     L6141+1
          stz     DP_BAS_TXTPTR2+1
          bvs     L9B4E
@@ -11793,7 +11910,7 @@ L9B00:   jsr     L7527
 
 L9B0B:   jsr     L9B00
          lda     DP_BAS_PAGE
-         sta     DP_FPB_mant+2
+         sta     DP_BAS_61_UK
          lda     DP_BAS_PAGE+1
          sta     DP_FPB_mant+3
          lda     DP_BAS_PAGE+2
@@ -11802,7 +11919,7 @@ L9B0B:   jsr     L9B00
          rts
 
 L9B1D:   ldx     DP_BAS_PAGE+2
-         stx     $5b
+         stx     DB_BAS_UNK_5A_6+1
          ldy     #$00
          sty     DP_FPB_sgn
          rts
@@ -11814,8 +11931,8 @@ exec_SAVE:
          .a16
          .i16
          stz     DP_BAS_TMP6+4
-         stz     $5b
-         stz     $5d
+         stz     DB_BAS_UNK_5A_6+1
+         stz     DB_BAS_UNK_5A_6+3
          stz     DP_FPB_mant
          sec
          lda     DP_BAS_TOP
@@ -11926,7 +12043,7 @@ exec_BPUT:
          bcc     @L9BDF
          dec     DP_BAS_TXTPTR_OFF
 @L9BDF:  jsr     parse_nextstmt_yield_PTR2_OFF
-         jsr     L993C
+         jsr     popIntA
          ldy     #$00
          bra     @L9BFB
 
@@ -11954,7 +12071,7 @@ exec_BPUT:
          jsr     parse_nextstmt_yield_PTR2_OFF
          lda     DP_BAS_INT_WA
          pha
-         jsr     L993C
+         jsr     popIntA
          pla
 @L9C13:  rep     #$10
          .i16
@@ -11967,37 +12084,32 @@ exec_BPUT:
          .i8
          bra     L9BAD
 
-L9C22:   pla
+printStringAfter:
+         pla
          sta     DP_BAS_TMP6
          pla
          sta     DP_BAS_TMP6+1
          phk
          pla
          sta     DP_BAS_TMP6+2
-         bra     @L9C31
+         bra     printTMP6ptr
 
-@L9C2E:  jsr     L9C84
-@L9C31:  jsr     L605A
-         bpl     @L9C2E
+L9C2E:   jsr     doOSASCI
+printTMP6ptr:
+         jsr     incTMP6ptrLDA
+         bpl     L9C2E
          phk
          pei     (DP_BAS_TMP6)
          php
          rti
 
-         .byte   $a9
-         .byte   $05
-         .byte   $da
-         .byte   $a2
-         .byte   $48
-         .byte   $a0
-         .byte   $00
-         .byte   $20
-         .byte   $76
-         .byte   $9c
-         .byte   $fa
-         .byte   $a5
-         .byte   $4c
-
+         lda     #$05
+         phx
+         ldx     #$48
+         ldy     #$00
+         jsr     cop_OSWORD
+         plx
+         lda     DP_FPA_sgn
 INT_inc_WA:
          inc     DP_BAS_INT_WA
          bne     @L9C56
@@ -12026,7 +12138,7 @@ NEW_int_reset_TOP_empty_prog:
          rts
 
 call_OSBYTE:
-         cop     $06
+         cop     COP_06_OPOSB
          rts
 
 cop_OSWORD:
@@ -12040,11 +12152,12 @@ printCRLF:
          jsr     call_OSWRCH
          rts
 
-L9C84:   jsr     call_OSWRCH
+doOSASCI:
+         jsr     call_OSWRCH ;TODO - call OSASCI instead?
          cmp     #$0d
-         bne     @L9C8E
+         bne     @ret
          jsr     printCRLF
-@L9C8E:  rts
+@ret:    rts
 
 call_OSRDCH:
          phx
