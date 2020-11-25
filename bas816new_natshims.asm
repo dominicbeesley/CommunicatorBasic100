@@ -27,6 +27,188 @@ BL_debug_print:
 		lda	#$0D
 		jmp	call_OSWRCH
 
+		; we assume stack looks like a native interrupt i.e.
+                ;               + 6             Program bank
+                ;               + 5             PCH
+                ;               + 4             PCL
+                ;               + 3             Native mode flags
+                ;		+ 2		Caller retH
+                ;		+ 1		Caller retL
+
+ShowRegs:	php				; save entry flags
+
+                ;               + 7             Program bank
+                ;               + 6             PCH
+                ;               + 5             PCL
+                ;               + 4             Native mode flags
+                ;		+ 3		Caller retH
+                ;		+ 2		Caller retL
+                ;               + 1             Entry flags
+
+		sta	DP_BAS_BL_DEBUGPTR	; save flags
+		rep	#$30
+		.a16
+		.i16
+		phb
+		phd
+		phy
+		phx
+		pha
+
+                ;               + 16            Program bank
+                ;               + 15            PCH
+                ;               + 14            PCL
+                ;               + 13            Native mode flags
+                ;		+ 12		Caller retH
+                ;		+ 11		Caller retL
+                ;               + 10            Entry flags
+                ;		+ 9		B
+                ;		+ 7		DP
+                ;		+ 5		Y (16)
+                ;		+ 3		X (16)
+                ;		+ 1		A (16)
+
+                sep	#$30
+                .a8
+                .i8
+
+		jsr	printStringAfter
+		.byte	13,10,"Flags="
+		nop
+		lda	13,S
+		jsr	list_printHexByte
+		lda	#'='
+		jsr	call_OSWRCH
+		ldx	#7
+		lda	13,S
+@lp:		rol	A
+		pha
+		lda	FlagNames,X
+		bcc	@skU
+		and	#$DF
+@skU:		jsr	call_OSWRCH
+		pla
+		dex
+		bpl	@lp
+
+		jsr	printStringAfter		
+		.byte	", Stack="
+		nop
+		tsc
+		clc
+		adc	#16
+		xba
+		bcc	@sk1
+		inc	A
+@sk1:		jsr	list_printHexByte
+		tsc
+		clc
+		adc	#16
+		jsr	list_printHexByte
+
+		jsr	printStringAfter		
+		.byte	", PC="
+		nop
+		lda	16,S
+		jsr	list_printHexByte
+		lda	15,S
+		jsr	list_printHexByte
+		lda	14,S
+		jsr	list_printHexByte
+
+		jsr	printStringAfter		
+		.byte	", B="
+		nop
+		lda	9,S
+		jsr	list_printHexByte
+
+		jsr	printCRLF
+
+		jsr	printStringAfter
+		.byte	"A="
+		lda	2,S
+		jsr	list_printHexByte
+		lda	1,S
+		jsr	list_printHexByte
+
+		jsr	printStringAfter
+		.byte	", X="
+		lda	3,S
+		jsr	list_printHexByte
+		lda	4,S
+		jsr	list_printHexByte
+
+		jsr	printStringAfter
+		.byte	", Y="
+		lda	5,S
+		jsr	list_printHexByte
+		lda	6,S
+		jsr	list_printHexByte
+
+		jsr	printCRLF
+
+		rep	#$30
+		.a16
+		.i16
+		pla
+		plx
+		ply
+		pld
+		plb
+		plp
+		rts
+
+FlagNames:	.byte	"czidxmvn" 		; backwards nvmxdizc
+
+		; 
+		; we assume stack looks like a native interrupt i.e.
+                ;               + 6             Program bank
+                ;               + 5             PCH
+                ;               + 4             PCL
+                ;               + 3             Native mode flags
+                ;		+ 2		Caller retH
+                ;		+ 1		Caller retL
+StackTrace:	sep	#$30
+		.a8
+		.i8
+		; assume 8 bit stack!
+		tsx
+		txa
+		clc
+		adc	#7			; skip stack crud
+		sta	DP_BAS_BL_DEBUGPTR	; store stack start
+		and	#$F8
+		tax
+@lp0:		txa
+		and	#7
+		bne	@sk0
+		jsr	printCRLF
+		lda	#'1'			; assumes page 1 stack!
+		jsr	call_OSWRCH
+		txa
+		jsr	list_printHexByte
+@sk0:		jsr	@spc
+
+		cpx	DP_BAS_BL_DEBUGPTR
+		bcc	@nop
+
+		lda	f:$000100,X
+		jsr	list_printHexByte
+@sk1:		inx
+		bne	@lp0
+		jsr	printCRLF
+		rts
+
+@nop:		jsr	@spc2
+		bra	@sk1
+
+
+@spc2:		jsr	@spc
+@spc:		lda	#' '
+		jmp	call_OSWRCH
+
+
+
 
 BLITTER_shims_init:
 

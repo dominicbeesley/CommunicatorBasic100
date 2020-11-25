@@ -9618,7 +9618,9 @@ progFndDEF_skDefFnd:
                 sta     [DP_BAS_VARTOP],y
                 iny
                 jsr     CheckVarFitsY
+        .IFDEF COMMUNICATOR
                 pla
+        .ENDIF
                 lda     #RETV_UK1
                 rts
 
@@ -9691,6 +9693,7 @@ exec_FN_PROC:   sta     DP_BAS_40_VARTYPE
                 txa
                 sbc     #$00
                 sta     DP_BAS_TMP6+2
+
                 ldx     DP_BAS_TXTPTR_OFF
                 ldy     #$02
                 jsr     varScanNameAtTMP6_Y
@@ -9838,7 +9841,8 @@ doFNPROCargumentsEntry:
                 jsr     parse_skip_spaces
                 cmp     #'('
                 bne     @L8AEA
-@L8AC7:         jsr     evalAtOFF
+@L8AC7:         
+                jsr     evalAtOFF
                 jsr     stack_INTorREAL
                 lda     DP_BAS_40_VARTYPE
                 sta     DP_BAS_INT_WA
@@ -9847,7 +9851,7 @@ doFNPROCargumentsEntry:
                 inx
                 phx
                 jsr     parse_skip_space_CMPcomma
-                beq     @L8AC7
+                beq     @L8AC7                
                 cmp     #')'
                 bne     @L8AEA
                 pla
@@ -10112,6 +10116,12 @@ BRK_HANDLER:
         .ENDIF
         .IFDEF BLITTER
                 cli
+
+                ;TODO remove
+                jsr     ShowRegs
+                jsr     StackTrace
+                ;TODO remove^^^
+
                 sep     #$30
 
                 ; BRK vector in native mode stack will contain:
@@ -10121,12 +10131,14 @@ BRK_HANDLER:
                 ;               + 1             Native mode flags
 
                 pla                             ; ignore flags
+
                 pla                             ; pointer
                 sta     DP_BAS_BL_ERRPTR
                 pla
                 sta     DP_BAS_BL_ERRPTR+1
                 pla
                 sta     DP_BAS_BL_ERRPTR+2
+
 
                 ;reset stack etc
                 pea     BLITTER_BASIC_DP
@@ -10147,6 +10159,7 @@ BRK_HANDLER:
                 jsr     call_OSBYTE
                 lda     #OSBYTE_126_ESCAPE_ACK
                 jsr     call_OSBYTE
+
 
                 jsr     HandleBRKfindERL
                 stz     DP_BAS_TRACEFLAG
@@ -12825,7 +12838,10 @@ moduleCallARITHref:
         .ENDIF ;COMMUNICATOR
         .IFDEF BLITTER
 moduleCallARITHref:
-                TODO    "ARITH module call"
+                txa
+                jsr     list_printHexByte
+
+                TODO    "=X ARITH module call"
 
                 .include "bas816new_natshims.asm"
         .ENDIF
