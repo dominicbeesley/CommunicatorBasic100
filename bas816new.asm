@@ -5,8 +5,12 @@
 ; This was taken originally from a Disassembly of Communicator BASIC v100      *
 ;*******************************************************************************
                 .setcpu "65816"
+                .smart
 
-                .include "BAS816new.inc"
+                .include "bas816new.inc"
+        .IFDEF BLITTER
+                .include "bas816new_BLITTER.inc"
+        .ENDIF
 
                 .CODE
 
@@ -15,8 +19,28 @@
 
 ;DEBUG and TODO macros
 
+        .macro DEBUG str
+                .local @DEBUGstraddr, @DEBUGcallit
+                .segment "DEBUG"
+@DEBUGstraddr:  .byte str,0
+@DEBUGcallit:   pha
+                lda     #^@DEBUGstraddr
+                sta     DP_BAS_BL_DEBUGPTR+2
+                lda     #>@DEBUGstraddr
+                sta     DP_BAS_BL_DEBUGPTR+1
+                lda     #<@DEBUGstraddr
+                sta     DP_BAS_BL_DEBUGPTR+0
+                jsr     BL_debug_print
+                pla
+                rts
+                .code
+                jsr     @DEBUGcallit
+        .endmacro
+
         .macro TODO str
-                brk
+                .local @TODOhere
+                DEBUG str
+        @TODOhere:   bra @TODOhere
         .endmacro
 
         .ENDIF
@@ -59,7 +83,7 @@ strCopyright:   .byte   "(C)1986 Acorn"
         .IFDEF BLITTER
                 brl     BlitterStart
 strCopyright:
-                .byte   "65816 BASIC (c) 2020 Dossy",$0a,$0d,$0b                
+                .byte   "65816 BASIC (c) 2020 Dossy",$0a,$0d,$00                
         .ENDIF
 
 
@@ -669,7 +693,11 @@ HELPENV:        php
 
         .IFDEF BLITTER
 BlitterStart:
-                ; make sure we're in native mode
+
+                sei
+                jsr     BLITTER_shims_init
+
+                ; Now enter native mode
                 clc
                 xce
 
@@ -679,17 +707,20 @@ BlitterStart:
 
                 ; TODO: API for assigning DP, for now just set to $1900 in Bank0!
 
-                pea     $1900
+                pea     BLITTER_BASIC_DP
                 pld
 
 
                 tsc
                 sta     DP_stack_save
 
+
+
                 ; 
                 sep     #$30
                 .a8
                 .i8
+
 
         .IFDEF COMMUNICATOR
                 jsr     arith_get_reference             ;Get ARITHMETIC module reference
@@ -810,31 +841,21 @@ BlitterStart:
                 stz     $45
                 stz     $46
 
-; TODO: NATIVE SHIMS
-;;;                lda     #>BRK_HANDLER
-;;;                xba
-;;;                lda     #<BRK_HANDLER
-;;;                phk
-;;;                plb
-;;;                ldx     #_COBRK
-;;;                jsl     _CO
-;;;                bcc     L4E64
-;;;                jsr     L4C14
-;;;                jsr     memFreeDP
-;;;                .a16
-;;;                .i16
-;;;                phk
-;;;                plb
-;;;                lda     #ABRT_CANNOTSETBRK
-;;;                ldx     #$0002
-;;;                sec
-;;;                jsl     _CWT
-;;;                cop     COP_0F_OPERR
-;;;ABRT_CANNOTSETBRK:
-;;;                .byte   "Cannot set BRK handler",$0d,$00
-;;;
-;;;                .a8
-;;;                .i8
+
+                lda     #^BRK_HANDLER
+                sta     f:NATVEC_BRK+2
+                lda     #>BRK_HANDLER
+                sta     f:NATVEC_BRK+1
+                lda     #<BRK_HANDLER
+                sta     f:NATVEC_BRK
+
+                lda     #^strCopyright
+                sta     DP_BAS_BL_ERRPTR+2
+                lda     #>strCopyright
+                sta     DP_BAS_BL_ERRPTR+1
+                lda     #<strCopyright
+                sta     DP_BAS_BL_ERRPTR+0
+
 L4E64:          cli
                 jmp     braNEW2
 
@@ -3566,6 +3587,7 @@ reset_prog_prompt:
                 ldy     DP_BAS_MEMBASE+2
                 sty     DP_BAS_TXTPTR2+2
                 jsr     exec_ERROR_OFF_reset_ERRORPTR
+        .IFDEF COMMUNICATOR
                 lda     DP_BAS_ARG2_FLAG
                 beq     immedPrompt
                 lda     DP_stack_save+1
@@ -3582,8 +3604,15 @@ reset_prog_prompt:
                 ldy     #$01
                 jsr     doOLD
                 brl     doRUN
+        .ENDIF
 
-immedPrompt:    lda     #'>'
+immedPrompt:    
+        .IFDEF COMMUNICATOR
+                lda     #'>'
+        .ELSE
+                ; TODO: debug helper, remove
+                lda     #'#'        
+        .ENDIF
                 jsr     call_OSWRCH
                 jsr     ReadKeysTo_MEMBASE
 runFromTXTPTR:  lda     DP_stack_save+1
@@ -3594,7 +3623,6 @@ runFromTXTPTR:  lda     DP_stack_save+1
                 jsr     tokenizeAndStore
                 bcs     resetVarsImmedPrompt
                 jmp     execImmediateLine
-
 doOSCLIatPTR2:  jsr     parse_updPTRfromPTR2_yield
 
         .IFDEF COMMUNICATOR
@@ -3715,8 +3743,8 @@ skipSpacesAtYExecImmed:
         .IFDEF BLITTER
                 phx
                 phy
-                TODO    "CheckESCape Flag"
-                bra     @_skNoEV               
+                lda     f:MOS_ZP_ESC_FLAG
+                bpl     @_skNoEV               
         .ENDIF
 
 @jmp_brk_11_Escape:
@@ -3741,7 +3769,8 @@ skipSpacesAtYExecImmed:
 ;*******************************************************************************
 ;* A contains a builtin function token, dispatch to the function based on A    *
 ;*******************************************************************************
-evalDispatchFN: asl     A
+evalDispatchFN: 
+                asl     A
                 tax
                 phk
                 lda     tblFnDispatch-27,x
@@ -5317,7 +5346,13 @@ doREPORT:
                 rts
         .ENDIF
         .IFDEF BLITTER
-                TODO    "REPORT"
+                ldy     #0
+@lp:            lda     [DP_BAS_BL_ERRPTR],y
+                beq     @sk
+                jsr     doListPrintTokenA
+                iny
+                bra     @lp
+@sk:            rts
         .ENDIF
 
 exec_VDU_hibyte:
@@ -6089,7 +6124,10 @@ parse_yield:
                 rts
         .ENDIF
         .IFDEF BLITTER
-                TODO    "yield CHECK FOR ESCAPE"
+                lda     f:MOS_ZP_ESC_FLAG
+                bpl     @sknoesc
+                brl     brk_11_Escape
+@sknoesc:       rts
         .ENDIF
 
 ackESCThenDoSomethingWithatHELP:
@@ -8541,7 +8579,7 @@ exec_POINT:     jsr     evalAtYcheckTypeInAConvert2INT
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF BLITTER
-                TODO    "OSWORD_point"
+                TODO    "WRDp"
         .ENDIF
                 lda     DP_FPA_sgn
                 bmi     exec_TRUE
@@ -9003,8 +9041,9 @@ exec_ERR:
                 plx
         .ENDIF
         .IFDEF BLITTER
-                TODO    "ERR"
+                lda     DP_BAS_BL_ERRNO
         .ENDIF
+
                 bra     retA_8bit_INT
 
 exec_GET:       jsr     call_OSRDCH
@@ -9014,14 +9053,22 @@ exec_TIME:      iny
                 lda     [DP_BAS_TXTPTR],y
                 cmp     #'$'
                 beq     exec_TIMEdollar
+        .IFDEF COMMUNICATOR
                 ldx     #DP_BAS_INT_WA
                 ldy     #>DP_BAS_INT_WA
                 lda     #OSWORD_1_READTIME
-        .IFDEF COMMUNICATOR
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF BLITTER
-                TODO    "OSWORD_TIME"
+                ldx     #<BANK0_OSWORD_BLOCK
+                ldy     #>BANK0_OSWORD_BLOCK
+                lda     #OSWORD_1_READTIME
+                jsl     nat_OSWORD
+                ldx     #3
+@lp:            lda     f:BANK0_OSWORD_BLOCK,X
+                sta     DP_BAS_INT_WA,X
+                dex
+                bpl     @lp
         .ENDIF
                 lda     #RETV_INT
                 rts
@@ -10064,7 +10111,47 @@ BRK_HANDLER:
 @sk:            
         .ENDIF
         .IFDEF BLITTER
-                TODO    "BRK_HANDLER"
+                cli
+                sep     #$30
+
+                ; BRK vector in native mode stack will contain:
+                ;               + 4             Program bank
+                ;               + 3             PCH
+                ;               + 2             PCL
+                ;               + 1             Native mode flags
+
+                pla                             ; ignore flags
+                pla                             ; pointer
+                sta     DP_BAS_BL_ERRPTR
+                pla
+                sta     DP_BAS_BL_ERRPTR+1
+                pla
+                sta     DP_BAS_BL_ERRPTR+2
+
+                ;reset stack etc
+                pea     BLITTER_BASIC_DP
+                pld
+                phk
+                plb
+
+                stz     DP_BAS_SET_TO_Z_AT_EOS
+                lda     DP_stack_save+1
+                xba
+                lda     DP_stack_save
+                tcs
+                ldx     #$ff
+                stx     DP_BAS_OPT
+                inx
+                ldy     #$00
+                lda     #OSBYTE_222_RW_VDUQLEN
+                jsr     call_OSBYTE
+                lda     #OSBYTE_126_ESCAPE_ACK
+                jsr     call_OSBYTE
+
+                jsr     HandleBRKfindERL
+                stz     DP_BAS_TRACEFLAG
+
+
         .ENDIF
                 lda     DP_BAS_ONERRORPTR
                 sta     DP_BAS_TXTPTR2
@@ -10090,7 +10177,7 @@ exec_ERROR_OFF_reset_ERRORPTR:
                 sta     DP_BAS_ONERRORPTR+2
                 rts
 
-ONERROROFF:     phk
+ONERROROFF:     phk                                     ;; TODO: this assumes K<>here for BASIC which might not be true on blitter!?
                 pla
                 cmp     DP_BAS_ONERRORPTR+2
                 bne     @rts
@@ -11394,6 +11481,7 @@ exec_REPEAT:    ldx     DP_BAS_REPEAT_LVL
                 sty     DP_BAS_REPEAT_LVL
                 jmp     skipSpacesExecImmed
 
+        .IFDEF COMMUNICATOR
 ReadKeysTo_InBuf:
                 lda     DP_BAS_STRWKSP_L+2
                 phb
@@ -11416,21 +11504,18 @@ L95C9:          sta     DP_BAS_TMP6+1
                 stz     DP_BAS_TMP6+3
                 lda     #$ee                            ;max char value
                 sta     DP_BAS_TMP6+4
-                stz     DB_BAS_UNK_5A_6
+                stz     DP_BAS_TMP6+5
 
-        .IFDEF COMMUNICATOR
                 lda     #$20
                 tsb     DP_BAS_CO_FLAGS
                 bne     @L95E0
-        .ENDIF
-                stz     DB_BAS_UNK_5A_6+1
-                stz     DP_FPB_sgn
-@L95E0:         stz     DB_BAS_UNK_5A_6+3
-                stz     DP_FPB_exp
-                stz     DP_FPB_mant
-                stz     DP_FPB_mant+1
+                stz     DP_BAS_TMP6+6
+                stz     DP_BAS_TMP6+7
+@L95E0:         stz     DP_BAS_TMP6+8
+                stz     DP_BAS_TMP6+9
+                stz     DP_BAS_TMP6+10
+                stz     DP_BAS_TMP6+11
 @L95E8:         
-        .IFDEF COMMUNICATOR
                 lda     #>DP_BAS_TMP6
                 xba
                 lda     #DP_BAS_TMP6
@@ -11458,19 +11543,70 @@ L95C9:          sta     DP_BAS_TMP6+1
 @L9613:         phb
                 bra     @L95E8
 
-brl_brk_11_Escape:
-                brl     brk_11_Escape
         .ENDIF
         .IFDEF BLITTER
-                TODO    "OSWORD 0"
+
+ReadKeysTo_InBuf:
+                jsr     BL_doOSWORD0
+                phy
+                ;TODO use TFM?
+                tyx
+@lp:            lda     f:BANK0_SCRATCH_PAGE,X
+                sta     [DP_BAS_STRWKSP_L],Y
+                dex
+                dey
+                cpy     #$FF
+                bne     @lp
+                bra     L9619
+
+
+ReadKeysTo_MEMBASE:
+                jsr     BL_doOSWORD0
+                phy
+                tyx
+@lp:            lda     f:BANK0_SCRATCH_PAGE,X
+                sta     [DP_BAS_MEMBASE],Y
+                dex
+                dey
+                cpy     #$FF
+                bne     @lp
+                bra     L9619
+
+
+BL_doOSWORD0:
+                ;TODO: consider moving the immediate buffer to Bank 0?
+                lda     #<BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK
+                lda     #>BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK+1
+                lda     #$FF
+                sta     f:BANK0_OSWORD_BLOCK+2    ; len
+                lda     #' '
+                sta     f:BANK0_OSWORD_BLOCK+3    ; min char
+                lda     #$EE
+                sta     f:BANK0_OSWORD_BLOCK+4    ; max char
+
+                ldx     #<BANK0_OSWORD_BLOCK
+                ldy     #>BANK0_OSWORD_BLOCK
+                lda     #0
+                jsl     nat_OSWORD
+                bcs     brl_brk_11_Escape
+                rts
+
         .ENDIF
+brl_brk_11_Escape:
+                brl     brk_11_Escape
+
 
 L9619:          stz     DP_BAS_COUNT
         .IFDEF COMMUNICATOR
                 lda     #$20
                 trb     DP_BAS_CO_FLAGS
+                ldy     DP_BAS_TMP6+6
         .ENDIF
-                ldy     DB_BAS_UNK_5A_6+1
+        .IFDEF BLITTER
+                ply
+        .ENDIF
                 lda     #RETV_STR
                 rts
 
@@ -12197,7 +12333,9 @@ printBadProgram:
                 jsr     printStringAfter
                 .byte   $0d,"Bad program",$0d
                 nop
+        .IFDEF COMMUNICATOR
                 stz     DP_BAS_ARG2_FLAG
+        .ENDIF
                 jmp     reset_prog_prompt
 
 jmp_brk06_type_mismatch2:
@@ -12496,7 +12634,8 @@ cop_OSWORD:     cop     COP_07_OPOSW
         .ENDIF
         .IFDEF BLITTER
 call_OSBYTE:
-                TODO "call_OSBYTE"
+                jsl     nat_OSBYTE
+                rts
         .ENDIF
 
 printCRLF:      lda     #$0a                            ;;TODO OSNEWL instead?
@@ -12544,7 +12683,10 @@ call_OSWRCH:
                 rts
         .ENDIF
         .IFDEF BLITTER
-                TODO    "OSWRCH"
+
+                jsl     nat_OSWRCH                      ;TODO: check and use EQUate?                
+                rts
+
         .ENDIF
 
                 pha                                     ;TODO: dead code?
@@ -12684,4 +12826,8 @@ moduleCallARITHref:
         .IFDEF BLITTER
 moduleCallARITHref:
                 TODO    "ARITH module call"
+
+                .include "bas816new_natshims.asm"
         .ENDIF
+
+
