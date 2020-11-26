@@ -298,7 +298,7 @@ L4C6B:          pea     DP_BAS_00_REAL_UK
                 plb
                 ldx     #DP_BAS_MEMSIZE
                 ldy     #$0006
-                cop     COP_OPRLH                       ;Parse HEX string
+                cop     COP_18_OPRLH                    ;Parse HEX string
                 phb
                 pha
                 sep     #$30
@@ -371,7 +371,7 @@ memOnPage:      stz     DP_BAS_ARG2_FLAG
                 plb
                 ldx     #DP_BAS_ARG2
                 ldy     #$0006
-                cop     COP_OPRLH
+                cop     COP_18_OPRLH
                 sep     #$30
                 .a8
                 .i8
@@ -5112,7 +5112,7 @@ eval_real2INT:  php
                 phb
                 jsr     stack_REAL
                 jsr     BHAeqDP_BAS_STACKptr
-                ldx     #FN_ARITH_INT
+                ldx     #ARITH_FN_INT
                 phk
                 jsr     moduleCallARITHref
                 jsr     DP_BAS_STACKptreqBHA
@@ -8329,7 +8329,7 @@ callOSBGET:
                 phx
                 rep     #$10
                 ldy     DP_BAS_INT_WA
-                cop     COP_OSBGT
+                cop     COP_0A_OPBGT
                 jsr     setREPORT_BHA_Cy
                 sep     #$10
                 plx
@@ -11107,7 +11107,7 @@ callOSBGET_2:
                 rep     #$10
                 .i16
                 ldy     DP_BAS_CURCHAN
-                cop     COP_OSBGT
+                cop     COP_0A_OPBGT
                 jsr     setREPORT_BHA_Cy
                 sep     #$10
                 .i8

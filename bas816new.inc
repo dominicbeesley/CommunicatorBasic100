@@ -12,55 +12,7 @@ BLITTER_BASIC_DP	:=	$1900
 
 	.IFDEF COMMUNICATOR
 
-_CCO            =       $ff94                           ;Call coroutine
-_CKREAD         =       6
-_CO             =       $ff90
-_COBRK          =       $0c
-_COCRE          =       2
-_CODEL          =       6                               ;Delete a coroutine
-_COENV          =       4
-_CWT            =       $ff98
-_EV             =       $ffb0
-_MM             =       $ff8c
-_MMALA          =       $0c                             ;Allocate large ascending
-_ST             =       $ff88
-_STBMB          =       $20                             ;?
-_STSBK          =       $14                             ;Get BRK signature
-_STTBK          =       $16                             ;Get BRK text
-
-COP_00_OPWRC    =       0
-COP_02_OPWRA    =       $02
-COP_03_OPNLI    =       $03
-COP_04_OPRDC    =       4
-COP_06_OPOSB    =       $06
-COP_07_OPOSW    =       7
-COP_0B_OPBPT    =       $0b
-COP_0E_OPCOM    =       $0e
-COP_0F_OPERR    =       $0f
-COP_11_OPADF    =       $11                             ;Allocate a DP
-COP_16_OPAEV    =       $16
-COP_1A_OPFZB    =       $1a
-COP_21_OPPRE    =       $21
-COP_22_OPRLN    =       $22
-COP_24_OPCVD    =       $24                             ;Convert direct page ptr to long pointer
-COP_26_OPBHA    =       $26                             ;Get string banked address
-COP_28_OPCMD    =       $28                             ;Call module inline name
-COP_29_OPRFR    =       $29
-COP_2C_OPFMA    =       $2c
-COP_2E_OPFPO    =       $2e                             ;Find pool owner
-COP_44_OPOPN    =       $44
-COP_45_OPCLS    =       $45
-COP_46_OPEND    =       $46
-COP_4E_OPLOD    =       $4e
-COP_4F_OPSAV    =       $4f
-COP_54_OPRSP    =       $54                             ;Get PTR#
-COP_55_OPWSP    =       $55
-COP_57_OPRLL    =       $57                             ;Get EXT#
-COP_58_OPWLL    =       $58                             ;Set EXT#
-COP_5D_OPSTAR   =       $5d                             ;OSCLI?
-COP_61_OPERC    =       $61                             ;Convert error number to string
-COP_OPRLH       =       $18
-COP_OSBGT       =       $0a                             ;Call OSBGET
+	.include "names.inc"
 
 	.ENDIF ;COMMUNICATOR
 
@@ -69,19 +21,19 @@ COP_OSBGT       =       $0a                             ;Call OSBGET
 ;=========================================================================
 
 ARITH_FN_0C_UK  =       $0c
+ARITH_FN_POWER  =       $10
+ARITH_FN_SIN    =       $12
+ARITH_FN_COS    =       $14
+ARITH_FN_TAN    =       $16
 ARITH_FN_ACS    =       $18
 ARITH_FN_ASN    =       $1a
 ARITH_FN_ATN    =       $1c
-ARITH_FN_COS    =       $14
 ARITH_FN_DEG    =       $1e
-ARITH_FN_EXP    =       $26
-ARITH_FN_LN     =       $24
-ARITH_FN_LOG    =       $22
-ARITH_FN_POWER  =       $10
 ARITH_FN_RAD    =       $20
-ARITH_FN_SIN    =       $12
+ARITH_FN_LOG    =       $22
+ARITH_FN_LN     =       $24
+ARITH_FN_EXP    =       $26
 ARITH_FN_SQR    =       $28
-ARITH_FN_TAN    =       $16
 FN_ARITH_INT    =       $30
 
 ;=========================================================================
