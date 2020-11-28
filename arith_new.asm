@@ -1,10 +1,18 @@
 ; Target assembler: cc65 v2.18.0 [--target none -C ARITH100.bin_cc65.cfg]
 ; 6502bench SourceGen v1.7.3
                 .setcpu "65816"
-_HDMMT          =       2                               ;Task Memory Pool Handle
-_MMASA          =       $0a                             ;Allocate Small Ascending
-COP_0F_OPERR    =       $0f                             ;Throw an error
-COP_10_OPADP    =       $10                             ;Allocate Direct Page, followed by 2-byte inline size
+
+                .include "names.inc"
+
+        .IFDEF BLITTER
+
+                .include        "bas816new_BLITTER.inc"
+
+                .export         arith_enter
+                .export         arith_init
+
+        .ENDIF
+
 RETV_INT        =       $40
 RETV_REAL       =       $ff
 
@@ -27,10 +35,9 @@ DP_75_QRY       =       $75
 DP_7A_QRY       =       $7a
 DP_7F_QRY       =       $7f
 DP_ART_WKSPptr  =       $84                             ;Pointer to Private Workspace
-_MM             =       $ff8c                           ;Memory Management
 
-;                .segment "SEG000"
-                .org    $af00
+        .IFDEF COMMUNICATOR
+                .CODE
                 .a16
                 .i16
                 brl     jmpServ
@@ -47,6 +54,10 @@ _MM             =       $ff8c                           ;Memory Management
                 .byte   $00
 
 jmpServ:        brl     ServiceHandler
+        .ENDIF
+        .IFDEF BLITTER
+                .SEGMENT "ARITHCODE"
+        .ENDIF
 
 fpConst_MinPiDiv2:
                 .byte   $81,$c9,$10,$00,$00             ;-PI/2
@@ -181,33 +192,35 @@ fpConst_1_2:    .byte   $81,$00,$00,$00,$00             ;TODO: remove?
                 .byte   $9f,$bc,$e3,$bc,$55
                 .byte   $38                             ;TODO: reove?
 tblDispatchFN:  .word   $0000                           ;0
-                .word   do_FNnul
-                .word   do_FNintADD
-                .word   do_FNintSUB
-                .word   do_FNINTnegate                  ;8
-                .word   do_FNint16mulint32
-                .word   do_FNmul
-                .word   do_FNdiv
-                .word   do_FNpow                        ;16
-                .word   do_FNsin
-                .word   do_FNcos
-                .word   do_FNtan
-                .word   do_FNacs                        ;24
-                .word   do_FNasn
-                .word   do_FNatn
-                .word   do_FNdeg
-                .word   do_FNrad                        ;32
-                .word   do_FNlog
-                .word   do_FNln
-                .word   do_FNexp
-                .word   do_FNsqr                        ;40
-                .word   do_FNsub
-                .word   do_FNcompare
-                .word   do_FNYtoreal
-                .word   do_FNint                        ;48
-                .word   do_FN_addYtomant7thenRound
-                .word   do_FNint2real
+                .word   .LOWORD(do_FNnul)
+                .word   .LOWORD(do_FNintADD)
+                .word   .LOWORD(do_FNintSUB)
+                .word   .LOWORD(do_FNINTnegate)                  ;8
+                .word   .LOWORD(do_FNint16mulint32)
+                .word   .LOWORD(do_FNmul)
+                .word   .LOWORD(do_FNdiv)
+                .word   .LOWORD(do_FNpow)                        ;16
+                .word   .LOWORD(do_FNsin)
+                .word   .LOWORD(do_FNcos)
+                .word   .LOWORD(do_FNtan)
+                .word   .LOWORD(do_FNacs)                        ;24
+                .word   .LOWORD(do_FNasn)
+                .word   .LOWORD(do_FNatn)
+                .word   .LOWORD(do_FNdeg)
+                .word   .LOWORD(do_FNrad)                        ;32
+                .word   .LOWORD(do_FNlog)
+                .word   .LOWORD(do_FNln)
+                .word   .LOWORD(do_FNexp)
+                .word   .LOWORD(do_FNsqr)                        ;40
+                .word   .LOWORD(do_FNsub)
+                .word   .LOWORD(do_FNcompare)
+                .word   .LOWORD(do_FNYtoreal)
+                .word   .LOWORD(do_FNint)                        ;48
+                .word   .LOWORD(do_FN_addYtomant7thenRound)
+                .word   .LOWORD(do_FNint2real)
+tblDispatchFN_size := *-tblDispatchFN
 
+        .IFDEF COMMUNICATOR
 ServiceHandler: pld
                 phd
                 pei     ($04)
@@ -229,7 +242,7 @@ ServiceHandler: pld
                 bcc     @skok2
                 brl     brk_42_BadFN
 
-@skok2:         jsr     BHAtoPtrA
+@skok2:         jsr     PtrAeqBHA
                 lda     $06,S
                 xba
                 lda     $05,S
@@ -240,7 +253,7 @@ ServiceHandler: pld
                 jsr     clrFPA
                 phk
                 jsr     clrFPB
-                jsr     (tblDispatchFN,x)
+                jsr     (.LOWORD(tblDispatchFN),x)
                 lda     DP_ART_PtrA
                 pha
                 lda     DP_ART_PtrA+1
@@ -259,9 +272,12 @@ ServiceHandler: pld
 @plpclcrtl:     plp
                 clc
                 rtl
+        .ENDIF ; COMMUNICATOR
 
 do_FNnul:       clc
                 rts
+
+        .IFDEF COMMUNICATOR
 
 AllocNewDP:     sep     #$30
                 phb
@@ -310,6 +326,116 @@ throwMemAlloc:  cop     COP_0F_OPERR
                 .asciiz "Memory allocation failure for Arithmetic package"
 throwDPAlloc:   cop     COP_0F_OPERR
                 .asciiz "Direct page allocation failure for Arithmetic package"
+
+        .ENDIF ; COMMUNICATOR
+
+        .IFDEF BLITTER
+
+                ; set up DP pointers etc
+arith_init:     
+                phd
+                pea     BLITTER_ARITH_DP
+                pld
+
+                lda     #<BLITTER_ARITH_WKSPC
+                sta     DP_ART_WKSPptr
+                lda     #>BLITTER_ARITH_WKSPC
+                sta     DP_ART_WKSPptr+1
+                lda     #^BLITTER_ARITH_WKSPC
+                sta     DP_ART_WKSPptr+2                
+
+                pld
+                rts
+
+
+arith_enter:
+                php
+                phd
+                
+                sep     #$30
+                .a8
+                .i8
+
+                phb
+                pha
+                xba
+                pha
+                phx
+                phy
+
+                .import list_printHexByte
+                .import printStringAfter
+                .import call_OSWRCH
+
+                phk
+                plb
+;                jsr     printStringAfter
+;                .byte   "ARITH:"
+;                nop
+;                lda     2,S
+;                jsr     list_printHexByte
+;                lda     #13
+;                jsr     call_OSWRCH
+;                lda     #10
+;                jsr     call_OSWRCH
+
+                ply
+                plx
+                pla
+                xba
+                pla
+                plb
+
+                pea     BLITTER_ARITH_DP
+                pld
+
+
+@sk:            pha
+                txa
+                ror     A
+                pla
+                bcc     @skok1
+                brl     brk_42_BadFN
+
+@skok1:         cpx     #tblDispatchFN_size
+                bcc     @skok2
+                brl     brk_42_BadFN
+
+
+@skok2:
+
+                jsr     PtrAeqBHA
+                phk
+                plb
+                phk
+                phk
+                jsr     clrFPA
+                phk
+                jsr     clrFPB
+                jsr     (.LOWORD(tblDispatchFN),x)
+                lda     DP_ART_PtrA
+                pha
+                lda     DP_ART_PtrA+1
+                pha
+                lda     DP_ART_PtrA+2
+                pha
+                plb
+                pla
+                xba
+                pla
+                pld
+                bcc     @plpclcrtl
+                plp
+                sec
+                rtl
+
+@plpclcrtl:     plp
+                clc
+                rtl
+
+        .ENDIF ; BLITTER
+
+
 do_FNintADD:    jsr     copyWKSPtoPtrB
                 ldy     #$07
                 jsr     copyYpl1PtrAtoPtrB
@@ -576,7 +702,7 @@ do_FNint2real:  jsr     ptrBpointAtDP_INTA
                 jsr     ptrAdec5packFPAtoPtrA
                 rtl
 
-BHAtoPtrA:      pha
+PtrAeqBHA:      pha
                 xba
                 pha
                 phb
@@ -623,16 +749,32 @@ addAtoPtrA:     clc
                 sta     DP_ART_PtrA+2
                 rts
 
+        .IFDEF BUGFIX
+subAminusAfromPtrA:
+                clc
+                adc     DP_ART_PtrA
+                sta     DP_ART_PtrA
+                bcs     @Sk
+                lda     #$FF
+                adc     DP_ART_PtrA+1
+                sta     DP_ART_PtrA+1
+                lda     #$FF
+                adc     DP_ART_PtrA+2
+                sta     DP_ART_PtrA+2
+
+@Sk:            rts
+        .ELSE
 subAminusAfromPtrA:
                 clc
                 adc     DP_ART_PtrA
                 sta     DP_ART_PtrA
                 bcs     @Sk
                 dec     DP_ART_PtrA+1
-                bcc     @Sk                             ;TODO: bug!
+                bcc     @Sk                             ;This is a BUG!
 
                 dec     DP_ART_PtrA+2
 @Sk:            rts
+        .ENDIF
 
 ptrAdec5packFPAtoPtrA:
                 sec                                     ;TODO: optimize this crap?
@@ -2242,9 +2384,15 @@ PtrAinc4:       clc
                 adc     DP_ART_PtrA
                 sta     DP_ART_PtrA
                 bcc     @rtl
-                inc     DP_ART_PtrA+1
+        .IFDEF BUGFIX
+                inc     DP_ART_PtrA+1                   ; TODO: BUG!
+                bne     @rtl
+                inc     DP_ART_PtrA+2
+        .ELSE
+                inc     DP_ART_PtrA+1                   ; TODO: BUG!
                 bcc     @rtl
                 inc     DP_ART_PtrA+2
+        .ENDIF
 @rtl:           rtl
 
                 ldx     #$41                            ;TODO: DEAD CODE

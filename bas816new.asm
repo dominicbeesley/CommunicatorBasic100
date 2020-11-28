@@ -10,12 +10,23 @@
                 .include "bas816new.inc"
         .IFDEF BLITTER
                 .include "bas816new_BLITTER.inc"
+
+                .export list_printHexByte
+                .export printStringAfter
+                .export call_OSWRCH
+
+                .import arith_enter
+                .import arith_init
+moduleCallARITHref = arith_enter
+                
         .ENDIF
 
                 .CODE
 
 
         .IFDEF BLITTER
+
+
 
 ;DEBUG and TODO macros
 
@@ -749,16 +760,18 @@ BlitterStart:
 
 
                 ; TODO get this using OSWORD 99?
-                lda     #0
+                lda     #<BLITTER_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE
+                lda     #>BLITTER_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE+1
-                lda     #08
+                lda     #^BLITTER_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE+2
 
-                lda     #0
+                lda     #<BLITTER_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE
+                lda     #>BLITTER_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE+1
-                lda     #02
+                lda     #^BLITTER_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE+2
 
 
@@ -856,7 +869,9 @@ BlitterStart:
                 lda     #<strCopyright
                 sta     DP_BAS_BL_ERRPTR+0
 
-L4E64:          cli
+                jsr     arith_init
+
+                cli
                 jmp     braNEW2
 
 
@@ -8050,7 +8065,7 @@ call_ARITH:     phb
                 jsr     stack_REAL
                 ply
                 plx
-                jsr     BHAeqDP_BAS_STACKptr
+                jsr     BHAeqDP_BAS_STACKptr               
                 phk
                 jsr     moduleCallARITHref
                 jsr     DP_BAS_STACKptreqBHA
@@ -10124,6 +10139,9 @@ BRK_HANDLER:
 
                 sep     #$30
 
+                pea     BLITTER_BASIC_DP
+                pld
+
                 ; BRK vector in native mode stack will contain:
                 ;               + 4             Program bank
                 ;               + 3             PCH
@@ -10890,11 +10908,11 @@ exec_RETURN:    jsr     parse_nextstmt_yield_TXTOFF2
                 jsl     _CWT
                 phk
                 plb
-        .ENDIF
-        ;TODO: optimize for bliiter with jmp?
                 jmp     continue
+@sk:
+        .ENDIF
 
-@sk:            ldy     DP_BAS_GOSUB_LVL
+                ldy     DP_BAS_GOSUB_LVL
                 beq     brk_26_NoGOSUB
                 dey
                 lda     [DP_BAS_GOSUB_STACKBASE],y
@@ -12837,11 +12855,6 @@ moduleCallARITHref:
                 .byte   $ff
         .ENDIF ;COMMUNICATOR
         .IFDEF BLITTER
-moduleCallARITHref:
-                txa
-                jsr     list_printHexByte
-
-                TODO    "=X ARITH module call"
 
                 .include "bas816new_natshims.asm"
         .ENDIF

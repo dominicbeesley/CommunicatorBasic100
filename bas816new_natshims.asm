@@ -14,6 +14,27 @@ HWVEC_6502_IRQ  := $00FFFE
 		.assert __SHIMS_SIZE__ <= $100, error, "SHIMS size must be <=$100"
 		.assert __NATVEC_SIZE__ = $10, error, "NATVEC size must be $10"
 
+debug_hex_byte:
+		.a8
+		.i8
+
+                pha
+                lsr     A
+                lsr     A
+                lsr     A
+                lsr     A
+                jsr     @nyb
+                pla
+                and     #$0f
+@nyb:
+                cmp     #$0a
+                bcc     @dig
+                adc     #$06
+@dig:
+                adc     #'0'
+                jmp     call_OSWRCH
+
+
 BL_debug_print:
 		lda	[DP_BAS_BL_DEBUGPTR]
 		beq	@sk
@@ -45,7 +66,6 @@ ShowRegs:	php				; save entry flags
                 ;		+ 2		Caller retL
                 ;               + 1             Entry flags
 
-		sta	DP_BAS_BL_DEBUGPTR	; save flags
 		rep	#$30
 		.a16
 		.i16
@@ -54,6 +74,9 @@ ShowRegs:	php				; save entry flags
 		phy
 		phx
 		pha
+
+		pea	BLITTER_BASIC_DP
+		pld
 
                 ;               + 16            Program bank
                 ;               + 15            PCH
@@ -76,7 +99,7 @@ ShowRegs:	php				; save entry flags
 		.byte	13,10,"Flags="
 		nop
 		lda	13,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	#'='
 		jsr	call_OSWRCH
 		ldx	#7
@@ -100,50 +123,59 @@ ShowRegs:	php				; save entry flags
 		xba
 		bcc	@sk1
 		inc	A
-@sk1:		jsr	list_printHexByte
+@sk1:		jsr	debug_hex_byte
 		tsc
 		clc
 		adc	#16
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 
 		jsr	printStringAfter		
 		.byte	", PC="
 		nop
 		lda	16,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	15,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	14,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 
 		jsr	printStringAfter		
 		.byte	", B="
 		nop
 		lda	9,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
+
+		jsr	printStringAfter		
+		.byte	", DP="
+		nop
+		lda	8,S
+		jsr	debug_hex_byte
+		lda	7,S
+		jsr	debug_hex_byte
+
 
 		jsr	printCRLF
 
 		jsr	printStringAfter
 		.byte	"A="
 		lda	2,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	1,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 
 		jsr	printStringAfter
 		.byte	", X="
 		lda	3,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	4,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 
 		jsr	printStringAfter
 		.byte	", Y="
 		lda	5,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 		lda	6,S
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 
 		jsr	printCRLF
 
@@ -168,14 +200,43 @@ FlagNames:	.byte	"czidxmvn" 		; backwards nvmxdizc
                 ;               + 3             Native mode flags
                 ;		+ 2		Caller retH
                 ;		+ 1		Caller retL
-StackTrace:	sep	#$30
+StackTrace:	php
+		rep	#$30
+		.a16
+		.i16
+		phd
+		pha
+		phx
+		phy
+
+		; 
+		; we assume stack looks like a native interrupt i.e.
+                ;               + 15            Program bank
+                ;               + 14            PCH
+                ;               + 13            PCL
+                ;               + 12            Native mode flags
+                ;		+ 11		Caller retH
+                ;		+ 10		Caller retL
+
+                ;		+ 9		Flags
+                ;		+ 7		DP
+                ;		+ 5		A
+                ;		+ 3		X
+                ;		+ 1		Y
+
+
+		sep	#$30
 		.a8
 		.i8
+
+		pea	BLITTER_BASIC_DP
+		pld
+
 		; assume 8 bit stack!
 		tsx
 		txa
 		clc
-		adc	#7			; skip stack crud
+		adc	#16			; skip stack crud
 		sta	DP_BAS_BL_DEBUGPTR	; store stack start
 		and	#$F8
 		tax
@@ -186,18 +247,30 @@ StackTrace:	sep	#$30
 		lda	#'1'			; assumes page 1 stack!
 		jsr	call_OSWRCH
 		txa
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 @sk0:		jsr	@spc
 
 		cpx	DP_BAS_BL_DEBUGPTR
 		bcc	@nop
 
 		lda	f:$000100,X
-		jsr	list_printHexByte
+		jsr	debug_hex_byte
 @sk1:		inx
 		bne	@lp0
 		jsr	printCRLF
+
+		rep	#$30
+		.a16
+		.i16
+		ply
+		plx
+		pla
+		pld
+		plp
 		rts
+
+		.a8
+		.i8
 
 @nop:		jsr	@spc2
 		bra	@sk1
@@ -207,10 +280,10 @@ StackTrace:	sep	#$30
 @spc:		lda	#' '
 		jmp	call_OSWRCH
 
-
-
-
 BLITTER_shims_init:
+		; we're entering in 8bit emulation mode
+		.a8
+		.i8
 
 		php
 		sei
@@ -219,9 +292,6 @@ BLITTER_shims_init:
 		phy
 		plb
 
-		; we're entering in 8bit emulation mode
-		.a8
-		.i8
 
 		lda	zp_mos_jimdevsave
 		pha
@@ -231,12 +301,19 @@ BLITTER_shims_init:
 		sta	zp_mos_jimdevsave
 		sta	fred_JIM_DEVNO
 
+
 		; copy shims to sys memory
 
-
-
 ;		lda	#^__SHIMS_RUN__
+		; check whether the page we're using is BLTURBO'd
+		lda	sheila_MEM_LOMEMTURBO
+		and	#1<<(>__SHIMS_RUN__ >> 4)
+		php
+		lda	#0
+		plp
+		bne	@skturbo
 		lda	#$FF				; force SYS bank (actually bank 0 logical)
+@skturbo:
 		sta	fred_JIM_PAGE_HI
 		lda	#>__SHIMS_RUN__
 		sta	fred_JIM_PAGE_LO
