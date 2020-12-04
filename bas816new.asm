@@ -10,7 +10,13 @@
                 .include "bas816new.inc"
         .IFDEF BLITTER
                 .include "bas816new_BLITTER.inc"
+        .ENDIF
 
+        .IFDEF BEEB816
+                .include "bas816new_BEEB816.inc"
+        .ENDIF
+
+        .IFDEF MOS
                 .export list_printHexByte
                 .export printStringAfter
                 .export call_OSWRCH
@@ -24,7 +30,7 @@ moduleCallARITHref = arith_enter
                 .CODE
 
 
-        .IFDEF BLITTER
+        .IFDEF MOS
 
 
 
@@ -91,8 +97,8 @@ strCopyright:   .byte   "(C)1986 Acorn"
                 .byte   $4b
         .ENDIF
 
-        .IFDEF BLITTER
-                brl     BlitterStart
+        .IFDEF MOS
+                brl     MOSStart
 strCopyright:
                 .byte   "65816 BASIC (c) 2020 Dossy",$0a,$0d,$00                
         .ENDIF
@@ -702,11 +708,11 @@ HELPENV:        php
                 rts
         .ENDIF ;COMMUNICATOR ; end of communicator module handlers
 
-        .IFDEF BLITTER
-BlitterStart:
+        .IFDEF MOS
+MOSStart:
 
                 sei
-                jsr     BLITTER_shims_init
+                jsr     MOS_shims_init
 
                 ; Now enter native mode
                 clc
@@ -718,7 +724,7 @@ BlitterStart:
 
                 ; TODO: API for assigning DP, for now just set to $1900 in Bank0!
 
-                pea     BLITTER_BASIC_DP
+                pea     MOS_BASIC_DP
                 pld
 
 
@@ -760,18 +766,18 @@ BlitterStart:
 
 
                 ; TODO get this using OSWORD 99?
-                lda     #<BLITTER_BASIC_MEMSZ
+                lda     #<MOS_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE
-                lda     #>BLITTER_BASIC_MEMSZ
+                lda     #>MOS_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE+1
-                lda     #^BLITTER_BASIC_MEMSZ
+                lda     #^MOS_BASIC_MEMSZ
                 sta     DP_BAS_MEMSIZE+2
 
-                lda     #<BLITTER_BASIC_MEMBASE
+                lda     #<MOS_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE
-                lda     #>BLITTER_BASIC_MEMBASE
+                lda     #>MOS_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE+1
-                lda     #^BLITTER_BASIC_MEMBASE
+                lda     #^MOS_BASIC_MEMBASE
                 sta     DP_BAS_MEMBASE+2
 
 
@@ -3758,8 +3764,8 @@ doOSCLIatPTR2:  jsr     parse_updPTRfromPTR2_yield
 @skok:          sep     #$30
                 plb
         .ENDIF ;COMMUNICATOR
-        .IFDEF BLITTER
-                TODO "BLITTER: OSCLI"
+        .IFDEF MOS
+                TODO "MOS: OSCLI"
         .ENDIF
 parse_skip_EOL: lda     #$0d
                 ldy     DP_BAS_TXTPTR2_OFF
@@ -3852,7 +3858,7 @@ skipSpacesAtYExecImmed:
                 cop     COP_16_OPAEV
                 bra     @_skNoEV
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 phx
                 phy
                 lda     f:MOS_ZP_ESC_FLAG
@@ -4154,7 +4160,7 @@ BPUT_A_to_CURCHAN:
                 plx
                 plb
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSBPUT"
         .ENDIF
                 rts
@@ -5115,7 +5121,7 @@ PAGEset_int:
                 sta     DP_BAS_PAGE+2
                 sta     [DP_BAS_SPECIAL_VARSptr],y
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 lda     DP_BAS_INT_WA
                 sta     DP_BAS_PAGE
 
@@ -5187,7 +5193,7 @@ exec_TIMEdollar_set:
                 phk
                 plb
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "CLOCK"
         .ENDIF
                 jmp     continue
@@ -5457,7 +5463,7 @@ doREPORT:
 @skDone:        plx
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 ldy     #0
 @lp:            lda     [DP_BAS_BL_ERRPTR],y
                 beq     @sk
@@ -6235,7 +6241,7 @@ parse_yield:
 @ev3sk:         plx
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 lda     f:MOS_ZP_ESC_FLAG
                 bpl     @sknoesc
                 brl     brk_11_Escape
@@ -6245,7 +6251,7 @@ parse_yield:
 ackESCThenDoSomethingWithatHELP:
                 lda     #OSBYTE_126_ESCAPE_ACK
                 jsr     call_OSBYTE
-        .IFDEF BLITTER
+        .IFDEF MOS
                 sec
                 rts
         .ENDIF
@@ -8392,7 +8398,7 @@ exec_EXT:       jsr     parse_handleY_WAeqmin1_HAptWA
                 cop     COP_57_OPRLL
                 bra     reportBHACy_retRETV_INT
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO "EXT"
         .ENDIF
 
@@ -8407,7 +8413,7 @@ reportBHACy_retRETV_INT:
                 sep     #$30
                 brl     retRETV_INT
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO "PTR"
         .ENDIF
 
@@ -8448,7 +8454,7 @@ callOSBGET:
                 plb
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSBGET"
         .ENDIF
 
@@ -8488,7 +8494,7 @@ exec_OPEN_A:    phb
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 ply
                 TODO    "OSFIND"
         .ENDIF
@@ -8636,7 +8642,7 @@ exec_EOF:       jsr     parse_fileHandleHash2
                 plb
                 sep     #$10
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "CK EOF"
         .ENDIF
                 bcs     exec_TRUE
@@ -8690,7 +8696,7 @@ exec_POINT:     jsr     evalAtYcheckTypeInAConvert2INT
         .IFDEF COMMUNICATOR
                 jsr     cop_OSWORD
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "WRDp"
         .ENDIF
                 lda     DP_FPA_sgn
@@ -9031,7 +9037,6 @@ getPpctAsINT:   ldy     #INTVAR_P+2
                 xba
                 brl     retAYX_24bit_INT
 
-; HERE HERE HERE working backwards
 brk1a_no_such_var:
                 brk     $1a
 
@@ -9152,7 +9157,7 @@ exec_ERR:
                 jsl     _ST
                 plx
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 lda     DP_BAS_BL_ERRNO
         .ENDIF
 
@@ -9171,7 +9176,7 @@ exec_TIME:      iny
                 lda     #OSWORD_1_READTIME
                 jsr     cop_OSWORD
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 ldx     #<BANK0_OSWORD_BLOCK
                 ldy     #>BANK0_OSWORD_BLOCK
                 lda     #OSWORD_1_READTIME
@@ -9225,7 +9230,7 @@ exec_TIMEdollar:
                 plb
                 tya
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "TIME$"
         .ENDIF
                 bra     ret_str_lenA
@@ -9642,7 +9647,7 @@ progFndDEF_linLp:
                 bne     setPAGEFromSpecialYFindDEF
                 brl     retFF_L896C
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 ; TODO: check this works then optimize
                 lda     DP_BAS_PAGE+2
                 sta     DP_BAS_TXTPTR2+2
@@ -10226,7 +10231,7 @@ BRK_HANDLER:
                 jsr     exec_ERROR_OFF_reset_ERRORPTR
 @sk:            
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 cli
 
                 ;TODO remove
@@ -10236,7 +10241,7 @@ BRK_HANDLER:
 
                 sep     #$30
 
-                pea     BLITTER_BASIC_DP
+                pea     MOS_BASIC_DP
                 pld
 
                 ; BRK vector in native mode stack will contain:
@@ -10256,7 +10261,7 @@ BRK_HANDLER:
 
 
                 ;reset stack etc
-                pea     BLITTER_BASIC_DP
+                pea     MOS_BASIC_DP
                 pld
                 phk
                 plb
@@ -10378,7 +10383,7 @@ OSWORD_continue:
         .IFDEF COMMUNICATOR
                 jsr     cop_OSWORD
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "CALL OSWORD"
         .ENDIF
                 bra     jmp_Continue
@@ -11230,7 +11235,7 @@ callOSBGET_2:
                 plb
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSBGET_2"
         .ENDIF
 
@@ -11672,7 +11677,7 @@ L95C9:          sta     DP_BAS_TMP6+1
                 bra     @L95E8
 
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
 
 ReadKeysTo_InBuf:
                 jsr     BL_doOSWORD0
@@ -11732,7 +11737,7 @@ L9619:          stz     DP_BAS_COUNT
                 trb     DP_BAS_CO_FLAGS
                 ldy     DP_BAS_TMP6+6
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 ply
         .ENDIF
                 lda     #RETV_STR
@@ -12423,7 +12428,7 @@ doLOAD:         lda     DP_BAS_PAGE
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "LOAD2PAGE"
         .ENDIF
 findTOP:        lda     DP_BAS_PAGE+2
@@ -12532,7 +12537,7 @@ exec_SAVE:      jsr     findTOP
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "SAVE PROGR"
         .ENDIF
                 bra     jmpEOS
@@ -12556,7 +12561,7 @@ exec_OSCLI:     jsr     evalYExpectString
                 .i8
                 plb
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSCLI"
         .ENDIF
                 bra     jmpEOS
@@ -12580,7 +12585,7 @@ doEXT:          jsr     parse_fileHandleHash_PTR2
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "EXT"
         .ENDIF
                 brl     jmpEOS
@@ -12604,7 +12609,7 @@ exec_PTRc:      jsr     parse_fileHandleHash_PTR2
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "PTR"
         .ENDIF
                 brl     jmpEOS                          ;TODO: dead code
@@ -12626,7 +12631,7 @@ exec_CLOSE:     jsr     parse_fileHandleHash_PTR2
                 .a8
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO "CLOSE"
         .ENDIF
                 bra     jmpEOS
@@ -12660,7 +12665,7 @@ BPUT_string_lp: lda     [DP_BAS_STRWKSP_L],y
                 sep     #$10
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "BPUTstr"
         .ENDIF
                 ply
@@ -12691,7 +12696,7 @@ BPUT_A:
                 sep     #$10
                 .i8
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "BPUT_A"
         .ENDIF
                 bra     jmpEOS
@@ -12722,7 +12727,7 @@ printTMP6ptr:   jsr     incTMP6ptrLDA
         .IFDEF COMMUNICATOR
                 jsr     cop_OSWORD
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSWORD_5_READ_IO_MEM"
         .ENDIF
                 plx
@@ -12760,7 +12765,7 @@ call_OSBYTE:    cop     COP_06_OPOSB
 cop_OSWORD:     cop     COP_07_OPOSW
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
 call_OSBYTE:
                 jsl     nat_OSBYTE
                 rts
@@ -12795,7 +12800,7 @@ call_OSRDCH:
                 plx
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 TODO    "OSRDCH"
         .ENDIF
 
@@ -12810,7 +12815,7 @@ call_OSWRCH:
                 pla
                 rts
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
 
                 jsl     nat_OSWRCH                      ;TODO: check and use EQUate?                
                 rts
@@ -12951,7 +12956,7 @@ moduleCallARITHref:
                 .byte   $d4
                 .byte   $ff
         .ENDIF ;COMMUNICATOR
-        .IFDEF BLITTER
+        .IFDEF MOS
 
                 .include "bas816new_natshims.asm"
         .ENDIF

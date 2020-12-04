@@ -13,6 +13,14 @@
 
         .ENDIF
 
+        .IFDEF BEEB816
+
+                .include        "bas816new_BEEB816.inc"
+
+                .export         arith_enter
+                .export         arith_init
+
+        .ENDIF
 
         .IF .defined(COMMUNICATOR)
                 .IF .defined(OPTIMIZE)
@@ -88,7 +96,7 @@ DP_ART_WKSPptr  =       $84                             ;Pointer to Private Work
 
 jmpServ:        brl     ServiceHandler
         .ENDIF
-        .IFDEF BLITTER
+        .IFDEF MOS
                 .SEGMENT "ARITHCODE"
         .ENDIF
 
@@ -313,7 +321,7 @@ ServiceHandler: pld
         .ENDIF ; COMMUNICATOR
 
 do_FNnul:       clc
-        .IF .defined(BUGFIX) || .defined(BLITTER)
+        .IF .defined(BUGFIX) || .defined(MOS)
                 INTRTL
         .ELSE
                 rts                             ; BUG: on Communicator this should be a JSL!
@@ -371,19 +379,19 @@ throwDPAlloc:   cop     COP_0F_OPERR
 
         .ENDIF ; COMMUNICATOR
 
-        .IFDEF BLITTER
+        .IFDEF MOS
 
                 ; set up DP pointers etc
 arith_init:     
                 phd
-                pea     BLITTER_ARITH_DP
+                pea     MOS_ARITH_DP
                 pld
 
-                lda     #<BLITTER_ARITH_WKSPC
+                lda     #<MOS_ARITH_WKSPC
                 sta     DP_ART_WKSPptr
-                lda     #>BLITTER_ARITH_WKSPC
+                lda     #>MOS_ARITH_WKSPC
                 sta     DP_ART_WKSPptr+1
-                lda     #^BLITTER_ARITH_WKSPC
+                lda     #^MOS_ARITH_WKSPC
                 sta     DP_ART_WKSPptr+2                
 
                 pld
@@ -398,7 +406,7 @@ arith_enter:
                 .a8
                 .i8
 
-                pea     BLITTER_ARITH_DP
+                pea     MOS_ARITH_DP
                 pld
 
 
@@ -444,7 +452,7 @@ arith_enter:
                 clc
 		rtl
 
-        .ENDIF ; BLITTER
+        .ENDIF ; MOS
 
 
 do_FNintADD:    jsr     copyWKSPtoPtrB

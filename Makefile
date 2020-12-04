@@ -16,7 +16,7 @@ ORGDIR=.
 #list of original basics
 ORGMODULES=	COMBAS100 ARITH100
 #list of recompiled/new basics
-BASICS_NEW=	bas816new_COMBAS100 bas816new_BLITTER
+BASICS_NEW=	bas816new_COMBAS100 bas816new_BLITTER bas816new_BEEB816
 ARITHS_NEW=	arith_new_COMARITH100
 BASICS_ORG=	COMBAS100
 ARITHS_ORG=	ARITH100
@@ -44,6 +44,7 @@ NOWT:=$(shell mkdir -p $(CMPDIR))
 
 .PRECIOUS: 	$(BUILDDIR)/bas816new_COMBAS100.lst \
 		$(BUILDDIR)/bas816new_BLITTER.lst \
+		$(BUILDDIR)/bas816new_BEEB816.lst \
 		$(BUILDDIR)/bas816new_COMBAS100.da.s \
 		$(BUILDDIR)/ORG_COMBAS100.da.s \
 		$(BUILDDIR)/arith_new_COMARITH100.da.s \
@@ -86,12 +87,17 @@ $(BUILDDIR)/ORG_%.da.s: $(ORGDIR)/%.bin
 $(BUILDDIR)/COMBAS100.o:		OPTDEF=
 $(BUILDDIR)/ARITH100.o:			OPTDEF=
 $(BUILDDIR)/bas816new_COMBAS100.o:	OPTDEF=-D COMMUNICATOR -D COMM100
-$(BUILDDIR)/bas816new_BLITTER.o:	OPTDEF=-D OPTIMIZE=1 -D BLITTER -D BUGFIX
+$(BUILDDIR)/bas816new_BLITTER.o:	OPTDEF=-D OPTIMIZE=1 -D BLITTER -D MOS -D BUGFIX
+$(BUILDDIR)/bas816new_BEEB816.o:	OPTDEF=-D OPTIMIZE=1 -D BEEB816 -D MOS -D BUGFIX
 $(BUILDDIR)/arith_new_COMARITH100.o:	OPTDEF=-D COMMUNICATOR -D COMM100
-$(BUILDDIR)/arith_new_blit_bas.o:	OPTDEF=-D OPTIMIZE=1 -D BLITTER -D BUGFIX
-$(BUILDDIR)/bas816new_BLITTER.o:	bas816new_natshims.asm
+$(BUILDDIR)/arith_new_blit_bas.o:	OPTDEF=-D OPTIMIZE=1 -D BLITTER -D MOS -D BUGFIX
+$(BUILDDIR)/arith_new_beeb816_bas.o:	OPTDEF=-D OPTIMIZE=1 -D BEEB816 -D MOS -D BUGFIX
+$(BUILDDIR)/bas816new_BLITTER.o:	bas816new_natshims.asm bas816new_BLITTER.inc
+$(BUILDDIR)/bas816new_BEEB816.o:	bas816new_natshims.asm bas816new_BEEB816.inc
+$(BUILDDIR)/arith_new_blit_bas.o:	bas816new_BLITTER.inc
+$(BUILDDIR)/arith_new_beeb816_bas.o:	bas816new_BEEB816.inc
 
-bas816new.asm:	bas816new.inc names.inc bas816new_BLITTER.inc
+bas816new.asm:	bas816new.inc names.inc
 arith_new.asm:  names.inc bas816new_BLITTER.inc
 
 $(BASICS_O_ORG):	COMBAS100.bin_cc65.S $(DEPS) $(INCS)
@@ -110,6 +116,9 @@ $(ARITHS_O_NEW):	arith_new.asm $(DEPS) $(INCS)
 $(BUILDDIR)/arith_new_blit_bas.o: arith_new.asm
 	$(AS) $(ASFLAGS) $(OPTDEF) -o $@ -g -l $(basename $@).lst $<
 
+$(BUILDDIR)/arith_new_beeb816_bas.o: arith_new.asm
+	$(AS) $(ASFLAGS) $(OPTDEF) -o $@ -g -l $(basename $@).lst $<
+
 
 $(BUILDDIR)/%.bin: $(BUILDDIR)/%.o %.cfg
 	$(LD) -vm -Ln $(basename $@).sy2 -m $(basename $@).map -o $@ -C $(notdir $(basename $@)).cfg $<
@@ -117,6 +126,8 @@ $(BUILDDIR)/%.bin: $(BUILDDIR)/%.o %.cfg
 $(BUILDDIR)/bas816new_BLITTER.bin: $(BUILDDIR)/bas816new_BLITTER.o bas816new_BLITTER.cfg $(BUILDDIR)/arith_new_blit_bas.o
 	$(LD) -vm -Ln $(basename $@).sy2 -m $(basename $@).map -o $@ -C $(notdir $(basename $@)).cfg $< $(BUILDDIR)/arith_new_blit_bas.o
 
+$(BUILDDIR)/bas816new_BEEB816.bin: $(BUILDDIR)/bas816new_BEEB816.o bas816new_BEEB816.cfg $(BUILDDIR)/arith_new_beeb816_bas.o
+	$(LD) -vm -Ln $(basename $@).sy2 -m $(basename $@).map -o $@ -C $(notdir $(basename $@)).cfg $< $(BUILDDIR)/arith_new_beeb816_bas.o
 
 
 

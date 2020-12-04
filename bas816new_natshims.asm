@@ -1,5 +1,5 @@
 
-
+; NOTE: this file is _included_ rather than linked!
 
 
 
@@ -7,9 +7,6 @@
 ; at ChipRAM 008Fxx and tests interrupt entry/exit by reenabling interrupts and calling 
 ; MOS functions
 
-NATVEC_CHIP	:= $008FE0
-
-HWVEC_6502_IRQ  := $00FFFE
 
 		.assert __SHIMS_SIZE__ <= $100, error, "SHIMS size must be <=$100"
 		.assert __NATVEC_SIZE__ = $10, error, "NATVEC size must be $10"
@@ -75,7 +72,7 @@ ShowRegs:	php				; save entry flags
 		phx
 		pha
 
-		pea	BLITTER_BASIC_DP
+		pea	MOS_BASIC_DP
 		pld
 
                 ;               + 16            Program bank
@@ -229,7 +226,7 @@ StackTrace:	php
 		.a8
 		.i8
 
-		pea	BLITTER_BASIC_DP
+		pea	MOS_BASIC_DP
 		pld
 
 		; assume 8 bit stack!
@@ -280,7 +277,9 @@ StackTrace:	php
 @spc:		lda	#' '
 		jmp	call_OSWRCH
 
-BLITTER_shims_init:
+MOS_shims_init:
+	.IFDEF BLITTER
+
 		; we're entering in 8bit emulation mode
 		.a8
 		.i8
@@ -368,6 +367,62 @@ BLITTER_shims_init:
 
 		plp
 		rts
+	.ENDIF
+	.IFDEF BEEB816
+		; HOGLET: check this for sanity please
+
+		; we're entering in 8bit emulation mode
+		.a8
+		.i8
+
+		php
+		sei
+
+		; point B at Bank 0 - destination for out copies
+		ldy	#0
+		; copy shims to sys memory
+
+		ldx	#<__SHIMS_SIZE__-1
+@l1:		phk
+		plb
+		lda	__SHIMS_LOAD__,X
+		phy
+		plb
+		sta	__SHIMS_RUN__,X
+
+		dex
+		cpx	#$FF
+		bne	@l1
+
+		; This should be the "shadow ram" for vectors defined in the .cfg file!?
+		ldy	#^__NATVEC_RUN__	
+
+		ldx	#<__NATVEC_SIZE__-1
+@l2:		phk
+		plb
+		lda	__NATVEC_LOAD__,X
+		phy
+		plb
+		sta	__NATVEC_RUN__,X
+		dex
+		cpx	#$FF
+		bne	@l2
+
+
+                ; clear NATVEC_BRK (not really needed as BASIC sets up its own native handler, 
+                ; emu mode handler will drop back to MOS, this should handle crashes before BASIC
+                ; is started)
+                lda	#<shim_brk_to_emu
+                sta	NATVEC_BRK
+                lda	#>shim_brk_to_emu
+                sta	NATVEC_BRK+1
+                lda	#^shim_brk_to_emu
+                sta	NATVEC_BRK+2
+
+
+		plp
+		rts
+	.ENDIF
 
 
 		.SEGMENT "SHIMS"

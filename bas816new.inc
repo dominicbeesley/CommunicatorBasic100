@@ -113,6 +113,9 @@ DP_BAS_CURCHAN  =       $90
 
 DP_BAS_MEMEND   =       $92
 DP_BAS_LOMEM_LIM_PAG =  $95
+
+;; ========================= COMMUNICATOR SPECIALS =======================
+
 	.IFDEF COMMUNICATOR
 DP_BAS_CO_FLAGS =       $97                             ;Seems to be a set of flags to decide what state 
 							;we're in and whether to yield? - bit $40 set disables yeild
@@ -121,10 +124,13 @@ DP_BAS_ARG2_FLAG =      $99
 DP_BAS_ARG2     =       $9a
 DP_BAS_CO_CTDN  =       $a0                             ;Seems to count down as statements are execed and then yield every 100th?
 	.ENDIF
-	.IFDEF BLITTER
+
+;; ============================== MOS SPECIALS ============================
+	.IFDEF MOS
 DP_BAS_BL_ERRPTR	= $97				; points at error string
 DP_BAS_BL_ERRNO		= $9A				; error number of last BRK
 	.ENDIF
+
 DP_BAS_MEMSIZE  =       $9d
 
 DP_BAS_MEMBASE  =       $a4                             ;Base of workspace
@@ -137,18 +143,25 @@ DP_BAS_FPTMPptr3 =      $b0                             ;Used in PRINT HASH
 DP_BAS_FOR_STACKBASE =  $b3
 DP_BAS_GOSUB_STACKBASE = $b6
 DP_BAS_REPEAT_STACKBASE = $b9
+
+;; ========================= COMMUNICATOR SPECIALS =======================
 	.IFDEF COMMUNICATOR
 DP_BAS_SPECIAL_VARSptr = $bc                            ;Points at copies of PAGE, TOP, etc?
 	.ENDIF
-	.IFDEF BLITTER
+
+;; ============================== MOS SPECIALS ============================
+	.IFDEF MOS
 DP_BAS_BL_DEBUGPTR	= $bc
 	.ENDIF
+
+
 DP_BAS_PAGE     =       $bf
 
 DP_BAS_SET_TO_Z_AT_EOS = $c6
 DP_BAS_C7_UK    =       $c7
 DP_BAS_LAST_EOSEOR_D_ = $c8                             ;Set to end of statement marker EOR D
 
+;; ========================= COMMUNICATOR SPECIALS =======================
 	.IFDEF COMMUNICATOR
 DP_BAS_ARITHMODREF =    $c9
 	.ENDIF

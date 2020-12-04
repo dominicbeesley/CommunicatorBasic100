@@ -5,13 +5,10 @@
 
 
 ;=========================================================================
-; BLITTER specific Defines
+; BEEB816 specific Defines
 ;=========================================================================
 
-
-NATVEC_CHIP	:= $008FE0
 HWVEC_6502_IRQ  := $00FFFE
-
 
 MOS_BASIC_DP			:= $001900
 MOS_ARITH_DP			:= $001A00
@@ -21,8 +18,8 @@ BANK0_SCRATCH_PAGE		:= $002100
 
 
 MOS_ARITH_WKSPC			:=	$01FD00		; just below page
-MOS_BASIC_MEMBASE		:=	$020000		; next bank after basic TODO: allocate/calculate
-MOS_BASIC_MEMSZ			:=	$080000		; 8 banks
+MOS_BASIC_MEMBASE		:=	$F90000		; next bank after basic TODO: allocate/calculate
+MOS_BASIC_MEMSZ			:=	$030000		; 3 banks
 
 OSBYTE				:= $00FFF4
 OSWRCH				:= $00FFEE
@@ -32,13 +29,4 @@ fred_JIM_PAGE_HI		:= $00FCFD
 fred_JIM_PAGE_LO		:= $00FCFE
 fred_JIM_DEVNO			:= $00FCFF
 
-zp_mos_jimdevsave		:= $EE
-
-JIM_DEVNO_BLITTER		:= $D1
-
-
 MOS_ZP_ESC_FLAG			:= $0000FF
-
-sheila_MEM_LOMEMTURBO		:= $FE37
-
-
