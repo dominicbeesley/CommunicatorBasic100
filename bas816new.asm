@@ -1043,13 +1043,109 @@ _ukCallEv23:    phx
         .ENDIF
 
 prog_search_lineno:
+        .IFDEF OPTIMIZE_SIZE
+                rep     #$20
+                .a16
+                lda     DP_BAS_PAGE
+                sta     DP_FPB_exp
+                ldy     DP_BAS_PAGE+2
+                sty     DP_FPB_mant+1                   ;Point at start of program
+@lp:
+                ldy     #$01
+                lda     [DP_FPB_exp],y                  ;get line no hi byte
+                xba
+                cmp     DP_BAS_INT_WA                   ;compare to line number in WA
+                bcs     @skCkLo                         ;greater or equal
+@nextline:      ldy     #$03
+                lda     [DP_FPB_exp],y                  ;get line length
+                and     #$FF                            ; we only want an 8 bit number!
+                adc     DP_FPB_exp                      ;add to pointer and repeat
+                sta     DP_FPB_exp
+                bcc     @lp
+                inc     DP_FPB_mant+1
+                bra     @lp
+
+@skCkLo:        sep     #$20
+                .a8
+                bne     @retCLCY2                       ;greater - exit
+                iny
+                rts                                     ;returns with Cy=1 - exact match
+
+@retCLCY2:      iny
+                clc
+                rts                                     ;failed to find return with Cy=0
+
+        .ELSEIF .defined (OPTIMIZE)
+                ; attempt to speed up by using 16bit DP pointers and databank register
+                ; assumption: databank wrapping won't cause bother!
+
+                clc
+                lda     DP_BAS_PAGE
+                adc     #1
+                sta     DP_FPB_exp
+                lda     DP_BAS_PAGE+1
+                adc     #0
+                sta     DP_FPB_exp+1
+                lda     DP_BAS_PAGE+2
+                adc     #0
+                pha
+                plb                                     ; bank is now at start of program
+
+                ldy     #2
+
+@lp:            lda     (DP_FPB_exp)                    ;get line no hi byte
+                cmp     DP_BAS_INT_WA+1                 ;compare to line number in WA
+                bcs     @skCkLo                         ;;greater or equal
+@nextline:      lda     (DP_FPB_exp),y                  ;get line length
+                adc     DP_FPB_exp                      ;add to pointer and repeat
+                sta     DP_FPB_exp
+                bcc     @lp
+                inc     DP_FPB_exp+1
+                bne     @lp
+                ; next bank
+                phb
+                pla
+                inc     A
+                pha
+                plb
+                bra     @lp
+
+@skCkLo:        bne     @retCLCY2                       ;greater - exit
+                dey
+                lda     (DP_FPB_exp),y
+                iny
+                cmp     DP_BAS_INT_WA                   ;compare lo
+                bcc     @nextline                       ;was less continue search
+                beq     @skclc
+@retCLCY2:
+                clc
+@skclc:         php
+                clc
+                lda     DP_FPB_exp
+                sbc     #0
+                sta     DP_FPB_exp
+                lda     DP_FPB_exp+1
+                sbc     #0
+                sta     DP_FPB_exp+1
+                phb
+                pla
+                sbc     #0
+                sta     DP_FPB_exp+2
+@rts:           phk
+                plb
+                plp                
+                rts
+
+
+        .ELSE
+
                 lda     DP_BAS_PAGE
                 sta     DP_FPB_exp
                 lda     DP_BAS_PAGE+1
                 sta     DP_FPB_mant
                 lda     DP_BAS_PAGE+2
                 sta     DP_FPB_mant+1                   ;Point at start of program
-prog_search_lineno_fromPTR:
+@lp:
                 ldy     #$01
                 lda     [DP_FPB_exp],y                  ;get line no hi byte
                 cmp     DP_BAS_INT_WA+1                 ;compare to line number in WA
@@ -1058,11 +1154,11 @@ prog_search_lineno_fromPTR:
                 lda     [DP_FPB_exp],y                  ;get line length
                 adc     DP_FPB_exp                      ;add to pointer and repeat
                 sta     DP_FPB_exp
-                bcc     prog_search_lineno_fromPTR
+                bcc     @lp
                 inc     DP_FPB_mant
-                bne     prog_search_lineno_fromPTR
+                bne     @lp
                 inc     DP_FPB_mant+1
-                bra     prog_search_lineno_fromPTR
+                bra     @lp
 
 @skCkLo:        bne     @retCLCY2                       ;greater - exit
                 iny
@@ -1075,6 +1171,7 @@ prog_search_lineno_fromPTR:
 @retCLCY2:      ldy     #$02
                 clc
                 rts                                     ;failed to find return with Cy=0
+        .ENDIF
 
 fpRealDivide:   jsr     checkTypeInAConvertToINT
                 lda     DP_BAS_INT_WA+3
@@ -6774,7 +6871,7 @@ _skev3mulrr:    jsr     popFPFromStackToPTR1
                 phb
                 jsr     stack_REAL
                 jsr     BHAeqDP_BAS_STACKptr
-                ldx     #ARITH_FN_0C_UK
+                ldx     #ARITH_FN_MUL
                 phk
                 jsr     moduleCallARITHref
                 jsr     DP_BAS_STACKptreqBHA
@@ -10420,7 +10517,7 @@ doListSkStart3: lda     DP_BAS_TXTPTR2
                 sta     DP_BAS_TXTPTR2+1
                 lda     DP_FPB_mant+1
                 sta     DP_BAS_TXTPTR2+2
-                bcs     oListSkGotCorrectLine
+                bcs     doListSkGotCorrectLine
                 dey
                 bra     doListSkGotNearestLine
 
@@ -10437,7 +10534,7 @@ doListSkGotNearestLine:
                 iny
                 lda     [DP_BAS_TXTPTR2],y
                 sta     DP_BAS_INT_WA
-oListSkGotCorrectLine:
+doListSkGotCorrectLine:
                 lda     DP_BAS_INT_WA
                 clc
                 sbc     DP_FPA_mant

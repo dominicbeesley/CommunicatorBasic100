@@ -13,6 +13,39 @@
 
         .ENDIF
 
+
+        .IF .defined(COMMUNICATOR)
+                .IF .defined(OPTIMIZE)
+                        .macro INTJSL addr
+                                jsr     addr
+                        .endmacro
+
+                        .macro INTRTL
+                                rts
+                        .endmacro
+                .ELSE
+                        .macro INTJSL addr
+                                phk
+                                jsr     addr
+                        .endmacro
+
+                        .macro INTRTL
+                                rtl
+                        .endmacro
+                .ENDIF
+
+        .ELSE
+                .macro INTJSL addr
+                        jsr     addr
+                .endmacro
+
+                .macro INTRTL
+                        rts
+                .endmacro
+        .ENDIF
+
+
+
 RETV_INT        =       $40
 RETV_REAL       =       $ff
 
@@ -248,11 +281,16 @@ ServiceHandler: pld
                 lda     $05,S
                 phk
                 plb
+        .IF .defined(COMMUNICATOR)
+                .IF !.defined(OPTIMIZE)
                 phk
-                phk
-                jsr     clrFPA
-                phk
-                jsr     clrFPB
+                .ENDIF
+        .ENDIF
+                
+		INTJSL	clrFPA
+                
+		INTJSL	clrFPB
+
                 jsr     (.LOWORD(tblDispatchFN),x)
                 lda     DP_ART_PtrA
                 pha
@@ -267,15 +305,19 @@ ServiceHandler: pld
                 bcc     @plpclcrtl
                 plp
                 sec
-                rtl
+		rtl
 
 @plpclcrtl:     plp
                 clc
-                rtl
+		rtl
         .ENDIF ; COMMUNICATOR
 
 do_FNnul:       clc
-                rts
+        .IF .defined(BUGFIX) || .defined(BLITTER)
+                INTRTL
+        .ELSE
+                rts                             ; BUG: on Communicator this should be a JSL!
+        .ENDIF
 
         .IFDEF COMMUNICATOR
 
@@ -356,36 +398,6 @@ arith_enter:
                 .a8
                 .i8
 
-                phb
-                pha
-                xba
-                pha
-                phx
-                phy
-
-                .import list_printHexByte
-                .import printStringAfter
-                .import call_OSWRCH
-
-                phk
-                plb
-;                jsr     printStringAfter
-;                .byte   "ARITH:"
-;                nop
-;                lda     2,S
-;                jsr     list_printHexByte
-;                lda     #13
-;                jsr     call_OSWRCH
-;                lda     #10
-;                jsr     call_OSWRCH
-
-                ply
-                plx
-                pla
-                xba
-                pla
-                plb
-
                 pea     BLITTER_ARITH_DP
                 pld
 
@@ -407,11 +419,10 @@ arith_enter:
                 jsr     PtrAeqBHA
                 phk
                 plb
-                phk
-                phk
-                jsr     clrFPA
-                phk
-                jsr     clrFPB
+                
+		jsr	clrFPA
+                
+		jsr	clrFPB
                 jsr     (.LOWORD(tblDispatchFN),x)
                 lda     DP_ART_PtrA
                 pha
@@ -427,11 +438,11 @@ arith_enter:
                 bcc     @plpclcrtl
                 plp
                 sec
-                rtl
+		rtl
 
 @plpclcrtl:     plp
                 clc
-                rtl
+		rtl
 
         .ENDIF ; BLITTER
 
@@ -442,15 +453,15 @@ do_FNintADD:    jsr     copyWKSPtoPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     copy4atPtrAtoINTAincPtr4
-                phk
-                jsr     INTAeqINTAplusPTRA
+                
+		INTJSL	copy4atPtrAtoINTAincPtr4
+                
+		INTJSL	INTAeqINTAplusPTRA
                 jsr     swapPtrAandPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     storeINTAatPtrA
-                rtl
+		INTRTL
 
 do_FNintSUB:    jsr     copyWKSPtoPtrB
                 ldy     #$07
@@ -458,27 +469,27 @@ do_FNintSUB:    jsr     copyWKSPtoPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     copy4atPtrAtoINTAincPtr4
-                phk
-                jsr     INTAeqPtrAsubINTA
+                
+		INTJSL	copy4atPtrAtoINTAincPtr4
+                
+		INTJSL	INTAeqPtrAsubINTA
                 jsr     swapPtrAandPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     storeINTAatPtrA
-                rtl
+		INTRTL
 
 do_FNINTnegate: jsr     ptrBpointAtDP_INTA
                 ldy     #$03
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     INTAeqMinusINTA
+                
+		INTJSL	INTAeqMinusINTA
                 jsr     swapPtrAandPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     storeINTAatPtrA
-                rtl
+		INTRTL
 
 do_FNint16mulint32:
                 jsr     copyWKSPtoPtrB
@@ -487,15 +498,15 @@ do_FNint16mulint32:
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     copy4atPtrAtoINTAincPtr4
-                phk
-                jsr     INTAeqPtrAmulINTA16
+                
+		INTJSL	copy4atPtrAtoINTAincPtr4
+                
+		INTJSL	INTAeqPtrAmulINTA16
                 jsr     swapPtrAandPtrB
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     storeINTAatPtrA
-                rtl
+		INTRTL
 
 do_FNmul:       jsr     copyInToStackAndUnpackToFPA
                 jsr     swapPtrAandPtrB
@@ -505,18 +516,18 @@ do_FNmul:       jsr     copyInToStackAndUnpackToFPA
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     FPAeqFPAmulFPB
-                phk
-                jsr     FPAmantRound7
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	FPAeqFPAmulFPB
+                
+		INTJSL	FPAmantRound7
 packFPAtoPtrBswapPtrAPtrB:
                 jsr     swapPtrAandPtrB                 ;TODO: optimize - this seems like a pissing about
                 lda     #$05
                 jsr     addAtoPtrA
                 jsr     ptrAdec5packFPAtoPtrA
-                rtl
+		INTRTL
 
 do_FNdiv:       jsr     copyInToStackAndUnpackToFPA
                 jsr     swapPtrAandPtrB
@@ -526,10 +537,10 @@ do_FNdiv:       jsr     copyInToStackAndUnpackToFPA
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     divPtrCByFPA
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	divPtrCByFPA
                 bra     packFPAtoPtrBswapPtrAPtrB
 
 do_FNpow:       jsr     copyInToStackAndUnpackToFPA
@@ -540,8 +551,8 @@ do_FNpow:       jsr     copyInToStackAndUnpackToFPA
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     LBA31
+                
+		INTJSL	LBA31
                 bra     packFPAtoPtrBswapPtrAPtrB
 
 do_FNsin:       clc
@@ -550,66 +561,66 @@ doSinCos_internal:
                 jsr     copyInToStackAndUnpackToFPA
                 plp
                 php
-                phk
-                jsr     trigNormaltheta
+                
+		INTJSL	trigNormaltheta
                 plp
-                phk
-                jsr     doSINCOS_internal
+                
+		INTJSL	doSINCOS_internal
                 bra     packFPAtoPtrBswapPtrAPtrB
 
 do_FNcos:       sec
                 bra     doSinCos_internal
 
 do_FNtan:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     trigNormaltheta
-                phk
-                jsr     doTan_internal
+                
+		INTJSL	trigNormaltheta
+                
+		INTJSL	doTan_internal
                 bra     packFPAtoPtrBswapPtrAPtrB
 
 do_FNacs:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     do_acs_internal
+                
+		INTJSL	do_acs_internal
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNasn:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     do_asn_internal
+                
+		INTJSL	do_asn_internal
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNatn:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     do_atn_internal
+                
+		INTJSL	do_atn_internal
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNdeg:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     setPtrCConstRad2Deg
+                
+		INTJSL	setPtrCConstRad2Deg
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNrad:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     setPtrCConstDeg2Rad
+                
+		INTJSL	setPtrCConstDeg2Rad
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNlog:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     LB9CB
+                
+		INTJSL	LB9CB
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNln:        jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     LB9D6
+                
+		INTJSL	LB9D6
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNsqr:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     fpFPAeq_sqrt_FPA
+                
+		INTJSL	fpFPAeq_sqrt_FPA
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNexp:       jsr     copyInToStackAndUnpackToFPA
-                phk
-                jsr     LB9DB
+                
+		INTJSL	LB9DB
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNsub:       jsr     copyInToStackAndUnpackToFPA
@@ -620,10 +631,10 @@ do_FNsub:       jsr     copyInToStackAndUnpackToFPA
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     FPAeqFPAminusPtrCround7
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	FPAeqFPAminusPtrCround7
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNcompare:   jsr     copyInToStackAndUnpackToFPA
@@ -634,12 +645,12 @@ do_FNcompare:   jsr     copyInToStackAndUnpackToFPA
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     unpackPtrCtoFPB
-                phk
-                jsr     compareFPAFPBresinCy
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	unpackPtrCtoFPB
+                
+		INTJSL	compareFPAFPBresinCy
                 pha
                 php
                 jsr     swapPtrAandPtrB
@@ -649,7 +660,7 @@ do_FNcompare:   jsr     copyInToStackAndUnpackToFPA
                 tya
                 sta     [DP_ART_PtrA]
                 pla
-                rtl
+		INTRTL
 
 do_FNYtoreal:   phy
                 jsr     ptrBpointAt_FP_FPAplus2
@@ -658,15 +669,15 @@ do_FNYtoreal:   phy
                 jsr     swapPtrAandPtrB
                 ply
                 sty     DP_ART_FPA+7
-                phk
-                jsr     normFPAmant2
+                
+		INTJSL	normFPAmant2
                 lda     DP_ART_FPA+7
                 pha
                 ldy     #$04
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
                 ply
-                rtl
+		INTRTL
 
 do_FNint:       jsr     copyInToStackAndUnpackToFPA
                 jsr     swapPtrAandPtrB
@@ -674,11 +685,11 @@ do_FNint:       jsr     copyInToStackAndUnpackToFPA
                 jsr     addAtoPtrA
                 jsr     copyWKSPtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     FPAtoINTAasint
+                
+		INTJSL	FPAtoINTAasint
                 jsr     swapPtrAandPtrB
                 jsr     storeINTAatPtrA
-                rtl
+		INTRTL
 
 do_FN_addYtomant7thenRound:
                 phy                                     ;what's in Y?
@@ -686,8 +697,8 @@ do_FN_addYtomant7thenRound:
                 ply
                 sty     DP_ART_FPA+7
                 stz     DP_ART_FPA
-                phk
-                jsr     FPAmantRound7
+                
+		INTJSL	FPAmantRound7
                 brl     packFPAtoPtrBswapPtrAPtrB
 
 do_FNint2real:  jsr     ptrBpointAtDP_INTA
@@ -696,11 +707,11 @@ do_FNint2real:  jsr     ptrBpointAtDP_INTA
                 lda     #$04
                 jsr     addAtoPtrA
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     intA2RealFPA
+                
+		INTJSL	intA2RealFPA
                 jsr     swapPtrAandPtrB
                 jsr     ptrAdec5packFPAtoPtrA
-                rtl
+		INTRTL
 
 PtrAeqBHA:      pha
                 xba
@@ -824,10 +835,10 @@ copyInToStackAndUnpackToFPA:
                 ldy     #$05
                 jsr     copyYpl1PtrAtoPtrB
                 jsr     swapPtrAandPtrB
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     unpackPtrCtoFPA
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	unpackPtrCtoFPA
                 rts
 
 INTAeqINTAplusPTRA:
@@ -849,7 +860,7 @@ INTAeqINTAplusPTRA:
 staINTA3_retINTV:
                 sta     DP_ART_INTA+3
                 lda     #RETV_INT
-                rtl
+		INTRTL
 
                 pha                                     ;TODO: dead code?
                 clc
@@ -859,7 +870,7 @@ staINTA3_retINTV:
                 bcc     @LB425
                 inc     DP_ART_PtrA+1
 @LB425:         pla
-                rtl
+		INTRTL
 
 INTAeqPtrAsubINTA:
                 sec
@@ -895,7 +906,7 @@ INTAeqMinusINTA:
                 sbc     DP_ART_INTA+3
                 sta     DP_ART_INTA+3
 rtlRETV_INT:    lda     #RETV_INT
-                rtl
+		INTRTL
 
 INTAeqMagINTA:  bit     DP_ART_INTA+3
                 bpl     jmpRtlRETV_INT
@@ -906,19 +917,19 @@ jmpRtlRETV_INT: jmp     rtlRETV_INT
 INTAeqPtrAmulINTA16:
                 ldy     DP_ART_INTA+1
                 phy
-                phk
-                jsr     INTAeqMagINTA
+                
+		INTJSL	INTAeqMagINTA
                 stx     DP_ATL_X_SAV
                 ldx     #DP_43_QRY
-                phk
-                jsr     stINTAatDPX
-                phk
-                jsr     copy4atPtrAtoINTAincPtr4
+                
+		INTJSL	stINTAatDPX
+                
+		INTJSL	copy4atPtrAtoINTAincPtr4
                 pla
                 eor     DP_ART_INTA+3
                 sta     $41
-                phk
-                jsr     INTAeqMagINTA
+                
+		INTJSL	INTAeqMagINTA
                 ldy     #$00
                 ldx     #$00
                 stz     DP_ART_FPB+4
@@ -951,21 +962,21 @@ INTAeqPtrAmulINTA16:
                 lda     $41
                 php
                 ldx     #DP_47_QRY
-                phk
-                jsr     storeDPXatINTA
+                
+		INTJSL	storeDPXatINTA
                 plp
                 bpl     @negsk
-                phk
-                jsr     INTAeqMinusINTA
+                
+		INTJSL	INTAeqMinusINTA
 @negsk:         ldx     DP_ATL_X_SAV
-                rtl
+		INTRTL
 
 FPAeqFPAmulFPB: lda     DP_ART_FPA+3
                 bne     @sk
                 jmp     rtlLBAD7
 
-@sk:            phk
-                jsr     unpackPtrCtoFPB
+@sk:            
+		INTJSL	unpackPtrCtoFPB
                 bne     @sk2
                 jmp     clrFPA
 
@@ -1002,8 +1013,8 @@ FPAeqFPAmulFPB: lda     DP_ART_FPA+3
                 rol     DP_ART_FPTMP
                 bcc     @skadd
                 clc
-                phk
-                jsr     @FPAmantaddFPBmant
+                
+		INTJSL	@FPAmantaddFPBmant
 @skadd:         dey
                 bne     @lp
                 plx
@@ -1031,15 +1042,15 @@ FPAeqFPAmulFPB: lda     DP_ART_FPA+3
                 lda     DP_ART_FPA+3
                 adc     DP_ART_FPB+3
                 sta     DP_ART_FPA+3
-                rtl
+		INTRTL
 
 intA2RealFPA:   stz     DP_ART_FPA+7
                 stz     DP_ART_FPA+1
 LB54E:          lda     DP_ART_INTA+3
                 sta     DP_ART_FPA
                 bpl     @LB55A
-                phk
-                jsr     INTAeqMinusINTA
+                
+		INTJSL	INTAeqMinusINTA
                 lda     DP_ART_INTA+3
 @LB55A:         bne     @LB582
                 stz     DP_ART_FPA+6
@@ -1077,10 +1088,10 @@ LB592:          stz     DP_ART_FPA
                 stz     DP_ART_FPA+2
                 stz     DP_ART_FPA+1
                 stz     DP_ART_FPA+3
-rtlLB59A:       rtl
+rtlLB59A:       INTRTL
 
-LB59B:          phk
-                jsr     clrFPA
+LB59B:          
+		INTJSL	clrFPA
                 tay
                 bpl     LB5A7
                 sta     DP_ART_FPA
@@ -1098,7 +1109,7 @@ LB5A9:          ora     #$00
                 bpl     @LB5AF
 @LB5B9:         sta     DP_ART_FPA+3
                 sty     DP_ART_FPA+2
-                rtl
+		INTRTL
 
 normFPAmant2:   lda     DP_ART_FPA+3
 normFPAmant:    bmi     rtlLB59A
@@ -1140,7 +1151,7 @@ _skLB5F3:       clc
                 rol     DP_ART_FPA+3
                 bpl     @lp
 _skLB606:       sta     DP_ART_FPA+2
-                rtl
+		INTRTL
 
 compareFPAFPBresinCy:
                 ldy     #$00
@@ -1165,16 +1176,16 @@ compareFPAFPBresinCy:
                 lda     DP_ART_FPB+6
                 cmp     DP_ART_FPA+6
                 bne     @LB636
-@LB635:         rtl
+@LB635:         INTRTL
 
 @LB636:         ror     A
                 eor     DP_ART_FPB
                 rol     A
                 lda     #$01
-                rtl
+		INTRTL
 
-LB63D:          phk
-                jsr     LBAE7
+LB63D:          
+		INTJSL	LBAE7
 jmpClrFPA:      jmp     clrFPA
 
 FPAmantToInt:   lda     DP_ART_FPA+2
@@ -1203,8 +1214,8 @@ FPAmantToInt:   lda     DP_ART_FPA+2
 
 LB671:          lda     DP_ART_FPA+2
                 bpl     LB63D
-                phk
-                jsr     clrFPB
+                
+		INTJSL	clrFPB
                 ldy     DP_ART_FPA+3
 beqifFPAsgnnveNegateMant:
                 beq     ifFPAsgnnveNegateMant
@@ -1265,19 +1276,19 @@ FPAnegateMant:  sec
                 tya
                 sbc     DP_ART_FPA+3
                 sta     DP_ART_FPA+3
-rtlLB6DC:       rtl
+rtlLB6DC:       INTRTL
 
 LB6DD:          lda     DP_ART_FPA+2
                 bmi     @LB6E6
                 stz     DP_ART_thetaQuadrant
                 jmp     fpCheckMant0SetSignExp0
 
-@LB6E6:         phk
-                jsr     LB671
+@LB6E6:         
+		INTJSL	LB671
                 lda     DP_ART_FPA+6
                 sta     DP_ART_thetaQuadrant
-                phk
-                jsr     copyFPBmantToFPA
+                
+		INTJSL	copyFPBmantToFPA
                 lda     #$80
                 sta     DP_ART_FPA+2
                 ldx     DP_ART_FPA+3
@@ -1289,8 +1300,8 @@ LB6DD:          lda     DP_ART_FPA+2
                 bra     @LB706
 
 @LB704:         dec     DP_ART_thetaQuadrant
-@LB706:         phk
-                jsr     FPAnegateMant
+@LB706:         
+		INTJSL	FPAnegateMant
 @LB70A:         jmp     normFPAmant2
 
                 inc     DP_ART_FPA+6                    ;TODO: dead code?
@@ -1301,14 +1312,14 @@ LB6DD:          lda     DP_ART_FPA+2
                 bne     @LB71D
                 inc     DP_ART_FPA+3
                 beq     jmpBrk14TooBig2
-@LB71D:         rtl
+@LB71D:         INTRTL
 
 divPtrCByFPA:   lda     DP_ART_FPA+3
                 bne     @skNotDiv0
                 jmp     jmpbrk12DivisionByZero          ;TODO: jump straight to brk!
 
-@skNotDiv0:     phk
-                jsr     unpackPtrCtoFPB
+@skNotDiv0:     
+		INTJSL	unpackPtrCtoFPB
                 bne     @skNotZ
                 jmp     clrFPA
 
@@ -1394,8 +1405,8 @@ divPtrCByFPA:   lda     DP_ART_FPA+3
                 lda     DP_ART_FPTMP+4
                 sta     DP_ART_FPA+3
                 bmi     FPAmantRound7
-                phk
-                jsr     normFPAmant_bitwise
+                
+		INTJSL	normFPAmant_bitwise
                 bra     FPAmantRound7
 
 FPAmantRound7:  lda     DP_ART_FPA+7
@@ -1404,8 +1415,8 @@ FPAmantRound7:  lda     DP_ART_FPA+7
                 beq     @skSetLowBit
                 inc     DP_ART_FPA+6
                 bne     @skCheckOv
-                phk
-                jsr     incFPAmant5_3_IncExpIfOv
+                
+		INTJSL	incFPAmant5_3_IncExpIfOv
                 bra     @skCheckOv
 
 @skSetLowBit:   rol     A
@@ -1423,31 +1434,35 @@ jmpBrk14TooBig: jmp     brk_14_TooBig
 doSINCOS_internal:
                 bcc     @skSIN
                 inc     DP_ART_thetaQuadrant
-@skSIN:         phk
-                jsr     doSINCOS_internal2              ;TODO: jmp FFS
-                rtl
+@skSIN:         
+        .IF !.defined(OPTIMIZE)
+		INTJSL	doSINCOS_internal2
+		INTRTL
+        .ELSE
+                jmp     doSINCOS_internal2
+        .ENDIF
 
 doTan_internal: lda     #DP_7F_QRY
-                phk
-                jsr     FPAcopyNormToDPA
-                phk
-                jsr     doSINCOS_internal2
+                
+		INTJSL	FPAcopyNormToDPA
+                
+		INTJSL	doSINCOS_internal2
                 lda     #DP_7A_QRY
-                phk
-                jsr     FPAcopyNormToDPA
+                
+		INTJSL	FPAcopyNormToDPA
                 lda     #DP_7F_QRY
-                phk
-                jsr     unpackDPAtoFPA
+                
+		INTJSL	unpackDPAtoFPA
                 inc     DP_ART_thetaQuadrant
-                phk
-                jsr     doSINCOS_internal2
+                
+		INTJSL	doSINCOS_internal2
 divDP7AbyFPA:   lda     #DP_7A_QRY
-                phk
-                jsr     PtrCeqDPA
-                phk
-                jsr     divPtrCByFPA
+                
+		INTJSL	PtrCeqDPA
+                
+		INTJSL	divPtrCByFPA
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
                 lda     $69                             ;TODO: DEAD CODE?
                 pha
@@ -1470,7 +1485,7 @@ copyFPBmantToFPA:
                 sta     DP_ART_FPA+6
                 lda     DP_ART_FPB+7
                 sta     DP_ART_FPA+7
-rtlLB83E:       rtl
+rtlLB83E:       INTRTL
 
 FPAeqFPAminusFPB:
                 lda     DP_ART_FPA+3
@@ -1606,72 +1621,72 @@ FPAeqFPAminusFPB:
                 jmp     normFPAmant
 
 do_acs_internal:
-                phk
-                jsr     do_asn_internal
-                phk
-                jsr     FPAeqminusFPAminusPIdiv2
-                rtl
+                
+		INTJSL	do_asn_internal
+                
+		INTJSL	FPAeqminusFPAminusPIdiv2
+		INTRTL
 
 do_asn_internal:
                 lda     DP_ART_FPA
                 bpl     do_asn_internal2
                 stz     DP_ART_FPA
-                phk
-                jsr     do_asn_internal2
+                
+		INTJSL	do_asn_internal2
                 lda     #RETV_REAL
                 sta     DP_ART_FPA
-                rtl
+		INTRTL
 
 do_asn_internal2:
-                phk
-                jsr     FPAcopyNormToDP7A
-                phk
-                jsr     doSINCOS_internal3
+                
+		INTJSL	FPAcopyNormToDP7A
+                
+		INTJSL	doSINCOS_internal3
                 lda     DP_ART_FPA+3
                 beq     FPAeqPIdiv2
-                phk
-                jsr     divDP7AbyFPA
-                phk
-                jsr     do_atn_internal2
-                rtl
+                
+		INTJSL	divDP7AbyFPA
+                
+		INTJSL	do_atn_internal2
+		INTRTL
 
 FPAeqPIdiv2:    lda     #<fpConst_PIdiv2
-                phk
-                jsr     FPAeqConstA
-                rtl
+                
+		INTJSL	FPAeqConstA
+		INTRTL
 
 do_atn_internal:
-                phk                                     ;TODO: just drop through FFS?
-                jsr     do_atn_internal2
-                rtl
+                                                     ;TODO: just drop through FFS?
+		INTJSL	do_atn_internal2
+		INTRTL
 
 do_atn_internal2:
-                phk
-                jsr     fpCheckMant0SetSignExp0
+                
+		INTJSL	fpCheckMant0SetSignExp0
                 bne     @sk
                 brl     retRETV_REAL
 
 @sk:            bpl     @sk2
                 stz     DP_ART_FPA
-                phk
-                jsr     @sk2
+                
+		INTJSL	@sk2
                 sta     DP_ART_FPA
-                rtl
+		INTRTL
 
 @sk2:           lda     DP_ART_FPA+2
                 cmp     #$81
                 bcc     do_atn_internal3
-                phk
-                jsr     FPAeq1divFPA
-                phk
-                jsr     do_atn_internal3
+                
+		INTJSL	FPAeq1divFPA
+                
+		INTJSL	do_atn_internal3
 FPAeqminusFPAminusPIdiv2:
-                phk
-                jsr     PtrCeqPIdiv2
-                phk
-                jsr     FPAeqminusFPAminusPtrCround7
+                
+		INTJSL	PtrCeqPIdiv2
+                
+		INTJSL	FPAeqminusFPAminusPtrCround7
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
 do_atn_internal3:
                 lda     DP_ART_FPA+2
@@ -1679,157 +1694,157 @@ do_atn_internal3:
                 bcs     @sk
                 brl     retRETV_REAL
 
-@sk:            phk
-                jsr     FPAcopyNormToDP7A
-                phk
-                jsr     LBADE
+@sk:            
+		INTJSL	FPAcopyNormToDP7A
+                
+		INTJSL	LBADE
                 lda     #$80
                 sta     DP_47_QRY
                 sta     DP_47_QRY+1
                 sta     DP_ART_FPB
-                phk
-                jsr     FPAeqFPAminusFPBround7
+                
+		INTJSL	FPAeqFPAminusFPBround7
                 ldx     #<fpConst_min0_08005
                 lda     #<fpConst_0_9273
                 ldy     #$04
-                phk
-                jsr     trigMagicWiConstAandX_Ytimes
+                
+		INTJSL	trigMagicWiConstAandX_Ytimes
                 jmp     PtrCtoDP7A
 
 setPtrCConstRad2Deg:
                 lda     #<fpConst_Rad2Deg
-                phk
-                jsr     FPAmulbyPiDiv2
-                rtl
+                
+		INTJSL	FPAmulbyPiDiv2
+		INTRTL
 
 setPtrCConstDeg2Rad:
                 lda     #<fpConst_Deg2Rad
-                phk
-                jsr     FPAmulbyPiDiv2
-                rtl
+                
+		INTJSL	FPAmulbyPiDiv2
+		INTRTL
 
-LB9CB:          phk
-                jsr     LBE76
+LB9CB:          
+		INTJSL	LBE76
                 lda     #<fpConst_0_43429
-                phk
-                jsr     FPAmulbyPiDiv2
-                rtl
+                
+		INTJSL	FPAmulbyPiDiv2
+		INTRTL
 
-LB9D6:          phk
-                jsr     LBE76
-                rtl
+LB9D6:          
+		INTJSL	LBE76
+		INTRTL
 
-LB9DB:          phk
-                jsr     LBF1C
-                rtl
+LB9DB:          
+		INTJSL	LBF1C
+		INTRTL
 
 FPAeq1divFPA:   lda     #<fpConst_1_0
-                phk
-                jsr     PtrCeqFPConstA
+                
+		INTJSL	PtrCeqFPConstA
                 jmp     divPtrCByFPA
 
 FPAeqminusFPAminusPtrCround7:
-                phk
-                jsr     FPAnegate
+                
+		INTJSL	FPAnegate
 FPAeqFPAminusPtrCround7:
-                phk
-                jsr     unpackPtrCtoFPB
+                
+		INTJSL	unpackPtrCtoFPB
                 bne     FPAeqFPAminusFPBround7
                 jmp     rtlLBAD7
 
 FPAeqFPAminusFPBround7:
-                phk
-                jsr     FPAeqFPAminusFPB
+                
+		INTJSL	FPAeqFPAminusFPB
                 jmp     FPAmantRound7
 
 FPAeqFPAmulFPBandRound7:
-                phk
-                jsr     FPAeqFPAmulFPB
+                
+		INTJSL	FPAeqFPAmulFPB
                 jmp     FPAmantRound7
 
-                phk                                     ;TODO: dead code?
-                jsr     intA2RealFPA
-                phk
-                jsr     copy4atPtrAtoINTAincPtr4
-                phk
-                jsr     LBE4D
-                phk
-                jsr     intA2RealFPA
+                                                     ;TODO: dead code?
+		INTJSL	intA2RealFPA
+                
+		INTJSL	copy4atPtrAtoINTAincPtr4
+                
+		INTJSL	LBE4D
+                
+		INTJSL	intA2RealFPA
                 bra     @LBA23
 
-                phk                                     ;TODO: dead code?
-                jsr     intA2RealFPA
-                phk
-                jsr     LBE4D
+                                                     ;TODO: dead code?
+		INTJSL	intA2RealFPA
+                
+		INTJSL	LBE4D
                 tay
-                phk
-                jsr     LBC81
-@LBA23:         phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     FPAeqFPAmulFPBandRound7
+                
+		INTJSL	LBC81
+@LBA23:         
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	FPAeqFPAmulFPBandRound7
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
                 jmp     brk_06_TypeMismatch             ;TODO: dead code?
 
 LBA31:          lda     DP_ART_FPA+2
                 cmp     #$87
                 bcs     LBA90
-                phk
-                jsr     LB6DD
+                
+		INTJSL	LB6DD
                 bne     @LBA4F
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     unpackPtrCtoFPA
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	unpackPtrCtoFPA
                 phk
                 plb
                 lda     DP_ART_thetaQuadrant
-                phk
-                jsr     LBD19
+                
+		INTJSL	LBD19
                 bra     rtlRETV_REAL2
 
-@LBA4F:         phk
-                jsr     FPAcopyNormToDP7A
+@LBA4F:         
+		INTJSL	FPAcopyNormToDP7A
                 lda     DP_ART_PtrA
                 sta     DP_ART_PtrC
                 lda     DP_ART_PtrA+1
                 sta     DP_ART_PtrC+1
                 lda     DP_ART_PtrA+2
                 sta     DP_ART_PtrC+2
-                phk
-                jsr     unpackPtrCtoFPA
+                
+		INTJSL	unpackPtrCtoFPA
                 phk
                 plb
                 lda     DP_ART_thetaQuadrant
-                phk
-                jsr     LBD19
+                
+		INTJSL	LBD19
 LBA6B:          lda     #DP_75_QRY
-                phk
-                jsr     FPAcopyNormToDPA
-                phk
-                jsr     ptrCeqptrAPtrAinc5
-                phk
-                jsr     unpackPtrCtoFPA
+                
+		INTJSL	FPAcopyNormToDPA
+                
+		INTJSL	ptrCeqptrAPtrAinc5
+                
+		INTJSL	unpackPtrCtoFPA
                 phk
                 plb
-                phk
-                jsr     LBE76
-                phk
-                jsr     PtrCtoDP7A
-                phk
-                jsr     LBF1C
+                
+		INTJSL	LBE76
+                
+		INTJSL	PtrCtoDP7A
+                
+		INTJSL	LBF1C
                 lda     #DP_75_QRY
-                phk
-                jsr     PtrCtoDPinA
+                
+		INTJSL	PtrCtoDPinA
 rtlRETV_REAL2:  lda     #RETV_REAL
-                rtl
+		INTRTL
 
-LBA90:          phk
-                jsr     FPAcopyNormToDP7A
-                phk
-                jsr     LBD36
+LBA90:          
+		INTJSL	FPAcopyNormToDP7A
+                
+		INTJSL	LBD36
                 bra     LBA6B
 
 add5ToConstPtrLSB:
@@ -1838,7 +1853,7 @@ add5ToConstPtrLSB:
                 adc     #$05
                 sta     DP_58_QRY
                 sta     DP_ART_PtrC
-                rtl
+		INTRTL
 
 PtrCeqPIdiv2:   lda     #<fpConst_PIdiv2
 PtrCeqFPConstA: sta     DP_ART_PtrC
@@ -1847,7 +1862,7 @@ PtrCeqFPConstA: sta     DP_ART_PtrC
                 phk
                 pla
                 sta     DP_ART_PtrC+2
-                rtl
+		INTRTL
 
                 lda     #DP_75_QRY                      ;TODO: DP pointer - DEAD CODE?
                 bra     PtrCeqDPA
@@ -1862,7 +1877,7 @@ PtrCeqDPA:      phd
                 sta     DP_ART_PtrC+1
                 stz     DP_ART_PtrC+2
                 pld
-                rtl
+		INTRTL
 
 clrFPA:         stz     DP_ART_FPA+2
                 stz     DP_ART_FPA+3
@@ -1872,7 +1887,7 @@ LBACB:          stz     DP_ART_FPA
                 stz     DP_ART_FPA+5
                 stz     DP_ART_FPA+6
 zeroFPA7rtl:    stz     DP_ART_FPA+7
-rtlLBAD7:       rtl
+rtlLBAD7:       INTRTL
 
 clrFPB:         stz     DP_ART_FPB
                 stz     DP_47_QRY
@@ -1881,7 +1896,7 @@ LBADE:          stz     DP_ART_FPB+4
                 stz     DP_ART_FPB+5
                 stz     DP_ART_FPB+6
                 stz     DP_ART_FPB+7
-                rtl
+		INTRTL
 
 LBAE7:          lda     DP_ART_FPA
                 sta     DP_ART_FPB
@@ -1897,7 +1912,7 @@ LBAE7:          lda     DP_ART_FPA
                 sta     DP_ART_FPB+6
                 lda     DP_ART_FPA+7
                 sta     DP_ART_FPB+7
-                rtl
+		INTRTL
 
 brk_14_TooBig:  brk     $14
 
@@ -1917,32 +1932,32 @@ brk_14_TooBig:  brk     $14
                 sta     DP_ART_INTA+2
                 lda     #RETV_INT
                 sec
-                rtl
+		INTRTL
 
 @LBB2B:         lda     #$a8
                 sta     DP_ART_FPA+2
                 stz     DP_ART_FPA+1
                 stz     DP_ART_FPA
-                phk
-                jsr     normFPAmant2
+                
+		INTJSL	normFPAmant2
                 lda     DP_53_QRY
                 bmi     @LBB47
                 beq     @LBB4F
-@LBB3D:         phk
-                jsr     LBB6A
+@LBB3D:         
+		INTJSL	LBB6A
                 dec     DP_53_QRY
                 bne     @LBB3D
                 bra     @LBB4F
 
-@LBB47:         phk
-                jsr     LBBAE
+@LBB47:         
+		INTJSL	LBBAE
                 inc     DP_53_QRY
                 bne     @LBB47
-@LBB4F:         phk
-                jsr     FPAmantRound7
+@LBB4F:         
+		INTJSL	FPAmantRound7
                 sec
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
 storeDPXatINTA: lda     $00,x                           ;TODO: optimize - only called once inline?
                 sta     DP_ART_INTA
@@ -1953,7 +1968,7 @@ storeDPXatINTA: lda     $00,x                           ;TODO: optimize - only c
                 lda     $03,x
                 sta     DP_ART_INTA+3
                 lda     #RETV_INT
-                rtl
+		INTRTL
 
 LBB6A:          clc
                 lda     DP_ART_FPA+2
@@ -1961,10 +1976,10 @@ LBB6A:          clc
                 sta     DP_ART_FPA+2
                 bcc     @LBB75
                 inc     DP_ART_FPA+1
-@LBB75:         phk
-                jsr     LBD91
-                phk
-                jsr     LBD95
+@LBB75:         
+		INTJSL	LBD91
+                
+		INTJSL	LBD95
 addFPBtoFPAmantAndIncExpIfCy:
                 lda     DP_ART_FPA+7
                 adc     DP_ART_FPB+7
@@ -1991,7 +2006,7 @@ FPAmantrorIncExp:
                 inc     DP_ART_FPA+2
                 bne     rtl1
                 inc     DP_ART_FPA+1
-rtl1:           rtl
+rtl1:           INTRTL
 
 LBBAE:          sec
                 lda     DP_ART_FPA+2
@@ -1999,20 +2014,20 @@ LBBAE:          sec
                 sta     DP_ART_FPA+2
                 bcs     @LBBB9
                 dec     DP_ART_FPA+1
-@LBBB9:         phk
-                jsr     LBD91
-                phk
-                jsr     addFPBtoFPAmantAndIncExpIfCy
-                phk
-                jsr     LBD91
-                phk
-                jsr     LBD95
-                phk
-                jsr     LBD95
-                phk
-                jsr     LBD95
-                phk
-                jsr     addFPBtoFPAmantAndIncExpIfCy
+@LBBB9:         
+		INTJSL	LBD91
+                
+		INTJSL	addFPBtoFPAmantAndIncExpIfCy
+                
+		INTJSL	LBD91
+                
+		INTJSL	LBD95
+                
+		INTJSL	LBD95
+                
+		INTJSL	LBD95
+                
+		INTJSL	addFPBtoFPAmantAndIncExpIfCy
                 stz     DP_47_QRY+1
                 lda     DP_ART_FPA+3
                 sta     DP_ART_FPB+4
@@ -2024,8 +2039,8 @@ LBBAE:          sec
                 sta     DP_ART_FPB+7
                 lda     DP_ART_FPA+7
                 rol     A
-                phk
-                jsr     addFPBtoFPAmantAndIncExpIfCy
+                
+		INTJSL	addFPBtoFPAmantAndIncExpIfCy
                 stz     DP_ART_FPB+4
                 lda     DP_ART_FPA+3
                 sta     DP_ART_FPB+5
@@ -2035,8 +2050,8 @@ LBBAE:          sec
                 sta     DP_ART_FPB+7
                 lda     DP_ART_FPA+6
                 rol     A
-                phk
-                jsr     addFPBtoFPAmantAndIncExpIfCy
+                
+		INTJSL	addFPBtoFPAmantAndIncExpIfCy
                 lda     DP_ART_FPA+4
                 rol     A
                 lda     DP_ART_FPA+3
@@ -2053,8 +2068,7 @@ incFPAmant5_3_IncExpIfOv:
                 inc     DP_ART_FPA+3
                 bne     rtl2
                 jmp     FPAmantrorIncExp
-
-rtl2:           rtl
+rtl2:           INTRTL
 
 unpackPtrCtoFPB:
                 stz     DP_ART_FPB+7
@@ -2082,25 +2096,25 @@ unpackPtrCtoFPB:
 @notZ:          tya
                 ora     #$80
 @zero:          sta     DP_47_QRY+1
-                rtl
+		INTRTL
 
-                phk                                     ;TODO: dead code to LBC53
-                jsr     FPAeqminusFPAminusPtrCround7
+                                                     ;TODO: dead code to LBC53
+		INTJSL	FPAeqminusFPAminusPtrCround7
 FPAnegate:      lda     DP_ART_FPA+3
                 beq     @sk
                 lda     DP_ART_FPA
                 eor     #$80
                 sta     DP_ART_FPA
 @sk:            lda     #RETV_REAL
-                rtl
+		INTRTL
 
                 jmp     brk_06_TypeMismatch             ;TODO: DEAD CODE?
 
                 lda     DP_ART_PtrA                     ;TODO: DEAD CODE?
                 sec
                 sbc     #$04
-                phk
-                jsr     LBD03
+                
+		INTJSL	LBD03
                 ldy     #$03
                 lda     DP_ART_INTA+3
                 sta     [DP_ART_PtrA],y
@@ -2112,7 +2126,7 @@ FPAnegate:      lda     DP_ART_FPA+3
                 sta     [DP_ART_PtrA],y
                 lda     DP_ART_INTA
                 sta     [DP_ART_PtrA]
-                rtl
+		INTRTL
 
 LBC81:          bne     @LBC86
                 jmp     LBDCD
@@ -2160,7 +2174,7 @@ unpackPtrCtoFPA:
 @skNotZ:        tya
                 ora     #$80
 @skzero:        sta     DP_ART_FPA+3
-                rtl
+		INTRTL
 
 FPAcopyNormToDP7A:
                 lda     #DP_7A_QRY
@@ -2196,7 +2210,7 @@ FPAcopyNormToPtrC:
                 lda     DP_ART_FPA+6
                 iny
                 sta     [DP_ART_PtrC],y
-                rtl
+		INTRTL
 
 LBD03:          sta     DP_ART_PtrA
                 bcs     @LBD09
@@ -2207,7 +2221,7 @@ LBD03:          sta     DP_ART_PtrA
                 bne     @LBD15
                 cmp     $03
                 bcc     @LBD16
-@LBD15:         rtl
+@LBD15:         INTRTL
 
 @LBD16:         jmp     rtlLBF9D
 
@@ -2216,19 +2230,19 @@ LBD19:          tax
                 dec     A
                 eor     #$ff
                 pha
-                phk
-                jsr     FPAeq1divFPA
+                
+		INTJSL	FPAeq1divFPA
                 plx
 @LBD25:         beq     LBD36
-                phk
-                jsr     FPAcopyNormToDP70
+                
+		INTJSL	FPAcopyNormToDP70
                 dex
                 beq     @LBD35
-@LBD2E:         phk
-                jsr     FPAeqFPAmulFPBandRound7
+@LBD2E:         
+		INTJSL	FPAeqFPAmulFPBandRound7
                 dex
                 bne     @LBD2E
-@LBD35:         rtl
+@LBD35:         INTRTL
 
 LBD36:          lda     #$80
                 sta     DP_ART_FPA+3
@@ -2241,8 +2255,8 @@ LBD36:          lda     #$80
                 lsr     A
                 lsr     A
                 lsr     A
-                phk
-                jsr     rtlLBF9D
+                
+		INTJSL	rtlLBF9D
                 lda     #$f0
                 trb     DP_ART_FPA+3
                 pha
@@ -2284,34 +2298,34 @@ LBD36:          lda     #$80
                 rol     A
                 sta     DP_ART_FPA+3
                 pla
-                rtl
+		INTRTL
 
-LBD91:          phk
-                jsr     LBAE7
+LBD91:          
+		INTJSL	LBAE7
 LBD95:          lsr     DP_47_QRY+1
                 ror     DP_ART_FPB+4
                 ror     DP_ART_FPB+5
                 ror     DP_ART_FPB+6
                 ror     DP_ART_FPB+7
-                rtl
+		INTRTL
 
 jmpbrk12DivisionByZero:
                 jmp     brk_12_DivisionByZero
 
 tblDivConsts:   .byte   $02,$08,$08,$08
 
-                phk                                     ;TODO: DEAD CODE
-                jsr     LBDD0
+                                                     ;TODO: DEAD CODE
+		INTJSL	LBDD0
                 bra     @LBDB4
 
-                phk                                     ;TODO: DEAD CODE entry to LBDB4
-                jsr     rtlLBF9D
+                                                     ;TODO: DEAD CODE entry to LBDB4
+		INTJSL	rtlLBF9D
                 lda     DP_ATL_X_SAV
                 tay
 @LBDB4:         beq     LBDCD
                 bpl     LBDCC
-FPAtoINTAasint: phk
-                jsr     FPAmantToInt
+FPAtoINTAasint: 
+		INTJSL	FPAmantToInt
                 lda     DP_ART_FPA+3
                 sta     DP_ART_INTA+3
                 lda     DP_ART_FPA+4
@@ -2320,11 +2334,11 @@ FPAtoINTAasint: phk
                 sta     DP_ART_INTA+1
                 lda     DP_ART_FPA+6
                 sta     DP_ART_INTA
-LBDCC:          rtl
+LBDCC:          INTRTL
 
 LBDCD:          jmp     brk_06_TypeMismatch
 
-LBDD0:          rtl
+LBDD0:          INTRTL
 
 ptrCeqptrAPtrAinc5:
                 lda     DP_ART_PtrA
@@ -2338,7 +2352,7 @@ ptrCeqptrAPtrAinc5:
                 sta     DP_ART_PtrA+1
                 lda     DP_ART_PtrA+2
                 sta     DP_ART_PtrC+2
-                rtl
+		INTRTL
 
 fpCheckMant0SetSignExp0:
                 lda     DP_ART_FPA+3
@@ -2350,12 +2364,12 @@ fpCheckMant0SetSignExp0:
                 lda     DP_ART_FPA
                 bne     @rtl
                 inc     A
-                rtl
+		INTRTL
 
 @sk:            stz     DP_ART_FPA
                 stz     DP_ART_FPA+2
                 stz     DP_ART_FPA+1
-@rtl:           rtl
+@rtl:           INTRTL
 
 stINTAatDPX:    lda     DP_ART_INTA                     ;TODO: optimize - only called once - inline?
                 sta     $00,x
@@ -2365,7 +2379,7 @@ stINTAatDPX:    lda     DP_ART_INTA                     ;TODO: optimize - only c
                 sta     $02,x
                 lda     DP_ART_INTA+3
                 sta     $03,x
-                rtl
+		INTRTL
 
 copy4atPtrAtoINTAincPtr4:
                 ldy     #$03
@@ -2393,7 +2407,7 @@ PtrAinc4:       clc
                 bcc     @rtl
                 inc     DP_ART_PtrA+2
         .ENDIF
-@rtl:           rtl
+@rtl:           INTRTL
 
                 ldx     #$41                            ;TODO: DEAD CODE
                 ldy     #$03
@@ -2412,8 +2426,8 @@ PtrAinc4:       clc
 LBE4D:          lda     DP_ART_PtrA
                 sec
                 sbc     #$05
-                phk
-                jsr     LBD03
+                
+		INTJSL	LBD03
                 lda     DP_ART_FPA+2
                 sta     [DP_ART_PtrA]
                 ldy     #$01
@@ -2431,10 +2445,10 @@ LBE4D:          lda     DP_ART_PtrA
                 iny
                 lda     DP_ART_FPA+6
                 sta     [DP_ART_PtrA],y
-                rtl
+		INTRTL
 
-LBE76:          phk
-                jsr     fpCheckMant0SetSignExp0
+LBE76:          
+		INTJSL	fpCheckMant0SetSignExp0
                 beq     @LBE7E
                 bpl     LBE94
 @LBE7E:         brk     $16
@@ -2447,8 +2461,8 @@ brk_15_nve_root:
                 .byte   "-ve root"
                 .byte   $00
 
-LBE94:          phk
-                jsr     LBADE
+LBE94:          
+		INTJSL	LBADE
                 ldy     #$80
                 sty     DP_ART_FPB
                 sty     DP_47_QRY+1
@@ -2463,39 +2477,39 @@ LBE94:          phk
                 dey
 @LBEAD:         phx
                 sty     DP_ART_FPA+2
-                phk
-                jsr     FPAeqFPAminusFPBround7
+                
+		INTJSL	FPAeqFPAminusFPBround7
                 lda     #DP_7F_QRY
-                phk
-                jsr     FPAcopyNormToDPA
+                
+		INTJSL	FPAcopyNormToDPA
                 ldx     #<fpConst_0_54625
                 lda     #<fpConst_min_0_5
                 ldy     #$02
-                phk
-                jsr     trigMagicWiConstAandX_Ytimes
+                
+		INTJSL	trigMagicWiConstAandX_Ytimes
                 lda     #DP_7F_QRY
-                phk
-                jsr     PtrCtoDPinA
-                phk
-                jsr     FPAeqFPAmulFPBandRound7
-                phk
-                jsr     FPAeqFPAminusPtrCround7
-                phk
-                jsr     FPAcopyNormToDP70
+                
+		INTJSL	PtrCtoDPinA
+                
+		INTJSL	FPAeqFPAmulFPBandRound7
+                
+		INTJSL	FPAeqFPAminusPtrCround7
+                
+		INTJSL	FPAcopyNormToDP70
                 pla
                 sec
                 sbc     #$81
-                phk
-                jsr     LB59B
+                
+		INTJSL	LB59B
                 lda     #<fpConst_ln_2
-                phk
-                jsr     FPAmulbyPiDiv2
-                phk
-                jsr     PtrCeqDP70
-                phk
-                jsr     FPAeqFPAminusPtrCround7
+                
+		INTJSL	FPAmulbyPiDiv2
+                
+		INTJSL	PtrCeqDP70
+                
+		INTJSL	FPAeqFPAminusPtrCround7
 rtlRETV_REAL:   lda     #RETV_REAL
-                rtl
+		INTRTL
 
 PtrCtoDP7A:     lda     #DP_7A_QRY
 PtrCtoDPinA:    phd
@@ -2515,10 +2529,10 @@ XYAtoPTRCFPAmulFPBround:
                 stx     DP_ART_PtrC+2
                 plx
 FPAeqFPAmulFPBandRound7retREAL:
-                phk
-                jsr     FPAeqFPAmulFPBandRound7
+                
+		INTJSL	FPAeqFPAmulFPBandRound7
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
 brk_18_ExpRange:
                 brk     $18
@@ -2536,21 +2550,21 @@ LBF1C:          lda     DP_ART_FPA+2
                 bpl     brk_18_ExpRange
                 jmp     clrFPA
 
-@LBF31:         phk
-                jsr     LB6DD
+@LBF31:         
+		INTJSL	LB6DD
                 ldx     #<fpConst_0_07121
                 lda     #<fpConst_1_2
                 ldy     #$03
-                phk
-                jsr     trigMagicWiConstAandX_Ytimes
-                phk
-                jsr     FPAcopyNormToDP7A
+                
+		INTJSL	trigMagicWiConstAandX_Ytimes
+                
+		INTJSL	FPAcopyNormToDP7A
                 lda     #<fpConst_e
-                phk
-                jsr     FPAeqConstA
+                
+		INTJSL	FPAeqConstA
                 lda     DP_ART_thetaQuadrant
-                phk
-                jsr     LBD19
+                
+		INTJSL	LBD19
                 bra     PtrCtoDP7A
 
 trigMagicWiConstAandX_Ytimes:
@@ -2559,21 +2573,21 @@ trigMagicWiConstAandX_Ytimes:
                 ldx     DP_ART_FPA+2
                 cpx     #$40
                 bcc     FPAeqConstA
-                phk
-                jsr     FPAeq1divFPA
-                phk
-                jsr     FPAcopyNormToDP70
+                
+		INTJSL	FPAeq1divFPA
+                
+		INTJSL	FPAcopyNormToDP70
                 lda     DP_58_QRY
-                phk
-                jsr     PtrCeqFPConstA
-                phk
-                jsr     FPAeqFPAminusPtrCround7
-@lp:            phk
-                jsr     @sk
-                phk
-                jsr     PtrCeqDP70
-                phk
-                jsr     FPAeqFPAminusPtrCround7
+                
+		INTJSL	PtrCeqFPConstA
+                
+		INTJSL	FPAeqFPAminusPtrCround7
+@lp:            
+		INTJSL	@sk
+                
+		INTJSL	PtrCeqDP70
+                
+		INTJSL	FPAeqFPAminusPtrCround7
                 dec     DP_52_QRY
                 bne     @lp
 @sk:            lda     #>fpConst_MinPiDiv2
@@ -2583,27 +2597,25 @@ trigMagicWiConstAandX_Ytimes:
                 pla
                 sta     DP_ART_PtrC+2
                 pla                                     ;TODO: pointless?
-                phk
-                jsr     add5ToConstPtrLSB
-                phk
-                jsr     divPtrCByFPA
-                phk
-                jsr     add5ToConstPtrLSB
+                
+		INTJSL	add5ToConstPtrLSB
+                
+		INTJSL	divPtrCByFPA
+                
+		INTJSL	add5ToConstPtrLSB
                 jmp     FPAeqFPAminusPtrCround7
 
-FPAeqConstA:    phk
-                jsr     PtrCeqFPConstA
+FPAeqConstA:    
+		INTJSL	PtrCeqFPConstA
                 jmp     unpackPtrCtoFPA
-
-rtlLBF9D:       rtl
+rtlLBF9D:       INTRTL
 
 FPAmulbyPiDiv2: ldy     #>fpConst_MinPiDiv2
                 phx
                 phk
                 plx
                 jmp     XYAtoPTRCFPAmulFPBround
-
-                rtl                                     ;TODO: DEAD?
+		INTRTL                                     ;TODO: DEAD?
 
 copyYpl1PtrAtoPtrB:
                 lda     [DP_ART_PtrA],y
@@ -2655,11 +2667,11 @@ copyWKSPtoPtrB: pha
                 lda     DP_ART_PtrA+2
                 adc     #$00
                 sta     DP_ART_PtrA+2
-                rtl
+		INTRTL
 
 fpFPAeq_sqrt_FPA:
-                phk
-                jsr     fpCheckMant0SetSignExp0
+                
+		INTJSL	fpCheckMant0SetSignExp0
                 bne     @sk
                 brl     rtlRETV_REAL
 
@@ -2678,8 +2690,8 @@ fpFPAeq_sqrt_FPA:
                 ror     DP_ART_FPA+5
                 ror     DP_ART_FPA+6
                 ror     DP_ART_FPA+7
-@sk6:           phk
-                jsr     clrFPB
+@sk6:           
+		INTJSL	clrFPB
                 stz     DP_ART_FPTMP+1
                 stz     DP_ART_FPTMP+2
                 stz     DP_ART_FPTMP+3
@@ -2750,16 +2762,16 @@ fpFPAeq_sqrt_FPA:
                 inx
                 cpx     #$05
                 bne     @lp1
-                phk
-                jsr     copyFPBmantToFPA
+                
+		INTJSL	copyFPBmantToFPA
                 lda     DP_ART_FPA+3
                 bmi     @normRetFPA
-                phk
-                jsr     normFPAmant3
-@normRetFPA:    phk
-                jsr     FPAmantRound7
+                
+		INTJSL	normFPAmant3
+@normRetFPA:    
+		INTJSL	FPAmantRound7
                 lda     #RETV_REAL
-                rtl
+		INTRTL
 
 trigNormaltheta:
                 lda     DP_ART_FPA+2
@@ -2767,89 +2779,89 @@ trigNormaltheta:
                 bcc     @sk
                 brl     brk_17_accuracyLost
 
-@sk:            phk
-                jsr     FPAcopyNormToDP70
-                phk
-                jsr     PtrCeqPIdiv2
-                phk
-                jsr     unpackPtrCtoFPB
+@sk:            
+		INTJSL	FPAcopyNormToDP70
+                
+		INTJSL	PtrCeqPIdiv2
+                
+		INTJSL	unpackPtrCtoFPB
                 lda     DP_ART_FPA
                 sta     DP_ART_FPB
                 dec     DP_47_QRY
-                phk
-                jsr     FPAeqFPAminusFPBround7
+                
+		INTJSL	FPAeqFPAminusFPBround7
                 lda     #<fpConst_2DivPi                ;TODO: not needed?
-                phk
-                jsr     FPAmulbyPiDiv2
-                phk
-                jsr     FPAtoINTAasint
+                
+		INTJSL	FPAmulbyPiDiv2
+                
+		INTJSL	FPAtoINTAasint
                 sta     DP_ART_thetaQuadrant
                 ora     DP_ART_INTA+1
                 ora     DP_ART_INTA+2
                 beq     @sk0theta
-                phk
-                jsr     LB54E
+                
+		INTJSL	LB54E
                 lda     #DP_75_QRY
-                phk
-                jsr     FPAcopyNormToDPA
+                
+		INTJSL	FPAcopyNormToDPA
                 lda     #<fpConst_MinPiDiv2
-                phk
-                jsr     FPAmulbyPiDiv2
-                phk
-                jsr     PtrCeqDP70
-                phk
-                jsr     FPAeqFPAminusPtrCround7
-                phk
-                jsr     FPAcopyNormToPtrC
+                
+		INTJSL	FPAmulbyPiDiv2
+                
+		INTJSL	PtrCeqDP70
+                
+		INTJSL	FPAeqFPAminusPtrCround7
+                
+		INTJSL	FPAcopyNormToPtrC
                 lda     #DP_75_QRY
-                phk
-                jsr     unpackDPAtoFPA
+                
+		INTJSL	unpackDPAtoFPA
                 lda     #<fpConst_4_454e_6
-                phk
-                jsr     FPAmulbyPiDiv2
-                phk
-                jsr     PtrCeqDP70
-                phk
-                jsr     FPAeqFPAminusPtrCround7
+                
+		INTJSL	FPAmulbyPiDiv2
+                
+		INTJSL	PtrCeqDP70
+                
+		INTJSL	FPAeqFPAminusPtrCround7
                 bra     @sk2theta
 
-@sk0theta:      phk
-                jsr     unpackDP70toFPA
-@sk2theta:      phk
-                jsr     FPAcopyNormToDP7A
-                phk
-                jsr     FPAeqFPAmulFPBandRound7
+@sk0theta:      
+		INTJSL	unpackDP70toFPA
+@sk2theta:      
+		INTJSL	FPAcopyNormToDP7A
+                
+		INTJSL	FPAeqFPAmulFPBandRound7
                 ldx     #<fpConst_min_0_011909
                 lda     #<fpConst_1_0
                 ldy     #$02
-                phk
-                jsr     trigMagicWiConstAandX_Ytimes
+                
+		INTJSL	trigMagicWiConstAandX_Ytimes
                 brl     PtrCtoDP7A
 
 doSINCOS_internal2:
                 lda     #$02
                 bit     DP_ART_thetaQuadrant
                 beq     @sk1
-                phk
-                jsr     @sk1
+                
+		INTJSL	@sk1
                 jmp     FPAnegate
 
 @sk1:           lda     DP_ART_thetaQuadrant
                 lsr     A
                 bcs     doSINCOS_internal3
 retRETV_REAL:   lda     #RETV_REAL
-                rtl
+		INTRTL
 
 doSINCOS_internal3:
-                phk
-                jsr     FPAcopyNormToDP70
-                phk
-                jsr     FPAeqFPAmulFPBandRound7
+                
+		INTJSL	FPAcopyNormToDP70
+                
+		INTJSL	FPAeqFPAmulFPBandRound7
                 lda     #<fpConst_1_0
-                phk
-                jsr     PtrCeqFPConstA
-                phk
-                jsr     FPAeqminusFPAminusPtrCround7
+                
+		INTJSL	PtrCeqFPConstA
+                
+		INTJSL	FPAeqminusFPAminusPtrCround7
                 jmp     fpFPAeq_sqrt_FPA
 
 brk_06_TypeMismatch:
@@ -2874,6 +2886,7 @@ brk_42_BadFN:   brk     $42
                 .byte   "Error!!!"
                 .byte   $00
 
+        .IFDEF COMMUNICATOR
 call_MM:        jsl     _MM
                 rts
 
@@ -2881,3 +2894,4 @@ call_MM:        jsl     _MM
                 .byte   $d2
                 .byte   $8e
                 .byte   $ff
+        .ENDIF

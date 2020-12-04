@@ -14,7 +14,7 @@
 ; ARITH module functions
 ;=========================================================================
 
-ARITH_FN_0C_UK  =       $0c
+ARITH_FN_MUL    =       $0C
 ARITH_FN_POWER  =       $10
 ARITH_FN_SIN    =       $12
 ARITH_FN_COS    =       $14
