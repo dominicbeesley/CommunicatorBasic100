@@ -364,6 +364,19 @@ MOS_shims_init:
                 lda	#^shim_brk_to_emu
                 sta	NATVEC_BRK+2
 
+                ; install our new BRKV handler to allow jumping long
+                ; put old BRK handler in new vector
+                lda	#0
+                sta	NATVEC_BRK_EMU+2
+                lda	BRKV
+                sta	NATVEC_BRK_EMU
+                lda	BRKV+1
+                sta	NATVEC_BRK_EMU+1
+
+                lda	#<shim_brk_emu
+                sta	BRKV
+                lda	#>shim_brk_emu
+                sta	BRKV+1
 
 		plp
 		rts
@@ -418,6 +431,20 @@ MOS_shims_init:
                 sta	NATVEC_BRK+1
                 lda	#^shim_brk_to_emu
                 sta	NATVEC_BRK+2
+
+                ; install our new BRKV handler to allow jumping long
+                ; put old BRK handler in new vector
+                lda	#0
+                sta	NATVEC_BRK_EMU+2
+                lda	BRKV
+                sta	NATVEC_BRK_EMU
+                lda	BRKV+1
+                sta	NATVEC_BRK_EMU+1
+
+                lda	#<shim_brk_emu
+                sta	BRKV
+                lda	#>shim_brk_emu
+                sta	BRKV+1
 
 
 		plp
@@ -490,7 +517,7 @@ nat_OSBYTE:	; force emulation, we don't care about A,X,Y losing 16bitness, OSBYT
 		sec
 		xce
 		jsr	OSBYTE
-		bcs	ret_SEC
+		bcs	ret_SEC		
 
 ret_CLC:
 		clc
@@ -509,11 +536,35 @@ ret_SEC:
 		sec
 		rtl
 
+; note this expects X/Y to point to a string in Bank0!
+
+nat_OSCLI:
+		php				; save flags			
+		phd
+		phb
+
+		phk				; reset direct page register for MOSishness
+		phk
+		pld
+
+		phk
+		plb				; reset databank register TODO: is this the most efficient way?
+
+		sec
+		xce				; enter emulation mode
+
+		jsr	OSCLI
+		bra	ret_CLC
 
 
+		; this is installed in the normal MOS brk vector and then jml onwards
+		; the default action is to call the old handler (when we were entered)
+shim_brk_emu:	jml	(NATVEC_BRK_EMU)
 
+		; this handles native mode interrupts
 shim_brk:	jml	(NATVEC_BRK)
 
+		; this is the default behaviour...pass down to the normal MOS handler
 shim_brk_to_emu:
 		; BRK vector in native mode stack will contain:
 		;		+ 4		Program bank

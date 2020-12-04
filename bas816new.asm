@@ -868,6 +868,14 @@ MOSStart:
                 lda     #<BRK_HANDLER
                 sta     f:NATVEC_BRK
 
+                lda     #^BRK_HANDLER_EMU
+                sta     f:NATVEC_BRK_EMU+2
+                lda     #>BRK_HANDLER_EMU
+                sta     f:NATVEC_BRK_EMU+1
+                lda     #<BRK_HANDLER_EMU
+                sta     f:NATVEC_BRK_EMU
+
+
                 lda     #^strCopyright
                 sta     DP_BAS_BL_ERRPTR+2
                 lda     #>strCopyright
@@ -3557,7 +3565,7 @@ parse_skip_spaces_CMPcommaBRK:
 brk_05_missing_comma:
                 brk     $05
 
-                .byte   $8d
+                .byte   tknMissing
                 .byte   ','
                 .byte   $00
 
@@ -3765,7 +3773,22 @@ doOSCLIatPTR2:  jsr     parse_updPTRfromPTR2_yield
                 plb
         .ENDIF ;COMMUNICATOR
         .IFDEF MOS
-                TODO "MOS: OSCLI"
+                ;TODO move the copy to the native handler?
+                ; copy down to bank 0 and run from there
+                phb
+                ldy     #0
+                phy
+                plb
+@lposc:         lda     [DP_BAS_TXTPTR2],Y
+                sta     BANK0_SCRATCH_PAGE,Y
+                cmp     #$0D
+                beq     @skosc
+                iny
+                bne     @lposc
+@skosc:         ldx     #<BANK0_SCRATCH_PAGE
+                ldy     #>BANK0_SCRATCH_PAGE
+                plb
+                jsl     nat_OSCLI
         .ENDIF
 parse_skip_EOL: lda     #$0d
                 ldy     DP_BAS_TXTPTR2_OFF
@@ -10197,6 +10220,35 @@ HandleBRKfindERL:
                 stz     DP_BAS_ERL+1
                 rts
 
+        .IFDEF MOS
+                ; A BRK has happened in emulation mode (probably OSCLI?)
+                ; BRK vector in emu mode stack will contain:
+                ;               + 3             PCH
+                ;               + 2             PCL
+                ;               + 1             Native mode flags
+                ; we will be in emulation mode and the error bank is always assumed to be 0                
+BRK_HANDLER_EMU:
+                ; we will munge the stack and pretend a native mode BRK
+                pha             ; space byte to move down into
+                php
+                pha
+
+                lda     4,S
+                sta     3,S
+                lda     5,S
+                sta     4,S
+                lda     6,S
+                sta     5,S
+                lda     #0
+                sta     6,S
+                pla
+                clc
+                xce
+                plp
+                bra     BRK_HANDLER
+
+        .ENDIF
+
 BRK_HANDLER:    
         .IFDEF COMMUNICATOR
                 cli
@@ -10252,17 +10304,31 @@ BRK_HANDLER:
 
                 pla                             ; ignore flags
 
-                pla                             ; pointer
+                sec
+                pla                             ; pointer-1
+                sbc     #1
                 sta     DP_BAS_BL_ERRPTR
                 pla
+                sbc     #0
                 sta     DP_BAS_BL_ERRPTR+1
+                sbc     #0
                 pla
                 sta     DP_BAS_BL_ERRPTR+2
 
+                lda     [DP_BAS_BL_ERRPTR]
+                sta     DP_BAS_BL_ERRNO
 
-                ;reset stack etc
-                pea     MOS_BASIC_DP
-                pld
+                ; put pointer back!
+                inc     DP_BAS_BL_ERRPTR
+                bne     @skinc
+                inc     DP_BAS_BL_ERRPTR+1
+                bne     @skinc
+                inc     DP_BAS_BL_ERRPTR
+@skinc:
+
+
+
+                ;reset data bank
                 phk
                 plb
 
@@ -12562,7 +12628,21 @@ exec_OSCLI:     jsr     evalYExpectString
                 plb
         .ENDIF
         .IFDEF MOS
-                TODO    "OSCLI"
+                ;TODO move the copy to the native handler?
+                phb
+                ldy     #0
+                phy
+                plb
+@lposc:         lda     [DP_BAS_STRWKSP_L],Y
+                sta     BANK0_SCRATCH_PAGE,Y
+                cmp     #$0D
+                beq     @skosc
+                iny
+                bne     @lposc
+@skosc:         ldx     #<BANK0_SCRATCH_PAGE
+                ldy     #>BANK0_SCRATCH_PAGE
+                plb
+                jsl     nat_OSCLI
         .ENDIF
                 bra     jmpEOS
 
