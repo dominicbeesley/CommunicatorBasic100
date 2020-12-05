@@ -556,6 +556,25 @@ nat_OSCLI:
 		jsr	OSCLI
 		bra	ret_CLC
 
+nat_OSRDCH:
+		php				; save flags			
+		phd
+		phb
+
+		phk				; reset direct page register for MOSishness
+		phk
+		pld
+
+		phk
+		plb				; reset databank register TODO: is this the most efficient way?
+
+		sec
+		xce				; enter emulation mode
+
+		jsr	OSRDCH
+		bcc	ret_CLC
+		bra	ret_SEC
+
 
 		; this is installed in the normal MOS brk vector and then jml onwards
 		; the default action is to call the old handler (when we were entered)

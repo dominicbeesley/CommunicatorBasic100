@@ -29,6 +29,7 @@ OSBYTE				:= $00FFF4
 OSWRCH				:= $00FFEE
 OSWORD				:= $00FFF1
 OSCLI				:= $00FFF7
+OSRDCH				:= $00FFE0
 
 BRKV				:= $000202
 

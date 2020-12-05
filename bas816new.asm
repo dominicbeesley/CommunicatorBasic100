@@ -12931,7 +12931,9 @@ call_OSRDCH:
                 rts
         .ENDIF
         .IFDEF MOS
-                TODO    "OSRDCH"
+                ;TODO: call direct in GET?
+                jsl     nat_OSRDCH
+                rts
         .ENDIF
 
 call_OSWRCH:    
