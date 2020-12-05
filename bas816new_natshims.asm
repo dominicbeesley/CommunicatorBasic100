@@ -461,15 +461,7 @@ nat_OSWRCH:
 		phb
 		phd
 
-		phk				; reset direct page register for MOSishness
-		phk
-		pld
-
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
-
-		sec
-		xce				; enter emulation mode
+		jsr	zeroBDPemu
 
 		jsr	OSWRCH
 
@@ -487,15 +479,7 @@ nat_OSWORD:
 		phd
 		phb
 
-		phk				; reset direct page register for MOSishness
-		phk
-		pld
-
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
-
-		sec
-		xce				; enter emulation mode
+		jsr	zeroBDPemu
 
 		jsr	OSWORD
 		bcs	ret_SEC
@@ -509,13 +493,8 @@ nat_OSBYTE:	; force emulation, we don't care about A,X,Y losing 16bitness, OSBYT
 		phd
 		phb
 
-		phk
-		phk				; reset direct page register for MOSishness
-		pld
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
-		sec
-		xce
+		jsr	zeroBDPemu
+
 		jsr	OSBYTE
 		bcs	ret_SEC		
 
@@ -543,12 +522,7 @@ nat_OSCLI:
 		phd
 		phb
 
-		phk				; reset direct page register for MOSishness
-		phk
-		pld
-
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
+		jsr	zeroBDPemu
 
 		sec
 		xce				; enter emulation mode
@@ -561,15 +535,7 @@ nat_OSRDCH:
 		phd
 		phb
 
-		phk				; reset direct page register for MOSishness
-		phk
-		pld
-
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
-
-		sec
-		xce				; enter emulation mode
+		jsr	zeroBDPemu
 
 		jsr	OSRDCH
 		bcc	ret_CLC
@@ -580,15 +546,7 @@ nat_OSFIND:
 		phd
 		phb
 
-		phk				; reset direct page register for MOSishness
-		phk
-		pld
-
-		phk
-		plb				; reset databank register TODO: is this the most efficient way?
-
-		sec
-		xce				; enter emulation mode
+		jsr	zeroBDPemu
 
 		jsr	OSFIND
 		bcc	ret_CLC
@@ -599,6 +557,24 @@ nat_OSBGET:
 		phd
 		phb
 
+		jsr	zeroBDPemu
+
+		jsr	OSBGET
+		bcc	ret_CLC
+		bra	ret_SEC
+
+nat_OSBPUT:
+		php				; save flags			
+		phd
+		phb
+		jsr	zeroBDPemu
+
+		jsr	OSBPUT
+		bcc	ret_CLC
+		bra	ret_SEC
+
+
+zeroBDPemu:
 		phk				; reset direct page register for MOSishness
 		phk
 		pld
@@ -608,11 +584,7 @@ nat_OSBGET:
 
 		sec
 		xce				; enter emulation mode
-
-		jsr	OSBGET
-		bcc	ret_CLC
-		bra	ret_SEC
-
+		rts
 
 		; this is installed in the normal MOS brk vector and then jml onwards
 		; the default action is to call the old handler (when we were entered)

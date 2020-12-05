@@ -12497,17 +12497,8 @@ doLOAD:         lda     DP_BAS_PAGE
                 ; checking this just loads the whole file blind and 
                 ; doesn't worry about what it crashes into
 
-                ; copy the filename to low memory
-                ldy     #0
-                ldx     #0
-@lp:            lda     [DP_BAS_TMP6],Y
-                sta     f:BANK0_SCRATCH_PAGE,X
-                cmp     #$0D
-                beq     @sk
-                iny
-                inx
-                bne     @lp
-@sk:
+                jsr     FileNameToLowMem
+
 
                 ; OPENIN the file
                 lda     #OSFILE_OPENIN
@@ -12566,7 +12557,23 @@ addAtoTOP:      adc     DP_BAS_TOP
         .IFDEF MOS
 brk_D6_fileNotFound:
                 brk     $D6
-                .byte   "File NotFound", 0
+                .byte   "File not found", 0
+brk_SaveOpenOutErrpr:
+                brk     $FE                     ; TODO: not sure this is right!
+                .byte   "Bad command",0
+FileNameToLowMem:
+                ; copy the filename to low memory
+                ldy     #0
+                ldx     #0
+@lp:            lda     [DP_BAS_TMP6],Y
+                sta     f:BANK0_SCRATCH_PAGE,X
+                cmp     #$0D
+                beq     @sk
+                iny
+                inx
+                bne     @lp
+@sk:            rts
+
         .ENDIF
 
 
@@ -12647,7 +12654,60 @@ exec_SAVE:      jsr     findTOP
                 .i8
         .ENDIF
         .IFDEF MOS
-                TODO    "SAVE PROGR"
+
+                ; make a -ve count
+                rep     #$30
+                .a16
+                .i16
+                sec
+                lda     DP_BAS_PAGE
+                sbc     DP_BAS_TOP
+                sta     DP_FP_TMP
+                lda     DP_BAS_PAGE+2
+                sbc     DP_BAS_TOP+2
+                sta     DP_FP_TMP+2
+                sep     #$30
+                .a8
+                .i8
+
+
+                ; this is a bit convoluted as we need to call mos to save
+                ; chunks of the file from low memory after copying from high
+                ; TODO use MVN/MVP
+                ; TODO set Load/Exec address?
+
+                jsr     FileNameToLowMem
+
+                ; OPENOUT the file
+                lda     #OSFILE_OPENOUT
+                ldx     #<BANK0_SCRATCH_PAGE
+                ldy     #>BANK0_SCRATCH_PAGE
+                jsl     nat_OSFIND
+
+                tay
+                bne     @skerr
+                brl     brk_SaveOpenOutErrpr
+@skerr:
+                ;TODO: this is slow improve with GBPB?
+@saveloop:      lda     [DP_BAS_TMP6+12]
+                jsl     nat_OSBPUT
+                
+                inc     DP_BAS_TMP6+12
+                bne     @sk
+                inc     DP_BAS_TMP6+13
+                bne     @sk
+                inc     DP_BAS_TMP6+14
+@sk:
+
+                inc     DP_FP_TMP
+                bne     @saveloop
+                inc     DP_FP_TMP+1
+                bne     @saveloop
+                inc     DP_FP_TMP+2
+                bne     @saveloop
+@eoff:          lda     #0
+                jsl     nat_OSFIND
+
         .ENDIF
                 bra     jmpEOS
 
