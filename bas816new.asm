@@ -12490,7 +12490,47 @@ doLOAD:         lda     DP_BAS_PAGE
                 .i8
         .ENDIF
         .IFDEF MOS
-                TODO    "LOAD2PAGE"
+                ; this is a bit convoluted as we need to call mos to load
+                ; chunks of the file into low memory then copy to high
+                ; TODO use MVN/MVP
+                ; Unlike the communicator version, which seems to have bounds
+                ; checking this just loads the whole file blind and 
+                ; doesn't worry about what it crashes into
+
+                ; copy the filename to low memory
+                ldy     #0
+                ldx     #0
+@lp:            lda     [DP_BAS_TMP6],Y
+                sta     f:BANK0_SCRATCH_PAGE,X
+                cmp     #$0D
+                beq     @sk
+                iny
+                inx
+                bne     @lp
+@sk:
+
+                ; OPENIN the file
+                lda     #OSFILE_OPENIN
+                ldx     #<BANK0_SCRATCH_PAGE
+                ldy     #>BANK0_SCRATCH_PAGE
+                jsl     nat_OSFIND
+
+                tay
+                beq     brk_D6_fileNotFound
+
+                ;TODO: this is slow improve with GBPB?
+@loadloop:      jsl     nat_OSBGET
+                bcs     @eoff
+                sta     [DP_BAS_TMP6+12]
+                inc     DP_BAS_TMP6+12
+                bne     @loadloop
+                inc     DP_BAS_TMP6+13
+                bne     @loadloop
+                inc     DP_BAS_TMP6+14
+                bne     @loadloop
+@eoff:          lda     #0
+                jsl     nat_OSFIND
+
         .ENDIF
 findTOP:        lda     DP_BAS_PAGE+2
                 sta     DP_BAS_TOP+2
@@ -12523,6 +12563,13 @@ addAtoTOP:      adc     DP_BAS_TOP
 @sk:            ldy     #$01
                 rts
 
+        .IFDEF MOS
+brk_D6_fileNotFound:
+                brk     $D6
+                .byte   "File NotFound", 0
+        .ENDIF
+
+
 printBadProgram:
                 jsr     printStringAfter
                 .byte   $0d,"Bad program",$0d
@@ -12535,7 +12582,8 @@ printBadProgram:
 jmp_brk06_type_mismatch2:
                 jmp     brk06_type_mismatch
 
-str600term:     lda     DP_BAS_STRWKSP_L
+strAtTermPTRatTMP6:     
+                lda     DP_BAS_STRWKSP_L
                 sta     DP_BAS_TMP6
                 lda     DP_BAS_STRWKSP_L+1
                 sta     DP_BAS_TMP6+1
@@ -12550,22 +12598,22 @@ strTerm:        ldy     DP_BAS_STRLEN
 evalYExpectString:
                 jsr     evalExpressionMAIN
                 bne     jmp_brk06_type_mismatch2
-                jsr     str600term
+                jsr     strAtTermPTRatTMP6
                 jmp     scanNextStmt
 
 evalYExStringStPAGEat61:
                 jsr     evalYExpectString
                 lda     DP_BAS_PAGE
-                sta     DP_BAS_61_UK
+                sta     DP_BAS_TMP6+12
                 lda     DP_BAS_PAGE+1
-                sta     DP_BAS_61_UK+1
+                sta     DP_BAS_TMP6+13
                 lda     DP_BAS_PAGE+2
-                sta     DP_BAS_61_UK+2
-                stz     DP_BAS_61_UK+3
+                sta     DP_BAS_TMP6+14
+                stz     DP_BAS_TMP6+15
                 rts
 
 L9B1D:          ldx     DP_BAS_PAGE+2
-                stx     DB_BAS_UNK_5A_6+1
+                stx     DP_BAS_TMP6+6
                 ldy     #$00
                 sty     DP_FPB_sgn
                 rts
