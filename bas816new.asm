@@ -8720,7 +8720,7 @@ exec_POINT:     jsr     evalAtYcheckTypeInAConvert2INT
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF MOS
-                TODO    "WRDp"
+                jsr     MOS_OSWORD
         .ENDIF
                 lda     DP_FPA_sgn
                 bmi     exec_TRUE
@@ -9200,15 +9200,10 @@ exec_TIME:      iny
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF MOS
-                ldx     #<BANK0_OSWORD_BLOCK
-                ldy     #>BANK0_OSWORD_BLOCK
+                ldx     #<DP_BAS_INT_WA
+                ldy     #0
                 lda     #OSWORD_1_READTIME
-                jsl     nat_OSWORD
-                ldx     #3
-@lp:            lda     f:BANK0_OSWORD_BLOCK,X
-                sta     DP_BAS_INT_WA,X
-                dex
-                bpl     @lp
+                jsr     MOS_OSWORD
         .ENDIF
                 lda     #RETV_INT
                 rts
@@ -10450,7 +10445,7 @@ OSWORD_continue:
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF MOS
-                TODO    "CALL OSWORD"
+                jsr     MOS_OSWORD
         .ENDIF
                 bra     jmp_Continue
 
@@ -12808,7 +12803,7 @@ printTMP6ptr:   jsr     incTMP6ptrLDA
                 jsr     cop_OSWORD
         .ENDIF
         .IFDEF MOS
-                TODO    "OSWORD_5_READ_IO_MEM"
+                jsr     MOS_OSWORD
         .ENDIF
                 plx
                 lda     DP_FPA_sgn
@@ -12846,6 +12841,61 @@ cop_OSWORD:     cop     COP_07_OPOSW
                 rts
         .ENDIF
         .IFDEF MOS
+                ; TODO: some space could be saved in the other OSWORD calls
+                ; by calling this?
+MOS_OSWORD:
+                ; need to copy the OSWORD block to somewhere that MOS understands
+                ; and then copy params back afterwards
+                ; OSWORD 0 is just called straight
+                ; OSWORD 1..7F  16 bytes are copied to Bank0 block and copied back after call
+                ; OSWORD >=80   block specifes # of input/output params
+                ;
+                ; assumptions:
+                ; All blocks are in current DP!
+                ; Y is 0 on entry
+                ; No flags are returned (OSWORD 0 will not work)
+                ; Y,X are undefined on exit
+                ; all OSWORDs called by BASIC are <$80
+                ; TODO: this is dangerous in that any OSWORD that doesn't play
+                ; nice will overwrite DP stuff...but no worse than normal MOS!
+                sta     DP_BAS_BL_OSWORD_CODE           ; save OSWORD code
+                phx                                     ; push pointer
+
+                ; block is in DP at X and we will copy 16 bytes
+                ; we have to use B=0, MOS_BASIC_DP,Y to access as can't have FAR,Y!
+                txy
+                ldx     #0
+                phx
+                plb                                     ; databank to point at DP
+@inlp:          lda     MOS_BASIC_DP,Y
+                sta     f:BANK0_OSWORD_BLOCK,X
+                inx
+                iny
+                cpx     #16
+                bne     @inlp
+
+                lda     DP_BAS_BL_OSWORD_CODE
+                ldx     #<BANK0_OSWORD_BLOCK
+                ldy     #>BANK0_OSWORD_BLOCK
+                jsl     nat_OSWORD
+
+                ply
+                ldx     #0
+                phx
+                plb                                     ; databank to point at DP
+@outlp:         lda     f:BANK0_OSWORD_BLOCK,X
+                sta     MOS_BASIC_DP,Y
+                inx
+                iny
+                cpx     #16
+                bne     @outlp
+
+                phk
+                plb
+
+                rts
+
+
 call_OSBYTE:
                 jsl     nat_OSBYTE
                 rts

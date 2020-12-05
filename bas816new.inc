@@ -129,6 +129,7 @@ DP_BAS_CO_CTDN  =       $a0                             ;Seems to count down as 
 	.IFDEF MOS
 DP_BAS_BL_ERRPTR	= $97				; points at error string
 DP_BAS_BL_ERRNO		= $9A				; error number of last BRK
+DP_BAS_BL_OSWORD_CODE	= $A0
 	.ENDIF
 
 DP_BAS_MEMSIZE  =       $9d
