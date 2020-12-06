@@ -3733,12 +3733,7 @@ reset_prog_prompt:
         .ENDIF
 
 immedPrompt:    
-        .IFDEF COMMUNICATOR
                 lda     #'>'
-        .ELSE
-                ; TODO: debug helper, remove
-                lda     #'#'        
-        .ENDIF
                 jsr     call_OSWRCH
                 jsr     ReadKeysTo_MEMBASE
 runFromTXTPTR:  lda     DP_stack_save+1
@@ -4184,7 +4179,10 @@ BPUT_A_to_CURCHAN:
                 plb
         .ENDIF
         .IFDEF MOS
-                TODO    "OSBPUT"
+                phx
+                ldy     DP_BAS_CURCHAN
+                jsl     nat_OSBPUT
+                plx
         .ENDIF
                 rts
 
@@ -6323,7 +6321,7 @@ rtsL7359:       rts
 secRTS:         sec
                 rts
 
-basPROCatHELP:  .byte   tknPROC                         ;TODO: is this byte needed?
+basPROCatHELP:  .byte   tknPROC                         
                 .byte   "@HELP",$0d
 
 HELP:           lda     #$10
@@ -6484,9 +6482,11 @@ evalDoCompareReal:
 evalDoCompareRealFPAwithPTR1:
                 jsr     fpMoveRealAtPTR1toFPB
 evalDoCompareRealFPAwithFPB:
+        .IF !.defined(OPTIMIZE)
                 bra     @unnecessary                    ;TODO - optimize away
-
-@unnecessary:   ldy     #$00
+@unnecessary:   
+        .ENDIF
+                ldy     #$00
                 lda     #$7f
                 trb     DP_FPB_sgn
                 lda     DP_FPA_sgn
@@ -6768,7 +6768,9 @@ evalL4Plus:     tay
                 bmi     evalL4IntPlusReal
                 bra     @skUnnecessary
 
+        .IF !.defined(OPTIMIZE)
                 bra     _skEvalLevel4NoLevel3           ;TODO: DEAD?
+        .ENDIF
 
 @skUnnecessary: clc
 ; evalL4IntegerAdd
@@ -6831,10 +6833,13 @@ evalLevel4Minus:
                 tay
                 beq     jmp_brk06_type_mismatch13
                 bmi     evalL4IntMinusReal
+        .IF !.defined(OPTIMIZE)
                 bra     @skUnnecessary
 
                 php                                     ;TODO: DEAD code
-@skUnnecessary: sec
+@skUnnecessary: 
+        .ENDIF
+                sec
                 lda     [DP_BAS_STACK]
                 sbc     DP_BAS_INT_WA
                 sta     DP_BAS_INT_WA
@@ -6894,6 +6899,7 @@ _skev3mulrr:    jsr     popFPFromStackToPTR1
                 lda     #RETV_REAL
                 jmp     _skevalLevel3noLevel2
 
+        .IF !.defined(OPTIMIZE)
                 php                                     ;TODO: dead code?
                 phy
                 phx
@@ -6912,6 +6918,7 @@ _skev3mulrr:    jsr     popFPFromStackToPTR1
                 plp
                 lda     #RETV_REAL
                 jmp     _skevalLevel3noLevel2
+        .ENDIF
 
 jmp_brk06_type_mismatch12:
                 jmp     brk06_type_mismatch
@@ -6942,9 +6949,12 @@ EvalL3Mul:      tay
                 phy
                 jsr     L83A4
                 stx     DP_BAS_40_VARTYPE
+        .IF !.defined(OPTIMIZE)
                 bra     @skUnnecessary                  ;TODO: DEAD code
 
-@skUnnecessary: ldx     #DP_BAS_TMP6+3
+@skUnnecessary: 
+        .ENDIF
+                ldx     #DP_BAS_TMP6+3
                 jsr     storeWAatDPX
                 jsr     popIntA
                 pla
@@ -7618,9 +7628,9 @@ parseDecScanExpToA:
 parseD_scanExpReadDigits:
                 iny
                 lda     [DP_BAS_TXTPTR],y
-notplus:        cmp     #':'                            ;TODO: closer char with arith
+notplus:        cmp     #':'                            
                 bcs     @retExp0
-                sbc     #'/'                            ;TODO: closer char with arith
+                sbc     #'/'                            
                 bcc     @retExp0
                 sta     DP_BAS_FP_TMPEXP
                 iny
@@ -8013,14 +8023,17 @@ fpFPAeqPTR1divFPA:
 fpFPAeqPTR1subFPA:
                 jsr     fpNegateFP_A
 fpFPAeqPTR1addFPA:
-                bra     @pointless                      ;TODO - optimize away!
-
-@pointless:     jsr     fpMoveRealAtPTR1toFPB
+        .IF !.defined(OPTIMIZE)
+                bra     @pointless                      
+@pointless:     
+        .ENDIF
+                jsr     fpMoveRealAtPTR1toFPB
                 beq     rts7ECC
-                jsr     L5307
+                jsr     L5307                
 fpRountMantFPA_bra:
-                bra     fpRountMantissaFPA              ;TODO - optimize away!
-
+        .IF !.defined(OPTIMIZE)
+                bra     fpRountMantissaFPA              
+        .ENDIF
 fpRountMantissaFPA:
                 lda     DP_FPA_mant+4
                 cmp     #$80
@@ -8104,12 +8117,17 @@ fpFPAeqPTRmulFPA_internal:
                 bne     @mullp2
                 plx
                 lda     DP_FPA_mant
-                bpl     @sk51B2                         ;TODO: optimize why jump to an rts!
+                bpl     @sk51B2 
+        .IF !.defined(OPTIMIZE)                        
                 jmp     rts7ECC
+        .ELSE
+                rts
+        .ENDIF
 
 @sk51B2:        jmp     NormaliseRealA_3
-
+        .IF !.defined(OPTIMIZE)
                 rts                                     ;TODO - DEAD code?
+        .ENDIF
 
 dpAddFPBmanttoFPAmant:
                 lda     DP_FPA_mant+4
@@ -8414,19 +8432,22 @@ retA_8bit_INT_presX:
                 plx
                 rts
 
-exec_EXT:       jsr     parse_handleY_WAeqmin1_HAptWA
+exec_EXT:       
         .IFDEF COMMUNICATOR
+                jsr     parse_handleY_WAeqmin1_HAptWA
                 phb
                 cop     COP_24_OPCVD
                 cop     COP_57_OPRLL
                 bra     reportBHACy_retRETV_INT
         .ENDIF
         .IFDEF MOS
-                TODO "EXT"
+                lda     #2                              ; OSARGS FN 
+                bra     mosGetFI
         .ENDIF
 
-exec_PTR:       jsr     parse_handleY_WAeqmin1_HAptWA
+exec_PTR:       
         .IFDEF COMMUNICATOR
+                jsr     parse_handleY_WAeqmin1_HAptWA
                 phb
                 cop     COP_24_OPCVD
                 cop     COP_54_OPRSP
@@ -8437,7 +8458,19 @@ reportBHACy_retRETV_INT:
                 brl     retRETV_INT
         .ENDIF
         .IFDEF MOS
-                TODO "PTR"
+                lda     #0
+mosGetFI:       pha
+                jsr     parse_fileHandleHash2
+                pla
+                ldx     MOS_ZP_TMP
+                ldy     DP_BAS_INT_WA
+                jsl     nat_OSARGS
+                ldx     #3
+@lp:            lda     f:MOS_ZP_TMP,X
+                sta     DP_BAS_INT_WA,X
+                dex
+                bpl     @lp
+                brl     retRETV_INT
         .ENDIF
 
 ;*******************************************************************************
@@ -8478,7 +8511,11 @@ callOSBGET:
                 rts
         .ENDIF
         .IFDEF MOS
-                TODO    "OSBGET"
+                phx
+                ldy     DP_BAS_INT_WA
+                jsl     nat_OSBGET
+                plx
+                rts
         .ENDIF
 
 exec_OPENIN:    lda     #$40
@@ -8516,14 +8553,37 @@ exec_OPEN_A:    phb
                 sep     #$30
                 .a8
                 .i8
-        .ENDIF
-        .IFDEF MOS
-                ply
-                TODO    "OSFIND"
-        .ENDIF
                 plb
                 lda     #RETV_INT
                 rts
+        .ENDIF
+        .IFDEF MOS
+
+                ; copy string to bank0
+
+                ldy     DP_BAS_STRLEN
+                tyx
+                lda     #$0D
+                sta     f:BANK0_SCRATCH_PAGE,X
+                
+
+@lp:            cpy     #0
+                beq     @sk
+                dex
+                dey                
+                lda     [DP_BAS_STRWKSP_L],Y
+                sta     f:BANK0_SCRATCH_PAGE,X
+                brl     @lp
+@sk:
+                ; point at low bank0 buffer
+                ldx     #<BANK0_SCRATCH_PAGE
+                ldy     #>BANK0_SCRATCH_PAGE
+                pla                             ; get back function code
+
+                jsl     nat_OSFIND
+                plb
+                brl     retA_8bit_INT
+        .ENDIF
 
 jmp_brk06_type_mismatch11:
                 jmp     brk06_type_mismatch
@@ -11283,7 +11343,7 @@ findProgLineOrBRK:
 
 callOSBGET_2:   
         .IFDEF COMMUNICATOR
-                phb                                     ;TODO: there is another OSBGET elsewhere
+                phb                                     
                 phx
                 rep     #$10
                 .i16
@@ -11297,7 +11357,11 @@ callOSBGET_2:
                 rts
         .ENDIF
         .IFDEF MOS
-                TODO    "OSBGET_2"
+                phx
+                ldy     DP_BAS_CURCHAN
+                jsl     nat_OSBGET
+                plx
+                rts
         .ENDIF
 
 jmp_brk06_type_mismatch3:
@@ -12749,11 +12813,12 @@ exec_OSCLI:     jsr     evalYExpectString
         .ENDIF
                 bra     jmpEOS
 
-doEXT:          jsr     parse_fileHandleHash_PTR2
+doEXT:
+        .IFDEF COMMUNICATOR
+                jsr     parse_fileHandleHash_PTR2
                 pei     (DP_BAS_INT_WA)
                 jsr     parse_expectEQ_PTR_OFF
                 jsr     checkTypeInVARTYPEConv2INT
-        .IFDEF COMMUNICATOR
                 rep     #$30
                 .a16
                 .i16
@@ -12767,17 +12832,19 @@ doEXT:          jsr     parse_fileHandleHash_PTR2
                 sep     #$30
                 .a8
                 .i8
+                brl     jmpEOS
         .ENDIF
         .IFDEF MOS
-                TODO    "EXT"
+                lda     #3                              ; OSARGS FN num
+                bra     mosSetFI
         .ENDIF
-                brl     jmpEOS
 
-exec_PTRc:      jsr     parse_fileHandleHash_PTR2
+exec_PTRc:      
+        .IFDEF COMMUNICATOR
+                jsr     parse_fileHandleHash_PTR2
                 pei     (DP_BAS_INT_WA)
                 jsr     parse_expectEQ_PTR_OFF
                 jsr     checkTypeInVARTYPEConv2INT
-        .IFDEF COMMUNICATOR
                 rep     #$30
                 .a16
                 .i16
@@ -12791,13 +12858,32 @@ exec_PTRc:      jsr     parse_fileHandleHash_PTR2
                 sep     #$30
                 .a8
                 .i8
+        .IF !.defined(OPTIMIZE)
+                brl     jmpEOS                          ;TODO: dead code
+        .ENDIF
+jmpEOS:         jmp     continue
         .ENDIF
         .IFDEF MOS
-                TODO    "PTR"
-        .ENDIF
-                brl     jmpEOS                          ;TODO: dead code
+                lda     #1                              ; OSARGS FN num
+mosSetFI:       pha
+                jsr     parse_fileHandleHash_PTR2
+                lda     DP_BAS_INT_WA
+                pha
+                jsr     parse_expectEQ_PTR_OFF
+                jsr     checkTypeInVARTYPEConv2INT    
+                ldx     #3
+@lp:            lda     DP_BAS_INT_WA,X
+                sta     f:MOS_ZP_TMP,X
+                dex
+                bpl     @lp
+                ply
+                pla
+                ldx     #MOS_ZP_TMP
+                jsl     nat_OSARGS
+jmpEOS:
+                jmp     continue
 
-jmpEOS:         jmp     continue
+        .ENDIF
 
 exec_CLOSE:     jsr     parse_fileHandleHash_PTR2
                 jsr     parse_nextstmt_yield_PTR2_OFF
@@ -12815,7 +12901,9 @@ exec_CLOSE:     jsr     parse_fileHandleHash_PTR2
                 .i8
         .ENDIF
         .IFDEF MOS
-                TODO "CLOSE"
+                lda     #0                              ; CLOSE
+                ldy     DP_BAS_INT_WA
+                jsl     nat_OSFIND
         .ENDIF
                 bra     jmpEOS
 
@@ -12849,7 +12937,8 @@ BPUT_string_lp: lda     [DP_BAS_STRWKSP_L],y
                 .i8
         .ENDIF
         .IFDEF MOS
-                TODO    "BPUTstr"
+                ldy     DP_BAS_INT_WA
+                jsl     nat_OSBPUT
         .ENDIF
                 ply
                 iny
@@ -12880,7 +12969,8 @@ BPUT_A:
                 .i8
         .ENDIF
         .IFDEF MOS
-                TODO    "BPUT_A"
+                ldy     DP_BAS_INT_WA
+                jsl     nat_OSBPUT
         .ENDIF
                 bra     jmpEOS
 

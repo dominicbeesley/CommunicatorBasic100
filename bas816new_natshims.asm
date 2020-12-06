@@ -573,6 +573,16 @@ nat_OSBPUT:
 		bcc	ret_CLC
 		bra	ret_SEC
 
+nat_OSARGS:
+		php				; save flags			
+		phd
+		phb
+		jsr	zeroBDPemu
+
+		jsr	OSARGS
+		bcc	ret_CLC
+		bra	ret_SEC
+
 
 zeroBDPemu:
 		phk				; reset direct page register for MOSishness

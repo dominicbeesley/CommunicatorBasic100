@@ -30,6 +30,7 @@ OSRDCH				:= $00FFE0
 OSBGET				:= $00FFD7
 OSBPUT				:= $00FFD4
 OSFIND				:= $00FFCE
+OSARGS				:= $00FFDA
 
 OSFILE_OPENIN			:= $40
 OSFILE_OPENOUT			:= $80
@@ -41,4 +42,8 @@ fred_JIM_PAGE_HI		:= $00FCFD
 fred_JIM_PAGE_LO		:= $00FCFE
 fred_JIM_DEVNO			:= $00FCFF
 
+; this is in language part of MOS's DP, we require at least 4 bytes for OSARGS
+MOS_ZP_TMP			:= $000000
+
+; Escape flag must be read from MOS DP
 MOS_ZP_ESC_FLAG			:= $0000FF
