@@ -1,17 +1,12 @@
 
 		.import	__SHIMS_SIZE__, __SHIMS_RUN__, __SHIMS_LOAD__
-		.import	__NATVEC_SIZE__, __NATVEC_RUN__, __NATVEC_LOAD__
-
 
 
 ;=========================================================================
-; BLITTER specific Defines
+; DOSSY TUBE specific Defines
 ;=========================================================================
 
-
-NATVEC_CHIP	:= $008FE0
 HWVEC_6502_IRQ  := $00FFFE
-
 
 MOS_BASIC_DP			:= $001900
 MOS_ARITH_DP			:= $001A00
@@ -21,9 +16,9 @@ BANK0_OSWORD_BLOCK		:= $002080
 BANK0_SCRATCH_PAGE		:= $002100
 
 
-MOS_ARITH_WKSPC			:=	$01FD00		; just below page
-MOS_BASIC_MEMBASE		:=	$020000		; next bank after basic TODO: allocate/calculate
-MOS_BASIC_MEMSZ			:=	$080000		; 8 banks
+MOS_ARITH_WKSPC			:=	$02FD00		; just below page
+MOS_BASIC_MEMBASE		:=	$030000		; next bank after basic TODO: allocate/calculate
+MOS_BASIC_MEMSZ			:=	$030000		; 3 banks
 
 OSBYTE				:= $00FFF4
 OSWRCH				:= $00FFEE
@@ -39,24 +34,10 @@ OSFILE				:= $00FFDD
 OSFIND_OPENIN			:= $40
 OSFIND_OPENOUT			:= $80
 
-BRKV				:= $000202
-
-JIM				:= $00FD00
-fred_JIM_PAGE_HI		:= $00FCFD
-fred_JIM_PAGE_LO		:= $00FCFE
-fred_JIM_DEVNO			:= $00FCFF
-
-zp_mos_jimdevsave		:= $EE
-
-JIM_DEVNO_BLITTER		:= $D1
-
+BRKV				:= $202
 
 ; this is in language part of MOS's DP, we require at least 4 bytes for OSARGS
 MOS_ZP_TMP			:= $000000
 
 ; Escape flag must be read from MOS DP
 MOS_ZP_ESC_FLAG			:= $0000FF
-
-sheila_MEM_LOMEMTURBO		:= $FE37
-
-

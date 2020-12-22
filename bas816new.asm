@@ -16,7 +16,11 @@
                 .include "bas816new_BEEB816.inc"
         .ENDIF
 
-        .IFDEF MOS
+        .IFDEF DOSSY
+                .include "bas816new_DOSSY.inc"
+        .ENDIF
+
+        .IFDEF MOS 
                 .export list_printHexByte
                 .export printStringAfter
                 .export call_OSWRCH
@@ -710,8 +714,6 @@ HELPENV:        php
 
         .IFDEF MOS
 MOSStart:
-
-                sei
                 jsr     MOS_shims_init
 
                 ; Now enter native mode
@@ -739,9 +741,6 @@ MOSStart:
                 .i8
 
 
-        .IFDEF COMMUNICATOR
-                jsr     arith_get_reference             ;Get ARITHMETIC module reference
-        .ENDIF
                 lda     #$01
                 and     DP_BAS_RAND+4
                 ora     DP_BAS_RAND
@@ -839,6 +838,7 @@ MOSStart:
                 lda     DP_BAS_PAGE+2
                 sta     DP_BAS_LOMEM_LIM_PAG+1
 
+
                 stz     DP_BAS_LISTO
                 stz     DP_BAS_SET_TO_Z_AT_EOS
                 lda     #$00
@@ -885,7 +885,6 @@ MOSStart:
 
                 jsr     arith_init
 
-                cli
                 jmp     braNEW2
 
 
@@ -4940,10 +4939,7 @@ mul16:          rep     #$30
 
 brk_0a_Bad_DIM: brk     $0a
 
-                .byte   $42
-                .byte   $61
-                .byte   $64
-                .byte   $20
+                .byte   "Bad "
                 .byte   tknDIM
                 .byte   $00
 
@@ -10351,6 +10347,21 @@ BRK_HANDLER:
                 pea     MOS_BASIC_DP
                 pld
 
+
+        .IFDEF DOSSY
+                ; the TUBE host will have set the error pointer
+                ; in its own direct page (0FC:0FE:0FD) variables use that
+                ; for now
+                ; 
+                lda     f:$0000FC
+                sta     DP_BAS_BL_ERRPTR+2
+                lda     f:$0000FD
+                sta     DP_BAS_BL_ERRPTR+0
+                lda     f:$0000FE
+                sta     DP_BAS_BL_ERRPTR+1
+
+        .ELSE
+
                 ; BRK vector in native mode stack will contain:
                 ;               + 4             Program bank
                 ;               + 3             PCH
@@ -10370,6 +10381,8 @@ BRK_HANDLER:
                 pla
                 sta     DP_BAS_BL_ERRPTR+2
 
+
+        .ENDIF
                 lda     [DP_BAS_BL_ERRPTR]
                 sta     DP_BAS_BL_ERRNO
 
@@ -12563,9 +12576,33 @@ doLOAD:         lda     DP_BAS_PAGE
 
                 jsr     FileNameToLowMem
 
+        .IFDEF DOSSY
+                lda     #<BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK
+                lda     #>BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK+1
+                
+                lda     DP_BAS_PAGE
+                sta     f:BANK0_OSWORD_BLOCK+2
+                lda     DP_BAS_PAGE+1
+                sta     f:BANK0_OSWORD_BLOCK+3
+                lda     DP_BAS_PAGE+2
+                sta     f:BANK0_OSWORD_BLOCK+4
+                lda     #0
+                sta     f:BANK0_OSWORD_BLOCK+5
+                sta     f:BANK0_OSWORD_BLOCK+6
 
+                ldx     #<BANK0_OSWORD_BLOCK
+                ldy     #>BANK0_OSWORD_BLOCK
+                dec     A
+                jsl     nat_OSFILE
+                tay
+                beq     brk_D6_fileNotFound
+
+
+        .ELSE
                 ; OPENIN the file
-                lda     #OSFILE_OPENIN
+                lda     #OSFIND_OPENIN
                 ldx     #<BANK0_SCRATCH_PAGE
                 ldy     #>BANK0_SCRATCH_PAGE
                 jsl     nat_OSFIND
@@ -12585,6 +12622,7 @@ doLOAD:         lda     DP_BAS_PAGE
                 bne     @loadloop
 @eoff:          lda     #0
                 jsl     nat_OSFIND
+        .ENDIF
 
         .ENDIF
 findTOP:        lda     DP_BAS_PAGE+2
@@ -12719,6 +12757,50 @@ exec_SAVE:      jsr     findTOP
         .ENDIF
         .IFDEF MOS
 
+
+
+        .IFDEF DOSSY
+
+                jsr     FileNameToLowMem
+
+                lda     #<BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK
+                lda     #>BANK0_SCRATCH_PAGE
+                sta     f:BANK0_OSWORD_BLOCK+1
+                
+                lda     DP_BAS_PAGE
+                sta     f:BANK0_OSWORD_BLOCK+2
+                sta     f:BANK0_OSWORD_BLOCK+6
+                sta     f:BANK0_OSWORD_BLOCK+10
+                lda     DP_BAS_PAGE+1
+                sta     f:BANK0_OSWORD_BLOCK+3
+                sta     f:BANK0_OSWORD_BLOCK+7
+                sta     f:BANK0_OSWORD_BLOCK+11
+                lda     DP_BAS_PAGE+2
+                sta     f:BANK0_OSWORD_BLOCK+4
+                sta     f:BANK0_OSWORD_BLOCK+8
+                sta     f:BANK0_OSWORD_BLOCK+12
+                lda     #0
+                sta     f:BANK0_OSWORD_BLOCK+5
+                sta     f:BANK0_OSWORD_BLOCK+9
+                sta     f:BANK0_OSWORD_BLOCK+13
+                sta     f:BANK0_OSWORD_BLOCK+17
+
+                lda     DP_BAS_TOP
+                sta     f:BANK0_OSWORD_BLOCK+14
+                lda     DP_BAS_TOP+1
+                sta     f:BANK0_OSWORD_BLOCK+15
+                lda     DP_BAS_TOP+2
+                sta     f:BANK0_OSWORD_BLOCK+16
+
+                ldx     #<BANK0_OSWORD_BLOCK
+                ldy     #>BANK0_OSWORD_BLOCK
+                lda     #0
+                jsl     nat_OSFILE
+
+
+        .ELSE
+
                 ; make a -ve count
                 rep     #$30
                 .a16
@@ -12743,7 +12825,7 @@ exec_SAVE:      jsr     findTOP
                 jsr     FileNameToLowMem
 
                 ; OPENOUT the file
-                lda     #OSFILE_OPENOUT
+                lda     #OSFIND_OPENOUT
                 ldx     #<BANK0_SCRATCH_PAGE
                 ldy     #>BANK0_SCRATCH_PAGE
                 jsl     nat_OSFIND
@@ -12771,6 +12853,7 @@ exec_SAVE:      jsr     findTOP
                 bne     @saveloop
 @eoff:          lda     #0
                 jsl     nat_OSFIND
+        .ENDIF ;DOSSY
 
         .ENDIF
                 bra     jmpEOS

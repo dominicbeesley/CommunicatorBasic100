@@ -22,6 +22,15 @@
 
         .ENDIF
 
+        .IFDEF DOSSY
+
+                .include        "bas816new_BEEB816.inc"
+
+                .export         arith_enter
+                .export         arith_init
+
+        .ENDIF
+
         .IF .defined(COMMUNICATOR)
                 .IF .defined(OPTIMIZE)
                         .macro INTJSL addr

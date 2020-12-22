@@ -9,7 +9,9 @@
 
 
 		.assert __SHIMS_SIZE__ <= $100, error, "SHIMS size must be <=$100"
+	.IFDEF __NATVEC_SIZE__
 		.assert __NATVEC_SIZE__ = $10, error, "NATVEC size must be $10"
+	.ENDIF
 
 debug_hex_byte:
 		.a8
@@ -45,6 +47,10 @@ BL_debug_print:
 		lda	#$0D
 		jmp	call_OSWRCH
 
+
+;TODO: ShowRegsL make new entry point here
+
+
 		; we assume stack looks like a native interrupt i.e.
                 ;               + 6             Program bank
                 ;               + 5             PCH
@@ -74,6 +80,8 @@ ShowRegs:	php				; save entry flags
 
 		pea	MOS_BASIC_DP
 		pld
+		phk
+		plb
 
                 ;               + 16            Program bank
                 ;               + 15            PCH
@@ -277,9 +285,28 @@ StackTrace:	php
 @spc:		lda	#' '
 		jmp	call_OSWRCH
 
+;============================================================================
+; Shims initialise
+;============================================================================
+;
+; The shims and any native vectors etc are setup here, in general shims
+; are copied to bank 0 and used to jump onwards to the MOS entry points with
+; emulation mode in force
+
+
 MOS_shims_init:
 	.IFDEF BLITTER
-
+;============================================================================
+; BLITTER Shims initialise
+;============================================================================
+;
+; Uses the JIM memory interface to copy the native mode vectors to the 
+; shadowed chip ram magic locations
+;
+; copies the shims code to bank0 
+;
+; makes a native and emulation mode break vectors
+; 
 		; we're entering in 8bit emulation mode
 		.a8
 		.i8
@@ -303,7 +330,6 @@ MOS_shims_init:
 
 		; copy shims to sys memory
 
-;		lda	#^__SHIMS_RUN__
 		; check whether the page we're using is BLTURBO'd
 		lda	sheila_MEM_LOMEMTURBO
 		and	#1<<(>__SHIMS_RUN__ >> 4)
@@ -382,6 +408,19 @@ MOS_shims_init:
 		rts
 	.ENDIF
 	.IFDEF BEEB816
+;============================================================================
+; BEEB816 Shims initialise
+;============================================================================
+;
+; Uses slow loopsto copy the native mode vectors to the 
+; shadowed chip ram magic locations, TODO: use MVN/P?
+;
+; copies the shims code to bank0 
+;
+; makes a native and emulation mode break vectors
+; 
+
+
 		; HOGLET: check this for sanity please
 
 		; we're entering in 8bit emulation mode
@@ -451,10 +490,96 @@ MOS_shims_init:
 		rts
 	.ENDIF
 
+	.IFDEF DOSSY
+;============================================================================
+; DOSSYtronics TUBE Shims initialise
+;============================================================================
+;
+; No native mode vectors, this is handled by the Tube Client ROM
+;
+; copies the shims code to bank0 
+;
+; Bodges together a pair of long break vectors...TODO: change client ROM to 
+; better handle native/emu mode BRKS
+;
+		; assume we're entering in 8bit mode, native
+		.a8
+		.i8
+
+		; switch to native anyway just in case
+		clc
+		xce		
+
+		; point B at Bank 0 - destination for out copies
+		ldy	#0
+		; copy shims to sys memory
+
+		ldx	#<__SHIMS_SIZE__-1
+@l1:		phk
+		plb
+		lda	__SHIMS_LOAD__,X
+		phy
+		plb
+		sta	__SHIMS_RUN__,X
+
+		dex
+		cpx	#$FF
+		bne	@l1
+
+		; the TUBE OS currently only has a single BRK entry point
+		; for both emulated and native mode, blithely pretend its
+		; a native brk, NATVEC_BRK_EMU is never called
+
+		lda	#<defaultbrk
+		sta	NATVEC_BRK
+		lda	#>defaultbrk
+		sta	NATVEC_BRK+1
+		lda	#^defaultbrk
+		sta	NATVEC_BRK+2
+
+		lda	#<bodgeBRK
+		sta	BRKV
+		lda	#>bodgeBRK
+		sta	BRKV+1
+
+		rts
+
+
+
+PrintUnexBRK:	jsr	printStringAfter
+		.byte   "UNEXPECTED BRK!",0
+		rts
+
+
+defaultbrk:	
+		; BRK vector in native mode stack will contain:
+		;		+ 4		Program bank
+		;		+ 3		PCH
+		;		+ 2		PCL
+		;		+ 1		Native mode flags
+		; BASIC should set up its own handlers, if this gets called
+		; something went wrong early in setup
+
+		jsr ShowRegs
+		jsr StackTrace
+		jsr PrintUnexBRK
+@here:		jmp @here
+
+
+
+
+	.ENDIF
 
 		.SEGMENT "SHIMS"
+;============================================================================
+; OS shims for BEEB816/BLITTER
+;============================================================================
+;
+; These shims wrap code to enter emulation mode and call the normal MOS 1.20
+; entry points
 
 
+	.IF .defined(BEEB816) || .defined(BLITTER)
 		; TODO: need to set D/B/K or do a long jump at least
 nat_OSWRCH:	
 		php				; save flags			
@@ -584,6 +709,7 @@ nat_OSARGS:
 		bra	ret_SEC
 
 
+
 zeroBDPemu:
 		phk				; reset direct page register for MOSishness
 		phk
@@ -707,5 +833,160 @@ NV_ABORT:	.word .LOWORD(shim_abort)
 NV_NMI:		.word .LOWORD(shim_nmi)
 NV_RES2:	.word .LOWORD(0)
 NV_IRQ:		.word .LOWORD(shim_irq)
+	.ENDIF
+
+
+	.IFDEF DOSSY
+;============================================================================
+; OS shims for DOSSYtronics TUBE
+;============================================================================
+;
+; These shims are simpler - the TUBE OS already contains native/emulation
+; mode agnostic entry points
+; 
+; At present these are entered with JSR so we just need to bounce down to 
+; bank 0 (here) and return with a JSL
+
+DP0:
+		phk
+		phk
+		pld
+		phk
+		plb
+		rts
+
+
+nat_OSWRCH:	
+		phd
+		phb
+
+		jsr	DP0
+
+		jsr	OSWRCH
+
+		plb
+		pld
+		rtl
+
+nat_OSWORD:	
+		phd
+		phb 
+
+		jsr	DP0
+
+		jsr	OSWORD
+
+		plb
+		pld
+		rtl
+
+
+
+nat_OSBYTE:	; force emulation, we don't care about A,X,Y losing 16bitness, OSBYTE return 8bits in A,X,Y
+		phd
+		phb
+
+		jsr	DP0
+
+		jsr	OSBYTE
+
+		plb
+		pld
+		rtl
+
+; note this expects X/Y to point to a string in Bank0!
+
+nat_OSCLI:
+		phd
+		phb
+
+		jsr	DP0
+
+		jsr	OSCLI
+
+		plb
+		pld
+		rtl
+
+nat_OSRDCH:	phd
+		phb
+
+		jsr	DP0
+		
+		jsr	OSRDCH
+
+		plb
+		pld
+		rtl
+
+nat_OSFIND:	phd
+		phb
+
+		jsr	DP0
+		
+		jsr	OSFIND
+
+		plb
+		pld
+		rtl
+
+nat_OSBGET:	phd
+		phb
+
+		jsr	DP0
+	
+		jsr	OSBGET
+
+		plb
+		pld
+		rtl
+
+nat_OSFILE:
+		phd
+		phb
+
+		jsr	DP0
+	
+		jsr	OSFILE
+
+		plb
+		pld
+		rtl
+
+
+nat_OSBPUT:	phd
+		phb
+
+		jsr	DP0
+	
+		jsr	OSBPUT
+
+		plb
+		pld
+		rtl
+
+nat_OSARGS:	phd
+		phb
+
+		jsr	DP0
+	
+		jsr	OSARGS
+
+		plb
+		pld
+		rtl
+
+		; !!! TODO: pretend all BRKs are native mode !!!
+bodgeBRK:	clc
+		xce
+		jml	[NATVEC_BRK]
+
+
+
+
+
+
+	.ENDIF
+
 
 	.END
