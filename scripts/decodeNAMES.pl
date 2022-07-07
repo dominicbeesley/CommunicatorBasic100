@@ -6,15 +6,25 @@
 # Decode the names tables from the NAMES module
 
 use strict;
+use File::Spec::Functions qw'catfile';
 
-# name of input file
-my $fnIN = "NAMES100.bin";
+sub usage($) {
+	my ($msg) = @_;
+
+	print STDERR "decodeNAMES.pl <BIN> <output folder>";
+
+	die $msg;	
+}
+
+
+my $fnIN = shift;
+my $dir_out = shift;
 
 # offset in binary of the first letter lookup table
 my $namesOffs = 0x016d;
 
-open(my $fh_in, "<:raw:", $fnIN) or die "Cannot open $fnIN $!";
-seek($fh_in, $namesOffs, 0) or die "Error seeking $!";
+open(my $fh_in, "<:raw:", $fnIN) or usage "Cannot open \"$fnIN\": $!";
+seek($fh_in, $namesOffs, 0) or usage "Error seeking $!";
 
 #keep track of offset
 my $curoffs = 0;
@@ -36,11 +46,15 @@ sub header {
 }
 
 
-open(my $fh_o_alpha, ">", "names_alpha.txt") or die "Cannot open names_alpha.txt $!";
+my $fn_alpha = catfile($dir_out, "names_alpha.txt");
+my $fn_num = catfile($dir_out, "names_num.txt");
+my $fn_inc = catfile($dir_out, "names.inc");
+
+open(my $fh_o_alpha, ">", $fn_alpha) or usage "Cannot open \"$fn_alpha\" : $!";
 header $fh_o_alpha;
-open(my $fh_o_num, ">", "names_num.txt") or die "Cannot open names_num.txt $!";
+open(my $fh_o_num, ">", $fn_num) or usage "Cannot open \"$fn_num\" : $!";
 header $fh_o_num;
-open(my $fh_o_inc, ">", "names.inc") or die "Cannot open names_num.txt $!";
+open(my $fh_o_inc, ">", $fn_inc) or usage "Cannot open \"$fn_inc\" : $!";
 header $fh_o_inc;
 
 #scan rest of file, assuming that it is in first letter order
