@@ -1,13 +1,13 @@
 # This makefile will compile and compare the diassembled communicator BASIC 
 # sourcecode against the original BIN
 
-
 BUILDDIR=./build
 CMPDIR=./cmp
 ORGDIR=./org
 INCDIR=./includes
 SCRIPTS=./scripts
 NEWSRCDIR=./src
+SSDDIR=./ssd
 
 AS=ca65
 ASFLAGS=-I $(INCDIR)
@@ -43,11 +43,14 @@ CMPDIFF=	$(addsuffix .diff, $(addprefix $(CMPDIR)/, $(CMPORGBASE))) \
 		$(CMPDIR)/bas816new_COMBAS100.diff \
 		$(CMPDIR)/arith_new_COMARITH100.diff
 
-HOSTFSDIR=~/hostfs/tools816
+SSDS=		$(SSDDIR)/BAS816_BLIT.ssd $(SSDDIR)/BAS816_DOSSY.ssd $(SSDDIR)/BAS816_BEEB816.ssd
+
+HOSTFSDIR=~/hostfs
 BEMDIR=/cygdrive/e/Users/dominic/BeebEm/DiscIms
 
 NOWT:=$(shell mkdir -p $(BUILDDIR))
 NOWT:=$(shell mkdir -p $(CMPDIR))
+NOWT:=$(shell mkdir -p $(SSDDIR))
 
 .PRECIOUS: 	$(BUILDDIR)/bas816new_COMBAS100.lst \
 		$(BUILDDIR)/bas816new_BLITTER.lst \
@@ -60,15 +63,16 @@ NOWT:=$(shell mkdir -p $(CMPDIR))
 		$(BUILDDIR)/ARITH100.bin \
 		$(BUILDDIR)/COMBAS100.bin
 
-all::	$(TARGETS) $(CMPDIFF)
+.DELETE_ON_ERROR:
+
+all::	$(TARGETS) $(CMPDIFF) $(SSDS)
 
 cmp::	$(CMPDIFF)
 
-hostfs:: $(BUILDDIR)/bas816new_BLITTER.bin $(BUILDDIR)/bas816new_DOSSY.bin
-	cp $(BUILDDIR)/bas816new_BLITTER.bin $(HOSTFSDIR)
-	cp bas816new_BLITTER.bin.inf $(HOSTFSDIR)
-	cp $(BUILDDIR)/bas816new_DOSSY.bin $(HOSTFSDIR)
-	cp bas816new_DOSSY.bin.inf $(HOSTFSDIR)
+hostfs::$(SSDS)
+	$(foreach s, $^, mkdir -p $(HOSTFSDIR)/$(notdir $(basename $(s)));)
+	$(foreach s, $^, dfs read -i -d $(HOSTFSDIR)/$(notdir $(basename $(s))) $(s);)
+
 
 bem::	$(BUILDDIR)/bas816new_DOSSY.bin
 	cp bas816new_DOSSY.bin.inf $(BUILDDIR)
@@ -168,6 +172,27 @@ $(BUILDDIR)/bas816new_DOSSY.bin: $(BUILDDIR)/bas816new_DOSSY.o $(NEWSRCDIR)/bas8
 $(GEN_INCS): $(ORGDIR)/NAMES100.bin $(SCRIPTS)/decodeNAMES.pl
 	$(SCRIPTS)/decodeNAMES.pl $(ORGDIR)/NAMES100.bin $(INCDIR)
 
+$(BUILDDIR)/%.bin.inf: $(NEWSRCDIR)/%.bin.inf $(BUILDDIR)/%.bin
+	cp $< $@
+
+$(SSDDIR)/BAS816_BLIT.ssd: $(BUILDDIR)/bas816new_BLITTER.bin.inf $(wildcard extras/blitter/*.inf) $(wildcard extras/shared/*.inf)
+	dfs form -80 $@
+	dfs title $@ "BAS816BLIT"
+	dfs opt4 -3 $@
+	dfs add $@ $^
+
+$(SSDDIR)/BAS816_DOSSY.ssd: $(BUILDDIR)/bas816new_DOSSY.bin.inf $(wildcard extras/dossy/*.inf) $(wildcard extras/shared/*.inf)
+	dfs form -80 $@
+	dfs title $@ "BAS816DOSSY"
+	dfs opt4 -3 $@
+	dfs add $@ $^
+
+$(SSDDIR)/BAS816_BEEB816.ssd: $(BUILDDIR)/bas816new_BEEB816.bin.inf $(wildcard extras/beeb816/*.inf) $(wildcard extras/shared/*.inf)
+	dfs form -80 $@
+	dfs title $@ "BAS816BEEB"
+	dfs opt4 -3 $@
+	dfs add $@ $^
+
 
 clean::
 	-rm $(BASICS_O_NEW) 2>/dev/nul
@@ -196,4 +221,5 @@ clean::
 	-rm $(addprefix $(BUILDDIR)/ORG_, $(addsuffix .da.s, $(CMPORGBASE))) 2>/dev/nul
 	-rm build/*
 	-rm $(CMPDIFF) 2>/dev/null
+	-rm ssd/*
 
